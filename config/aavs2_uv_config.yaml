@@ -1,0 +1,19 @@
+# UVData configuration for pyuvdata 
+# This should only include values that aren't derived from data shape
+# https://pyuvdata.readthedocs.io/en/latest/uvdata.html#required
+history: Created with aavs_sciops 1.0.0 
+instrument: AAVS2
+telescope_name: AAVS2
+telescope_ECEF_X: -2559453.29059553 
+telescope_ECEF_Y: 5095371.73544116
+telescope_ECEF_Z: -2849056.77357178
+channel_width: 925926.0             # Hz TODO: CHECK THIS! 781250.0 spacing after oversample?
+channel_spacing: 781250.0           # Hz - oversampled so spacing is smaller than width
+antenna_locations_file: config/aavs2_antenna_locations.txt
+baseline_order_file: config/aavs2_baseline_order.txt
+flex_spw: False
+polarization_type: stokes  # stokes, linear, or circular
+future_array_shapes: False
+vis_units: uncalib
+Nspws: 1
+Nphase: 1
