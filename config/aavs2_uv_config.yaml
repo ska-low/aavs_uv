@@ -2,11 +2,11 @@
 # This should only include values that aren't derived from data shape
 # https://pyuvdata.readthedocs.io/en/latest/uvdata.html#required
 history: Created with aavs_sciops 1.0.0 
-instrument: AAVS2
-telescope_name: AAVS2
-telescope_ECEF_X: -2559453.29059553 
-telescope_ECEF_Y: 5095371.73544116
-telescope_ECEF_Z: -2849056.77357178
+instrument: aavs2
+telescope_name: aavs2
+telescope_ECEF_X: -2559301.90974769
+telescope_ECEF_Y: 5095070.36573217
+telescope_ECEF_Z: -2848888.27966852
 channel_width: 925926.0             # Hz TODO: CHECK THIS! 781250.0 spacing after oversample?
 channel_spacing: 781250.0           # Hz - oversampled so spacing is smaller than width
 antenna_locations_file: config/aavs2_antenna_locations.txt

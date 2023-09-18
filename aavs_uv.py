@@ -1,21 +1,29 @@
-import pyuvdata
-import numpy as np
-from astropy.io import fits as pf
-from astropy.time import Time
-from astropy.coordinates import EarthLocation, AltAz, Angle, SkyCoord
-from pprint import pprint
-import yaml
-import pylab as plt
-import h5py
+# Basic imports
 import glob
 import os
-import pandas as pd
 import warnings
+import yaml
+from pprint import pprint
+
+# Basic science stuff
+import h5py
+import pylab as plt
+import pandas as pd
+import numpy as np
+
+# Astropy + pyuvdata
+from astropy.io import fits as pf
+from astropy.time import Time, TimeDelta
+from astropy.coordinates import EarthLocation, AltAz, Angle, SkyCoord, get_sun
+import pyuvdata
+from pyuvdata import UVData
+import pyuvdata.utils as uvutils
 
 def load_yaml(filename: str) -> dict:
     """ Read YAML file into a Python dict """ 
     d = yaml.load(open(filename, 'r'), yaml.Loader)
     return d
+
 
 def get_hdf5_metadata(filename: str) -> dict:
     """ Extract metadata from HDF5 and perform checks """
@@ -32,6 +40,37 @@ def get_hdf5_metadata(filename: str) -> dict:
         metadata = {k: v for (k, v) in datafile.get('root').attrs.items()}
         metadata['nof_integrations'] = metadata['n_blocks'] * metadata['n_samples']
     return metadata
+    
+
+def phase_to_sun(uv: UVData, t0: Time) -> UVData:
+    """ Phase UVData to sun, based on timestamp 
+
+    Computes the sun's RA/DEC in GCRS for the given time, then applies phasing.
+    This will then recompute UVW and apply phase corrections to data.
+
+    Note: 
+        Phase center is set to 'sidereal', i.e. fixed RA and DEC, not 'ephem', so that
+        we can apply calibration solutions taken at time t0 (where the Sun was when calibration
+        was run, not where it is now!)
+
+    Args:
+        uv (UVData): UVData object to apply phasing to (needs to have a phase center defined)
+        t0 (Time): Astropy Time() to use to compute Sun's RA/DEC
+
+    Returns:
+        uv (UVData): Same UVData as input, but with new phase center applied
+    """
+    sun = get_sun(t0)
+    
+    # sun will be returned in GCRS (Geocentric)
+    # Need to use GCRS, not ICRS! 
+    uv.phase(ra=sun.ra.rad, 
+             dec=sun.dec.rad, 
+             cat_type='sidereal',
+             cat_name=f'sun_{t0.isot}'
+            )
+    return uv
+
 
 def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
     """ Convert AAVS2/3 HDF5 correlator output to UVData object
@@ -73,13 +112,25 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
     uv.telescope_name = md['telescope_name']
     uv.vis_units      = md['vis_units']
     
+    # Telescope location
+    # Also instantiate an EarthLocation observer for LST / Zenith calcs
+    xyz = np.array(list(md[f'telescope_ECEF_{q}'] for q in ('X', 'Y', 'Z')))
+    uv.telescope_location = xyz
+    telescope_earthloc = EarthLocation.from_geocentric(*uv.telescope_location, unit='m')
+
+    # Load baselines and antenna locations (ENU)
     df_ant = pd.read_csv(md['antenna_locations_file'], delimiter=' ', skiprows=4, names=['name', 'X', 'Y', 'Z'])
     df_bl  = pd.read_csv(md['baseline_order_file'], delimiter=' ')
 
-    uv.antenna_names     = df_ant['name'].values
-    uv.antenna_numbers   = np.array(list(df_ant.index), dtype='int32') + 1
-    uv.antenna_positions = np.column_stack((df_ant['X'], df_ant['Y'], df_ant['Z']))
+    # Convert ENU locations to 'local' ECEF
+    # Following https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/mwa_corr_fits.py#L1456
+    antpos_ENU  = np.column_stack((df_ant['X'], df_ant['Y'], df_ant['Z']))
+    antpos_ECEF = uvutils.ECEF_from_ENU(antpos_ENU, *uv.telescope_location_lat_lon_alt) - uv.telescope_location
 
+    # Now fill in antenna info fields
+    uv.antenna_positions = antpos_ECEF
+    uv.antenna_names     = df_ant['name'].values
+    uv.antenna_numbers   = np.array(list(df_ant.index), dtype='int32')
     uv.ant_1_array = df_bl['ant1'].values
     uv.ant_2_array = df_bl['ant2'].values
     uv.baseline_array = df_bl['baseline'].values
@@ -99,16 +150,14 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
     # Spectral window axis
     uv.spw_array = np.array([0])
 
-    # Telescope location
-    # Also instantiate an EarthLocation observer for LST / Zenith calcs
-    xyz = np.array(list(md[f'telescope_ECEF_{q}'] for q in ('X', 'Y', 'Z')))
-    uv.telescope_location = xyz
-    telescope_earthloc = EarthLocation.from_geocentric(*uv.telescope_location, unit='m')
-
     # Time axis
     # Compute JD from unix time and LST - we can do this as we set an EarthLocation on t0 Time
-    t0   = Time(md['ts_start'], format='unix', location=telescope_earthloc)
-    lst0 = t0.sidereal_time('apparent').to('rad').value
+    t0    = Time(md['ts_start'], format='unix', location=telescope_earthloc)
+
+    # Time array is based on center of integration, so we add tdelt / 2 to t0
+    tdelt = TimeDelta(md['tsamp'], format='sec')
+    t0   += tdelt / 2
+    lst0  = t0.sidereal_time('apparent').to('rad').value
     uv.time_array = np.zeros(uv.Nblts, dtype='float64') + t0.jd
     uv.lst_array = np.zeros_like(uv.time_array) + lst0
     uv.integration_time = np.zeros_like(uv.time_array) + md['tsamp']
@@ -142,4 +191,11 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
         warnings.simplefilter("ignore")
         uv.set_uvws_from_antenna_positions(update_vis=False)
 
+    # Finally, load up data
+    with h5py.File(filename, mode='r') as datafile:
+        # Data have shape (nchan, nspw, nbaseline, npol)
+        # Need to transpose to (nbaseline, nspw, nchan, npol)
+        data = datafile['correlation_matrix']['data'][:]
+        uv.data_array = np.transpose(data, (2, 0, 1, 3))
+    
     return uv
