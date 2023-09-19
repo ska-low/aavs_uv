@@ -171,7 +171,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
     # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1338C13-L1338C47
     rdate_obj = Time(np.floor(uv.time_array[0]), format="jd", scale="utc")
     uv.rdate = rdate_obj.strftime("%Y-%m-%d")
-    uv.gst0  = rdate_obj.sidereal_time("apparent", "tio").deg
+    uv.gst0  = float(rdate_obj.sidereal_time("apparent", "tio").deg)
     uv.dut1  = float(rdate_obj.delta_ut1_utc)
     uv.earth_omega = 360.9856438593
     uv.timesys = "UTC"

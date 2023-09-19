@@ -23,19 +23,35 @@ def compare_uv_datasets(uv_orig, uv_comp):
 
                 if isinstance(param.value, (np.int32, np.int64, str, bool, int)):
                     try:
+                        if param_comp.value is None:
+                            print(f"{Fore.orange_1} WARNING: {key} missing in comparison  {Style.reset}")
                         assert param.value == param_comp.value
                     except AssertionError:
                         print(f" --- {key} --- \n Original: \n {param.value} \n Comparison: \n {param_comp.value}")
                 
                 elif isinstance(param.value, (float, np.float32, np.float64)):
                     try:
-                        assert np.isclose(param.value, param_comp.value)
+                        same_type = True
+                        assert type(param.value) == type(param_comp.value)
                     except AssertionError:
+                        if param_comp.value is None:
+                            print(f"{Fore.orange_1} WARNING: {key} missing in comparison {Style.reset}")
+                        else:
+                            print(f"{Fore.red} ERROR: {key} type mismatch {Style.reset}")
                         print(f" --- {key} --- \n Original: \n {param.value} \n Comparison: \n {param_comp.value}")
+                        same_type = False
+                    if same_type:
+                        try:
+                            assert np.isclose(param.value, param_comp.value)
+                        except AssertionError:
+                            print(f" --- {key} --- \n Original: \n {param.value} \n Comparison: \n {param_comp.value}")
+                        except:
+                            print(f"{Fore.red} ERROR: {key} {Style.reset}")
+                            raise
 
                 elif isinstance(param.value, np.ndarray):
                     if type(param.value) != type(param_comp.value):
-                        print(f"ERROR: Type mismatch:{type(param.value)} {type(param_comp.value)}")
+                        print(f"{Fore.red} ERROR: Type mismatch:{type(param.value)} {type(param_comp.value)} {Style.reset}")
                         param_comp.value = np.array(param_comp.value)
                     try:
                         if key in tolerances.keys():
@@ -154,5 +170,5 @@ def test_write():
     compare_uv_datasets(uv_phs, uv_gen)
 
 if __name__ == "__main__":
-    #test_compare()
+    test_compare()
     test_write()
