@@ -129,7 +129,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
 
     # Now fill in antenna info fields
     uv.antenna_positions = antpos_ECEF
-    uv.antenna_names     = df_ant['name'].values
+    uv.antenna_names     = df_ant['name'].values.astype('str')
     uv.antenna_numbers   = np.array(list(df_ant.index), dtype='int32')
     uv.ant_1_array = df_bl['ant1'].values
     uv.ant_2_array = df_bl['ant2'].values
@@ -141,14 +141,16 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
 
     # Polarization axis
     _pol_types = {
-        'stokes':   [1,   2,  3,  4],
-        'linear':   [-5, -6, -7, -8],
-        'circular': [-1, -2, -3, -4]
+        'stokes':   np.array([1,   2,  3,  4]),
+        'linear':   np.array([-5, -6, -7, -8]),
+        'linear_crossed': np.array([-5, -6, -8, -7]),
+        'circular': np.array([-1, -2, -3, -4])
     }
     uv.polarization_array = _pol_types[md['polarization_type'].lower()]
 
     # Spectral window axis
     uv.spw_array = np.array([0])
+    uv.flex_spw_id_array = np.array([0])
 
     # Time axis
     # Compute JD from unix time and LST - we can do this as we set an EarthLocation on t0 Time
@@ -161,6 +163,18 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
     uv.time_array = np.zeros(uv.Nblts, dtype='float64') + t0.jd
     uv.lst_array = np.zeros_like(uv.time_array) + lst0
     uv.integration_time = np.zeros_like(uv.time_array) + md['tsamp']
+
+    # Reference date RDATE and corresponding Greenwich sidereal time at midnight GST0
+    # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1305C13-L1305C85 
+    # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1318C20-L1318C21
+    # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1323C40-L1323C45
+    # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1338C13-L1338C47
+    rdate_obj = Time(np.floor(uv.time_array[0]), format="jd", scale="utc")
+    uv.rdate = rdate_obj.strftime("%Y-%m-%d")
+    uv.gst0  = rdate_obj.sidereal_time("apparent", "tio").deg
+    uv.dut1  = float(rdate_obj.delta_ut1_utc)
+    uv.earth_omega = 360.9856438593
+    uv.timesys = "UTC"
 
     # Compute zenith phase center
     zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'), obstime=t0, location=t0.location)
@@ -175,14 +189,14 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
         cat_epoch='J2000',
         info_source='user',
         force_update=False,
-        cat_id=None,
+        cat_id=0,
     )
 
     uv.phase_center_id_array  = np.zeros(uv.Nblts, dtype='int32') + phs_id
     uv.phase_center_app_ra    = np.zeros(uv.Nblts, dtype='float64') + zen_sc.icrs.ra.rad
     uv.phase_center_app_dec   = np.zeros(uv.Nblts, dtype='float64') + zen_sc.icrs.dec.rad
     uv.phase_center_frame_pa  = np.zeros(uv.Nblts, dtype='float64')
-    
+
     # Compute zenith UVW coordinates
     # Miriad convention is xyz(ant2) - xyz(ant1)
     # We assume numbers start at 1, not 0
@@ -197,5 +211,9 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
         # Need to transpose to (nbaseline, nspw, nchan, npol)
         data = datafile['correlation_matrix']['data'][:]
         uv.data_array = np.transpose(data, (2, 0, 1, 3))
-    
+
+        # Add optional arrays
+        uv.flag_array = np.zeros_like(uv.data_array, dtype='bool')
+        uv.nsample_array = np.ones_like(uv.data_array, dtype='float32')
+
     return uv
