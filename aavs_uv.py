@@ -106,7 +106,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
     uv.Npols           = md['n_stokes']
     uv.Nspws           = md['Nspws']
     uv.Nphase          = md['Nphase']
-    uv.Ntimes          = md['n_samples']
+    uv.Ntimes          = md['n_integrations']
     uv.channel_width   = md['channel_width']
     uv.flex_spw        = md['flex_spw']
     uv.future_array_shapes = md['future_array_shapes']
@@ -136,8 +136,8 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
     uv.antenna_positions = antpos_ECEF
     uv.antenna_names     = df_ant['name'].values.astype('str')
     uv.antenna_numbers   = np.array(list(df_ant.index), dtype='int32')
-    uv.ant_1_array       = np.repeat(df_bl['ant1'].values, md['n_integrations'])
-    uv.ant_2_array       = np.repeat(df_bl['ant2'].values, md['n_integrations'])
+    uv.ant_1_array       = np.tile(df_bl['ant1'].values, md['n_integrations'])
+    uv.ant_2_array       = np.tile(df_bl['ant2'].values, md['n_integrations'])
     # Create baseline array - note: overwrites baseline ordering file with pyuvdata standard.
     uv.baseline_array    = uvutils.antnums_to_baseline(uv.ant_1_array, uv.ant_2_array, md['n_antennas'])
     #uv.baseline_array    = np.repeat(df_bl['baseline'].values, md['n_integrations'])
@@ -161,15 +161,24 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
 
     # Time axis
     # Compute JD from unix time and LST - we can do this as we set an EarthLocation on t0 Time
-    t0    = Time(md['ts_start'], format='unix', location=telescope_earthloc)
+    t    = Time(np.zeros(uv.Nblts, dtype='float64') + md['ts_start'], 
+                 format='unix', location=telescope_earthloc)
 
     # Time array is based on center of integration, so we add tdelt / 2 to t0
-    tdelt = TimeDelta(md['tsamp'], format='sec')
-    t0   += tdelt / 2
-    lst0  = t0.sidereal_time('apparent').to('rad').value
-    uv.time_array = np.zeros(uv.Nblts, dtype='float64') + t0.jd
-    uv.lst_array = np.zeros_like(uv.time_array) + lst0
+    tdelt  = TimeDelta(md['tsamp'], format='sec')
+    t    += tdelt / 2
+    
+    # And for each time step we add an integration time step 
+    # repeat each item in array (0, 1, N_int) for Nbl -> (0, 0, ..., 1, 1, ..., N_int, N_int, ...)
+    tsteps = TimeDelta(np.repeat(np.arange(md['n_integrations']), uv.Nbls) * md['tsamp'], format='sec')
+    t    += tsteps
+    
+    lst  = t.sidereal_time('apparent').to('rad').value
+    uv.time_array = t.jd
+    uv.lst_array = lst
     uv.integration_time = np.zeros_like(uv.time_array) + md['tsamp']
+
+    t0 = t[0]
 
     # Reference date RDATE and corresponding Greenwich sidereal time at midnight GST0
     # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1305C13-L1305C85 
@@ -214,11 +223,11 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
 
     # Finally, load up data
     with h5py.File(filename, mode='r') as datafile:
-        # Data have shape (nint, nspw, nbaseline, npol)
-        # Need to transpose to (nbaseline * nint (Nblts), nspw, nchan, npol)
+        # Data have shape (nint, nbaseline, nspw, npol)
+        # Need to flatten to (nbaseline * nint (Nblts), nspw, nchan, npol)
         data = datafile['correlation_matrix']['data'][:]
-        uv.data_array = np.transpose(data, (2, 0, 1, 3))
-        uv.data_array = uv.data_array.reshape((uv.Nblts, uv.Nspws, uv.Nfreqs, uv.Npols))
+        #uv.data_array = np.transpose(data, (0, 2, 1, 3))
+        uv.data_array = data.reshape((uv.Nblts, uv.Nspws, uv.Nfreqs, uv.Npols))
 
         # HDF5 data are written as XX, XY, YX, YY (AIPS codes -5, -7, -8, -6)
         if md['polarization_type'].lower() == 'linear_crossed':
