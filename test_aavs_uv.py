@@ -133,7 +133,7 @@ def test0():
     filelist = get_aavs2_correlator_filelist(filepath)
     uv = hdf5_to_pyuvdata(filelist[0], yaml_config)
 
-def _setup_test(test_name: str=None, load_comp: bool=False) -> UVData:
+def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=False) -> UVData:
     """ Load datasets to use in tests
 
     Args:
@@ -156,7 +156,10 @@ def _setup_test(test_name: str=None, load_comp: bool=False) -> UVData:
     fn_raw = 'test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'    
     fn_uvf = 'test-data/aavs2_1x1000ms/chan_204_20230823T055556.uvfits'
     fn_mir = 'test-data/aavs2_1x1000ms/chan_204_20230823T055556.uv'
-
+    
+    fn_2x500_raw = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
+    fn_2x500_uvf = 'test-data/aavs2_2x500ms/chan_204_20230927T094734.uvfits'
+    
     def _load_and_phase_hdf5():
         uv_raw = hdf5_to_pyuvdata(fn_raw, yaml_raw)
         t0 = Time(uv_raw.time_array[0], format='jd')
@@ -173,7 +176,10 @@ def _setup_test(test_name: str=None, load_comp: bool=False) -> UVData:
         uv_uvf = UVData.from_file(fn_uvf, file_type='uvfits', run_check=False)
         uv_mir = UVData.from_file(fn_mir, file_type='miriad')
         return uv_phs, uv_uvf, uv_mir
-
+    elif load_2x500:
+        uv_phs = hdf5_to_pyuvdata(fn_2x500_raw, yaml_raw)
+        uv_uvf = UVData.from_file(fn_2x500_uvf, file_type='uvfits', run_check=False)
+        return uv_phs, uv_phs
     else:
         return uv_phs
 
@@ -184,14 +190,24 @@ def test_compare():
 
 def test_write():
     """ Test file write """
-    uv_phs = _setup_test('Write to UVFITS')
-    fn_out = 'pyuv_chan_204_20230823T055556.uvfits'
-    uv_phs.write_uvfits(fn_out, fix_autos=True)
-
-    uv_gen = UVData.from_file(fn_out)
-
-    compare_uv_datasets(uv_phs, uv_gen)
+    try:
+        uv_phs = _setup_test('Write to UVFITS')
+        fn_out = 'pyuv_chan_204_20230823T055556.uvfits'
+        uv_phs.write_uvfits(fn_out, fix_autos=True)
+    
+        uv_gen = UVData.from_file(fn_out)
+    
+        compare_uv_datasets(uv_phs, uv_gen)
+    finally:
+        if os.path.exists(fn_out):
+            os.remove(fn_out)
+            
+def test_aavs2_2x500():
+    """ Test 2x integration data """
+    uv_phs, uv_uvf = _setup_test('Reading 2x500ms data', load_2x500=True)
+    compare_uv_datasets(uv_phs, uv_uvf)
 
 if __name__ == "__main__":
     test_compare()
     test_write()
+    test_aavs2_2x500()
