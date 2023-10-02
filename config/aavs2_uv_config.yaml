@@ -12,7 +12,7 @@ channel_spacing: 781250.0           # Hz - oversampled so spacing is smaller tha
 antenna_locations_file: config/aavs2_antenna_locations.txt
 baseline_order_file: config/aavs2_baseline_order.txt
 flex_spw: False
-polarization_type: linear_crossed  # stokes, circular, linear (XX, YY, XY, YX) or linear_crossed (XX, YY, YX, XY)
+polarization_type: linear_crossed  # stokes, circular, linear (XX, YY, XY, YX) or linear_crossed (XX, XY, YX, YY)
 future_array_shapes: False
 vis_units: uncalib
 Nspws: 1

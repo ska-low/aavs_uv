@@ -38,7 +38,8 @@ def get_hdf5_metadata(filename: str) -> dict:
     
         # All good, get metadata
         metadata = {k: v for (k, v) in datafile.get('root').attrs.items()}
-        metadata['nof_integrations'] = metadata['n_blocks'] * metadata['n_samples']
+        metadata['n_integrations'] = metadata['n_blocks'] * metadata['n_samples']
+        metadata['data_shape'] = datafile['correlation_matrix']['data'].shape
     return metadata
     
 
@@ -72,13 +73,17 @@ def phase_to_sun(uv: UVData, t0: Time) -> UVData:
     return uv
 
 
-def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
+def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) -> pyuvdata.UVData:
     """ Convert AAVS2/3 HDF5 correlator output to UVData object
 
     Args:
         filename (str): Name of file to open
         yaml_config (str): YAML configuration file with basic telescope info.
                            See README for more information
+        phase_to_t0 (bool): Instead of phasing to Zenith, phase all timestamps to 
+                            the RA/DEC position of zenith at the first timestamp (t0).
+                            This is needed if writing UVFITS files, but not if you
+                            are doing snapshot imaging of each timestep. Default True.
     Returns:
         uv (pyuvdata.UVData): A UVData object that can be used to create 
                               UVFITS/MIRIAD/UVH5/etc files
@@ -96,7 +101,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
     uv.Nants_data      = md['n_antennas']
     uv.Nants_telescope = md['n_antennas']
     uv.Nbls            = md['n_baselines']
-    uv.Nblts           = md['n_baselines'] * md['n_samples']
+    uv.Nblts           = md['n_baselines'] * md['n_integrations']
     uv.Nfreqs          = md['n_chans']
     uv.Npols           = md['n_stokes']
     uv.Nspws           = md['Nspws']
@@ -131,9 +136,11 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
     uv.antenna_positions = antpos_ECEF
     uv.antenna_names     = df_ant['name'].values.astype('str')
     uv.antenna_numbers   = np.array(list(df_ant.index), dtype='int32')
-    uv.ant_1_array = df_bl['ant1'].values
-    uv.ant_2_array = df_bl['ant2'].values
-    uv.baseline_array = df_bl['baseline'].values
+    uv.ant_1_array       = np.repeat(df_bl['ant1'].values, md['n_integrations'])
+    uv.ant_2_array       = np.repeat(df_bl['ant2'].values, md['n_integrations'])
+    # Create baseline array - note: overwrites baseline ordering file with pyuvdata standard.
+    uv.baseline_array    = uvutils.antnums_to_baseline(uv.ant_1_array, uv.ant_2_array, md['n_antennas'])
+    #uv.baseline_array    = np.repeat(df_bl['baseline'].values, md['n_integrations'])
 
     # Frequency axis
     f0 = md['channel_spacing'] * md['channel_id']
@@ -143,7 +150,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
     _pol_types = {
         'stokes':   np.array([1,   2,  3,  4]),
         'linear':   np.array([-5, -6, -7, -8]),
-        'linear_crossed': np.array([-5, -6, -8, -7]),
+        'linear_crossed': np.array([-5, -7, -8, -6]),  # Note: we convert this to linear when loading data
         'circular': np.array([-1, -2, -3, -4])
     }
     uv.polarization_array = _pol_types[md['polarization_type'].lower()]
@@ -207,13 +214,33 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
 
     # Finally, load up data
     with h5py.File(filename, mode='r') as datafile:
-        # Data have shape (nchan, nspw, nbaseline, npol)
-        # Need to transpose to (nbaseline, nspw, nchan, npol)
+        # Data have shape (nint, nspw, nbaseline, npol)
+        # Need to transpose to (nbaseline * nint (Nblts), nspw, nchan, npol)
         data = datafile['correlation_matrix']['data'][:]
         uv.data_array = np.transpose(data, (2, 0, 1, 3))
+        uv.data_array = uv.data_array.reshape((uv.Nblts, uv.Nspws, uv.Nfreqs, uv.Npols))
+
+        # HDF5 data are written as XX, XY, YX, YY (AIPS codes -5, -7, -8, -6)
+        if md['polarization_type'].lower() == 'linear_crossed':
+            # A little irritating, but we need to rearrange to get into AIPS standard 
+            # xx = np.copy(uv.data_array[..., 0])  # (Already in right spot)
+            xy = np.copy(uv.data_array[..., 1])
+            yx = np.copy(uv.data_array[..., 2])
+            yy = np.copy(uv.data_array[..., 3])
+            # uv.data_array[..., 0] = xx           # (Already in right spot)
+            uv.data_array[..., 1] = yy
+            uv.data_array[..., 2] = xy
+            uv.data_array[..., 2] = yx
+            uv.polarization_array = _pol_types['linear']
 
         # Add optional arrays
         uv.flag_array = np.zeros_like(uv.data_array, dtype='bool')
         uv.nsample_array = np.ones_like(uv.data_array, dtype='float32')
+
+        # We have phased to Zenith, but pyuvdata's UVFITS writer needs data to be phased
+        # to the zenith of the first timestamp. So, we do this by default
+        if phase_to_t0:
+            phase_time = Time(uv.time_array[0], format="jd")
+            uv.phase_to_time(phase_time)
 
     return uv
