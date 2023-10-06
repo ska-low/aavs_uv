@@ -25,6 +25,7 @@ python-casacore = ["python-casacore"]
 [tool.poetry.dev-dependencies]
 pytest = "^7.4"
 pytest-cov = "^3.0"
+colored = "^2.2"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.2"
