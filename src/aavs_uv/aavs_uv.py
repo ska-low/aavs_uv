@@ -52,6 +52,20 @@ def phase_to_sun(uv: UVData, t0: Time) -> UVData:
     return uv
 
 
+def load_observation_metadata(filename: str, yaml_config: str):
+    """ Load observation metadata """
+    # Load metadata from config and HDF5 file
+    md      = get_hdf5_metadata(filename)
+    md_yaml = load_yaml(yaml_config)
+    md.update(md_yaml)
+
+    # Update path to antenna location files to use absolute path
+    config_abspath = os.path.dirname(os.path.abspath(yaml_config))
+    md['antenna_locations_file'] = os.path.join(config_abspath, md['antenna_locations_file'])
+    md['baseline_order_file']  = os.path.join(config_abspath, md['baseline_order_file'])
+
+    return md
+
 def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) -> pyuvdata.UVData:
     """ Convert AAVS2/3 HDF5 correlator output to UVData object
 
@@ -67,14 +81,12 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
         uv (pyuvdata.UVData): A UVData object that can be used to create 
                               UVFITS/MIRIAD/UVH5/etc files
     """
+
+    # Load metadata
+    md = load_observation_metadata(filename, yaml_config)
     
     # Create empty UVData object
     uv = pyuvdata.UVData()
-    
-    # Load metadata from config and HDF5 file
-    md      = get_hdf5_metadata(filename)
-    md_yaml = load_yaml(yaml_config)
-    md.update(md_yaml)
     
     #with h5py.File(filename, mode='r') as h:
     uv.Nants_data      = md['n_antennas']
@@ -103,9 +115,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
     telescope_earthloc = EarthLocation.from_geocentric(*uv.telescope_location, unit='m')
 
     # Load baselines and antenna locations (ENU)
-    config_abspath = os.path.dirname(os.path.abspath(yaml_config))
-    fn_antloc = os.path.join(config_abspath, md['antenna_locations_file'])
-    fn_bls  = os.path.join(config_abspath, md['baseline_order_file'])
+
     df_ant = pd.read_csv(fn_antloc, delimiter=' ', skiprows=4, names=['name', 'X', 'Y', 'Z'])
     df_bl  = pd.read_csv(fn_bls, delimiter=' ')
 
