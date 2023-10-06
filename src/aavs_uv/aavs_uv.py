@@ -2,7 +2,7 @@
 import glob
 import os
 import warnings
-import yaml
+
 from pprint import pprint
 
 # Basic science stuff
@@ -19,54 +19,8 @@ import pyuvdata
 from pyuvdata import UVData
 import pyuvdata.utils as uvutils
 
-def load_yaml(filename: str) -> dict:
-    """ Read YAML file into a Python dict """ 
-    d = yaml.load(open(filename, 'r'), yaml.Loader)
-    return d
-
-
-def station_location_from_platform_yaml(fn_yaml: str) -> (EarthLocation, pd.DataFrame):
-    """ Load station location from AAVS3 MCCS yaml config 
-
-    Args:
-        fn_yaml (str): Filename path to yaml config
-
-    Returns:
-        (earth_loc, ant_enu): astropy EarthLocation and antenna ENU locations in m
-    """
-    d =load_yaml(fn_yaml)
-    d_station = d['platform']['array']['station_clusters']['a1']['stations']['1']
-
-    # Generate pandas dataframe of antenna positions
-    d_ant = d_station['antennas']
-    ant_enu = [[int(k), *list(d_ant[k]['location_offset'].values())] for k in d_ant.keys()]
-    ant_enu = pd.DataFrame(ant_enu, columns=('name', 'E', 'N', 'U'))
-
-    # Generate array central reference position
-    # NOTE: Currently using WGS84 instead of GDA2020
-    loc = d_station['reference']
-    earth_loc = EarthLocation.from_geodetic(loc['longitude'], loc['latitude'], loc['ellipsoidal_height'])
-
-    return  earth_loc, ant_enu
-    
-
-def get_hdf5_metadata(filename: str) -> dict:
-    """ Extract metadata from HDF5 and perform checks """
-    with h5py.File(filename, mode='r') as datafile:
-        expected_keys = ['n_antennas', 'ts_end', 'n_pols', 'n_beams', 'tile_id', 'n_chans', 'n_samples', 'type',
-                         'data_type', 'data_mode', 'ts_start', 'n_baselines', 'n_stokes', 'channel_id', 'timestamp',
-                         'date_time', 'n_blocks']
-    
-        # Check that keys are present
-        if set(expected_keys) - set(datafile.get('root').attrs.keys()) != set():
-            raise Exception("Missing metadata in file")
-    
-        # All good, get metadata
-        metadata = {k: v for (k, v) in datafile.get('root').attrs.items()}
-        metadata['n_integrations'] = metadata['n_blocks'] * metadata['n_samples']
-        metadata['data_shape'] = datafile['correlation_matrix']['data'].shape
-    return metadata
-    
+from aavs_uv.io.yaml import load_yaml
+from aavs_uv.io.aavs_hdf5 import get_hdf5_metadata
 
 def phase_to_sun(uv: UVData, t0: Time) -> UVData:
     """ Phase UVData to sun, based on timestamp 
@@ -98,6 +52,20 @@ def phase_to_sun(uv: UVData, t0: Time) -> UVData:
     return uv
 
 
+def load_observation_metadata(filename: str, yaml_config: str):
+    """ Load observation metadata """
+    # Load metadata from config and HDF5 file
+    md      = get_hdf5_metadata(filename)
+    md_yaml = load_yaml(yaml_config)
+    md.update(md_yaml)
+
+    # Update path to antenna location files to use absolute path
+    config_abspath = os.path.dirname(os.path.abspath(yaml_config))
+    md['antenna_locations_file'] = os.path.join(config_abspath, md['antenna_locations_file'])
+    md['baseline_order_file']  = os.path.join(config_abspath, md['baseline_order_file'])
+
+    return md
+
 def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) -> pyuvdata.UVData:
     """ Convert AAVS2/3 HDF5 correlator output to UVData object
 
@@ -113,14 +81,12 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
         uv (pyuvdata.UVData): A UVData object that can be used to create 
                               UVFITS/MIRIAD/UVH5/etc files
     """
+
+    # Load metadata
+    md = load_observation_metadata(filename, yaml_config)
     
     # Create empty UVData object
     uv = pyuvdata.UVData()
-    
-    # Load metadata from config and HDF5 file
-    md      = get_hdf5_metadata(filename)
-    md_yaml = load_yaml(yaml_config)
-    md.update(md_yaml)
     
     #with h5py.File(filename, mode='r') as h:
     uv.Nants_data      = md['n_antennas']
@@ -149,6 +115,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
     telescope_earthloc = EarthLocation.from_geocentric(*uv.telescope_location, unit='m')
 
     # Load baselines and antenna locations (ENU)
+
     df_ant = pd.read_csv(md['antenna_locations_file'], delimiter=' ', skiprows=4, names=['name', 'X', 'Y', 'Z'])
     df_bl  = pd.read_csv(md['baseline_order_file'], delimiter=' ')
 

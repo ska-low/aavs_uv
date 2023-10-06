@@ -11,8 +11,7 @@ from ska_sdp_datamodels.visibility import Visibility, create_visibility
 from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame, PolarisationFrame
 
-from aavs_uv import get_hdf5_metadata, load_yaml
-
+from aavs_uv.aavs_uv import load_observation_metadata
 
 def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str) -> Visibility:
     """ Generate a SDP Visibility object from a AAVS2 HDF5 file
@@ -30,8 +29,7 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str) -> Visibility:
 
     """
     # Load metadata
-    md = get_hdf5_metadata(fn_raw)
-    md.update(load_yaml(yaml_raw))
+    md = load_observation_metadata(fn_raw, yaml_raw)
     
     # Create Configuration and Frames
     config    = Configuration()
@@ -55,7 +53,7 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str) -> Visibility:
 
     # Instantiate config
     config = config.constructor(
-        name='AAVS2', 
+        name=md['telescope_name'], 
         names=[f'ant{x:03d}' for x in range(md['n_antennas'])],
         stations=[f'{x}' for x in range(md['n_antennas'])],
         location=telescope_earthloc,
