@@ -11,8 +11,8 @@ from ska_sdp_datamodels.visibility import Visibility, create_visibility
 from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame, PolarisationFrame
 
-from aavs_uv import get_hdf5_metadata, load_yaml
-
+from aavs_uv.io.yaml import load_yaml
+from aavs_uv.io.aavs_hdf5 import get_hdf5_metadata
 
 def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str) -> Visibility:
     """ Generate a SDP Visibility object from a AAVS2 HDF5 file

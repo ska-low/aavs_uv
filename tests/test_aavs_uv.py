@@ -129,7 +129,7 @@ def get_aavs2_correlator_filelist(filepath: str) -> list:
 def test0():
     """ Test basic data loading using get_aavs2_correlator_filelist """
     filepath    = 'data/2023_08_23-13:53/'
-    yaml_config = 'config/aavs2_uv_config.yaml'
+    yaml_config = '../config/aavs2/uv_config.yaml'
     filelist = get_aavs2_correlator_filelist(filepath)
     uv = hdf5_to_pyuvdata(filelist[0], yaml_config)
 
@@ -152,7 +152,7 @@ def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=Fal
         uv_uvf: Loaded from a UVFITS file - chan_204_20230823T055556.uvfits
         uv_mir: Loaded from a MIRIAD file - chan_204_20230823T055556.uv
     """
-    yaml_raw = 'config/aavs2_uv_config.yaml'
+    yaml_raw = '../config/aavs2/uv_config.yaml'
     fn_raw = 'test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'    
     fn_uvf = 'test-data/aavs2_1x1000ms/chan_204_20230823T055556.uvfits'
     fn_mir = 'test-data/aavs2_1x1000ms/chan_204_20230823T055556.uv'
