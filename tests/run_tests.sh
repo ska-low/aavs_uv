@@ -1,0 +1,1 @@
+ pytest --cov=aavs_uv . --cov-report html

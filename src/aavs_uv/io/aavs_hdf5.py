@@ -8,7 +8,7 @@ def get_hdf5_metadata(filename: str) -> dict:
                          'date_time', 'n_blocks']
     
         # Check that keys are present
-        if set(expected_keys) - set(datafile.get('root').attrs.keys()) != set():
+        if set(expected_keys) - set(datafile.get('root').attrs.keys()) != set(): # pragma: no cover
             raise Exception("Missing metadata in file")
     
         # All good, get metadata
