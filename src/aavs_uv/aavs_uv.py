@@ -116,8 +116,8 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
 
     # Load baselines and antenna locations (ENU)
 
-    df_ant = pd.read_csv(fn_antloc, delimiter=' ', skiprows=4, names=['name', 'X', 'Y', 'Z'])
-    df_bl  = pd.read_csv(fn_bls, delimiter=' ')
+    df_ant = pd.read_csv(md['antenna_locations_file'], delimiter=' ', skiprows=4, names=['name', 'X', 'Y', 'Z'])
+    df_bl  = pd.read_csv(md['baseline_order_file'], delimiter=' ')
 
     # Convert ENU locations to 'local' ECEF
     # Following https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/mwa_corr_fits.py#L1456
