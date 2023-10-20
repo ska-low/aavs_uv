@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 from aavs_uv.io.yaml import load_yaml
 import pandas as pd
 from astropy.coordinates import EarthLocation
@@ -16,7 +18,13 @@ def station_location_from_platform_yaml(fn_yaml: str) -> (EarthLocation, pd.Data
 
     # Generate pandas dataframe of antenna positions
     d_ant = d_station['antennas']
-    ant_enu = [[int(k), *list(d_ant[k]['location_offset'].values())] for k in d_ant.keys()]
+
+    location_getter = itemgetter("east", "north", "up")
+    ant_enu = [
+        [f"SB{a['smartbox']}-{a['smartbox_port']}", *location_getter(a["location_offset"])]
+        for a in sorted(d_ant.values(), key=lambda x: (int(x["tpm"]), x["tpm_y_channel"] // 2))
+    ]
+
     ant_enu = pd.DataFrame(ant_enu, columns=('name', 'E', 'N', 'U'))
 
     # Generate array central reference position
