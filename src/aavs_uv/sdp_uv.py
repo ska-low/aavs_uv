@@ -5,7 +5,9 @@ import h5py
 
 from astropy.coordinates import EarthLocation, AltAz, Angle, SkyCoord
 from astropy.time import Time
+
 import pyuvdata.utils as uvutils
+from pyuvdata import UVData
 
 from ska_sdp_datamodels.visibility import Visibility, create_visibility
 from ska_sdp_datamodels.configuration import Configuration
@@ -110,3 +112,76 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str) -> Visibility:
         v.vis.data = d
 
     return v
+
+
+def uvdata_to_sdp_vis(uv: UVData) -> Visibility:
+    """ Convert pyuvdata object to SDP Visibility 
+    
+    Args:
+        uv (UVData): pyuvdata UVData object
+    
+    Returns:
+        v (Visibility): SDP Visibility object
+    """
+
+    # Create Configuration and Frames
+    # TODO: Derive from UVData
+    config    = Configuration()
+    rec_frame = ReceptorFrame('linear')
+    pol_frame = PolarisationFrame('linear')
+    
+    telescope_earthloc = EarthLocation.from_geocentric(*uv.telescope_location, unit='m')
+
+    antpos_ECEF = uv.antenna_positions
+
+    # Instantiate config
+    config = config.constructor(
+        name=uv.telescope_name, 
+        names=uv.antenna_names,
+        stations=len(uv.antenna_numbers),
+        location=telescope_earthloc,
+        xyz=antpos_ECEF,
+        receptor_frame=rec_frame,
+        diameter=1.0,  # Errors if not set
+        mount='altaz')
+
+    # Setup time -- note time_array is Nbls*Nt long, we assume it is ordered
+    t = Time(uv.time_array[::uv.Nbls], format='jd', location=telescope_earthloc)
+    t_hourangle = t.sidereal_time('apparent').to('rad').value
+
+    # Setup frequency
+    f_c  = uv.freq_array[0]   # TODO: handle multiple spectral windows
+    f_bw = np.ones_like(f_c) * uv.channel_width
+
+    # setup phase center
+    pcd = uv.phase_center_catalog[1]
+    pc_name = pcd['cat_name']
+    pc_sc = SkyCoord(pcd['cat_lon'], pcd['cat_lat'], unit=('rad', 'rad'))
+
+    #integration_time (float, optional) – Only used in the specific case where times only has one element
+    t_int = uv.integration_time[0] if uv.Ntimes == 1 else None
+
+    # Instantiate SDP Visibility object
+    v = create_visibility(
+        config=config,
+        times=t_hourangle,
+        frequency=f_c,
+        phasecentre=pc_sc,
+        channel_bandwidth=f_bw,
+        weight=1.0,
+        polarisation_frame=pol_frame,
+        integration_time=t_int,  # Only used in specific case of
+        zerow=False,
+        elevation_limit=None,
+        source=pc_name,
+        scan_id=0,
+        scan_intent=None,
+        execblock_id=0,
+        meta={},
+        utc_time=t[0],
+        times_are_ha=True,
+    ) 
+
+    # TODO: Add actual data
+    return v
+
