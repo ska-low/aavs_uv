@@ -1,5 +1,7 @@
 import numpy as np
 import pylab as plt
+from astropy.coordinates import SkyCoord
+
 from aavs_uv.postx.ant_array import RadioArray
 from aavs_uv.sdp_uv import hdf5_to_sdp_vis
 from aavs_uv.postx.allsky_viewer import AllSkyViewer
@@ -20,14 +22,18 @@ def test_postx():
     print(aa.zenith)
     
     # RadioArray - various aa.update() calls
+    aa.verbose = True
     aa.update()
+    aa.verbose = False
     aa.update(t_idx=0)
+    aa.conjugate_data = True
     aa.update(f_idx=0)
     aa.update(update_gsm=True)
     
     # RadioArray - images
     img  = aa.make_image()
     hmap = aa.make_healpix(n_side=64)
+    hmap = aa.make_healpix(n_side=64, apply_mask=False)
     gsm  = aa.generate_gsm()
 
     # Sky catalog
@@ -37,7 +43,10 @@ def test_postx():
     asv = AllSkyViewer(aa, skycat=skycat)
     asv.load_skycat(skycat)
     asv.update()
+
     print(asv.get_pixel(aa.zenith))
+    sc_north = SkyCoord('12:00', '80:00:00', unit=('hourangle', 'deg'))
+    assert asv.get_pixel(sc_north) == (0, 0)
 
 def test_postx_plotting():
     aa = setup_test()
@@ -63,7 +72,13 @@ def test_postx_plotting():
     asv = AllSkyViewer(aa, skycat=skycat)
 
     asv.new_fig()
-    asv.plot(overlay_srcs=True)
+    asv.plot()
+    plt.show()
+    
+    plt.subplot(2,1,1)
+    asv.plot(overlay_srcs=True, subplot_id=(2,1,1), colorbar=True)
+    plt.subplot(2,1,2)
+    pdata = asv.plot(subplot_id=(2,1,2), colorbar=True, return_data=True)
     plt.show()
 
     asv.mollview(apply_mask=True, fov=np.pi/2)

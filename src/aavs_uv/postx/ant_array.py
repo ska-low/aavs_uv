@@ -310,6 +310,7 @@ class RadioArray(object):
                 mask[pix_visible] = False
             else:
                 mask = np.zeros_like(mask)
+                pix_visible = pix0
 
             lmn = skycoord_to_lmn(sc[pix_visible], sc_zen)
             t_g = np.einsum('id,pd', lmn, self.xyz_local, optimize=True) / SPEED_OF_LIGHT
