@@ -57,6 +57,7 @@ class RadioArray(object):
         # Convert antenna positions back into ENU
         loc, enu = loc_xyz_ECEF_to_ENU(vis.configuration.attrs['location'], vis.configuration['xyz'])
         self.xyz_local = enu 
+        
         self.n_ant = len(self.xyz_local)
         
         # Setup frequency, time, and phase centre
@@ -197,6 +198,7 @@ class RadioArray(object):
         self.workspace['cgrid'] = c
         self.workspace['cgrid_conj'] = np.conj(c)
     
+
     def plot_corr_matrix(self, log: bool=True):
         """ Plot correlation matrix """
         data = np.log(np.abs(self.workspace['data'])) if log else np.abs(self.workspace['data'])
@@ -205,6 +207,48 @@ class RadioArray(object):
         plt.ylabel("Antenna Q")
         plt.colorbar()
     
+
+    def plot_antennas(self, x: str='E', y: str='N', overlay_names: bool=False, overlay_fontsize: str='x-small', **kwargs):
+        """ Plot antenna locations in ENU
+        
+        Args:
+            x (str): One of 'E', 'N', or 'U'
+            y (str): One of 'E', 'N', or 'U'
+            overlay_names (bool): Overlay the antenna names on the plot. Default False
+            overlay_fontsize (str): Font size for antenna names 'xx-small', 'x-small', 'small', 'medium', 
+                                                                'large', 'x-large', 'xx-large'
+        """
+        enu_map = {'E':0, 'N':1, 'U':2}
+        title = f"{self.name} | Lon: {self.earthloc.to_geodetic().lon:.2f} | Lat: {self.earthloc.to_geodetic().lat:.2f}"
+        plt.scatter(self.xyz_local[:, enu_map[x.upper()]], self.xyz_local[:, enu_map[y.upper()]], **kwargs)
+        plt.xlabel(f"{x} [m]")
+        plt.ylabel(f"{y} [m]")
+
+        if overlay_names:
+            names = self.vis.attrs['configuration']['names'].data
+            for ii in range(self.n_ant):
+                plt.text(self.xyz_local[:, enu_map[x]][ii], self.xyz_local[:, enu_map[y]][ii], names[ii], fontsize=overlay_fontsize)
+        plt.title(title)
+    
+    def plot_uvw(self, x: str='U', y: str='V', **kwargs):
+        """ Plot UVW coordinates
+        
+        Args:
+            x (str): One of 'U', 'V', or 'W'
+            y (str): One of 'U', 'V', or 'W'
+        """
+        uvw_map = {'U':0, 'V':1, 'W':2}
+        t_idx  = self.workspace['t_idx']
+        uvw = self.vis.uvw
+        
+        # Set plotting defaults
+        if 'marker' not in kwargs.keys(): kwargs['marker'] = '.'
+        if 'alpha' not in kwargs.keys(): kwargs['alpha']   = 0.05
+
+        plt.scatter(uvw[t_idx, :, uvw_map[x.upper()]], uvw[t_idx, :, uvw_map[y.upper()]], **kwargs)
+        plt.xlabel(f"{x} [m]")
+        plt.ylabel(f"{y} [m]")      
+
     def make_image(self, n_pix: int=128, update: bool=True) -> np.array:
         """ Make an image out of a beam grid 
         

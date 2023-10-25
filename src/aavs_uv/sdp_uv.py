@@ -54,7 +54,7 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str) -> Visibility:
     # Instantiate config
     config = config.constructor(
         name=md['telescope_name'], 
-        names=[f'ant{x:03d}' for x in range(md['n_antennas'])],
+        names=df_ant['name'],
         stations=[f'{x}' for x in range(md['n_antennas'])],
         location=telescope_earthloc,
         xyz=antpos_ECEF,
