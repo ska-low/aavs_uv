@@ -51,14 +51,15 @@ class RadioArray(object):
         self.verbose = verbose
         self.name = vis.attrs['meta']['instrument']
     
-        xyz = list(vis.configuration.attrs['location'].value)
-        self.earthloc = EarthLocation.from_geocentric(*xyz, unit='m')
+        xyz0 = list(vis.configuration.attrs['location'].value)
+        self.earthloc = EarthLocation.from_geocentric(*xyz0, unit='m')
         
         # Convert antenna positions back into ENU
         loc, enu = loc_xyz_ECEF_to_ENU(vis.configuration.attrs['location'], vis.configuration['xyz'])
-        self.xyz_local = enu 
-        
-        self.n_ant = len(self.xyz_local)
+        self.xyz_enu  = enu 
+        self.xyz_ecef = vis.configuration['xyz'].data + xyz0
+
+        self.n_ant = len(self.xyz_enu)
         
         # Setup frequency, time, and phase centre
         self.f = Quantity(vis.coords['frequency'].data, 'Hz')
@@ -99,7 +100,7 @@ class RadioArray(object):
             c (np.array): Per-antenna phase weights
         """            
         lmn = skycoord_to_lmn(src, self.get_zenith())
-        t_g = np.einsum('id,pd', lmn, self.xyz_local, optimize=True) / SPEED_OF_LIGHT
+        t_g = np.einsum('id,pd', lmn, self.xyz_enu, optimize=True) / SPEED_OF_LIGHT
         c = phase_vector(t_g, self.workspace['f'].to('Hz').value, conj=conj)
         return c
     
@@ -190,7 +191,7 @@ class RadioArray(object):
         # i, j: pix idx
         # d: direction cosine lmn, and baseline XYZ (dot product)
         # p: antenna idx 
-        t_g = np.einsum('ijd,pd', lmn, self.xyz_local, optimize=True) / SPEED_OF_LIGHT
+        t_g = np.einsum('ijd,pd', lmn, self.xyz_enu, optimize=True) / SPEED_OF_LIGHT
 
         # geometric delay to phase weights
         c = phase_vector(t_g, self.workspace['f'].to('Hz').value) * self.workspace['c0']
@@ -220,14 +221,14 @@ class RadioArray(object):
         """
         enu_map = {'E':0, 'N':1, 'U':2}
         title = f"{self.name} | Lon: {self.earthloc.to_geodetic().lon:.2f} | Lat: {self.earthloc.to_geodetic().lat:.2f}"
-        plt.scatter(self.xyz_local[:, enu_map[x.upper()]], self.xyz_local[:, enu_map[y.upper()]], **kwargs)
+        plt.scatter(self.xyz_enu[:, enu_map[x.upper()]], self.xyz_enu[:, enu_map[y.upper()]], **kwargs)
         plt.xlabel(f"{x} [m]")
         plt.ylabel(f"{y} [m]")
 
         if overlay_names:
             names = self.vis.attrs['configuration']['names'].data
             for ii in range(self.n_ant):
-                plt.text(self.xyz_local[:, enu_map[x]][ii], self.xyz_local[:, enu_map[y]][ii], names[ii], fontsize=overlay_fontsize)
+                plt.text(self.xyz_enu[:, enu_map[x]][ii], self.xyz_enu[:, enu_map[y]][ii], names[ii], fontsize=overlay_fontsize)
         plt.title(title)
     
     def plot_uvw(self, x: str='U', y: str='V', **kwargs):
@@ -313,7 +314,7 @@ class RadioArray(object):
                 pix_visible = pix0
 
             lmn = skycoord_to_lmn(sc[pix_visible], sc_zen)
-            t_g = np.einsum('id,pd', lmn, self.xyz_local, optimize=True) / SPEED_OF_LIGHT
+            t_g = np.einsum('id,pd', lmn, self.xyz_enu, optimize=True) / SPEED_OF_LIGHT
             c = phase_vector(t_g, ws['f'].to('Hz').value)
 
             ws['hpx']['mask'] = mask

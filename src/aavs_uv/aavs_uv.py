@@ -231,7 +231,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
             # uv.data_array[..., 0] = xx           # (Already in right spot)
             uv.data_array[..., 1] = yy
             uv.data_array[..., 2] = xy
-            uv.data_array[..., 2] = yx
+            uv.data_array[..., 3] = yx
             uv.polarization_array = _pol_types['linear']
 
         # Add optional arrays
