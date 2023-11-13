@@ -170,7 +170,7 @@ def uvdata_to_sdp_vis(uv: UVData) -> Visibility:
     # Instantiate SDP Visibility object
     v = create_visibility(
         config=config,
-        times=pc_hourangle,
+        times=t,
         frequency=f_c,
         phasecentre=pc_sc,
         channel_bandwidth=f_bw,
@@ -185,7 +185,7 @@ def uvdata_to_sdp_vis(uv: UVData) -> Visibility:
         execblock_id=0,
         meta={},
         utc_time=None,
-        times_are_ha=True,
+        times_are_ha=False,
     ) 
 
     # TODO: Add actual data

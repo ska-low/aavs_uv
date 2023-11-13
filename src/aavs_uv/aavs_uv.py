@@ -66,7 +66,7 @@ def load_observation_metadata(filename: str, yaml_config: str):
 
     return md
 
-def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) -> pyuvdata.UVData:
+def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True, max_int: int=None) -> pyuvdata.UVData:
     """ Convert AAVS2/3 HDF5 correlator output to UVData object
 
     Args:
@@ -77,6 +77,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
                             the RA/DEC position of zenith at the first timestamp (t0).
                             This is needed if writing UVFITS files, but not if you
                             are doing snapshot imaging of each timestep. Default True.
+        max_int (int):      Maximum number of intergrations to read. Default None (read all)
     Returns:
         uv (pyuvdata.UVData): A UVData object that can be used to create 
                               UVFITS/MIRIAD/UVH5/etc files
@@ -87,6 +88,12 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
     
     # Create empty UVData object
     uv = pyuvdata.UVData()
+
+    if max_int is None:
+        max_int = md['n_integrations']
+
+    if max_int < md['n_integrations']:
+        md['n_integrations'] = max_int
     
     #with h5py.File(filename, mode='r') as h:
     uv.Nants_data      = md['n_antennas']
@@ -217,7 +224,8 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True) ->
     with h5py.File(filename, mode='r') as datafile:
         # Data have shape (nint, nbaseline, nspw, npol)
         # Need to flatten to (nbaseline * nint (Nblts), nspw, nchan, npol)
-        data = datafile['correlation_matrix']['data'][:]
+        n_int = md['n_integrations']
+        data = datafile['correlation_matrix']['data'][:n_int]
         #uv.data_array = np.transpose(data, (0, 2, 1, 3))
         uv.data_array = data.reshape((uv.Nblts, uv.Nspws, uv.Nfreqs, uv.Npols))
 
