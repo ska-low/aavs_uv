@@ -12,16 +12,50 @@ from aavs_uv.aavs_uv import load_observation_metadata
 from aavs_uv.io.mccs_yaml import station_location_from_platform_yaml
 import h5py
 
-        
-def create_antenna_data_array(platform_yaml_file: str) -> (EarthLocation, xp.Dataset):
-    eloc, antpos = station_location_from_platform_yaml(platform_yaml_file)
-    antpos_enu   = np.column_stack((antpos['E'], antpos['N'], antpos['U']))    
-    antpos_names = antpos['name']
-    antpos_flags = antpos['flagged']
+from dataclasses import dataclass
 
+# Define the data class for UV data
+@dataclass 
+class UV:
+    name: str               # Antenna array name, e.g. AAVS3
+    antennas: xp.Dataset    # An xarray dataset (generated with create_antenna_data_array)
+    data: xp.DataArray      # An xarray DataArray (generated with create_visibility_array)
+    timestamps: Time        # Astropy timestamps Time() array
+    origin: EarthLocation   # Astropy EarthLocation for array origin
+    provenance: dict        # Provenance/history information and other metadata
+        
+
+def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.Dataset:
+    """ Create an xarray Dataset for antenna locations 
+    
+    Args:
+        antpos (pd.Dataframe): Pandas dataframe with antenna positions. Should have 
+                               columns: id | name | E | N | U | flagged
+        eloc (EarthLocation): Astropy EarthLocation corresponding to array center
+    
+    Returns:
+        dant (xp.Dataset): xarray Dataset with antenna locations
+    
+    Notes:
+        <xarray.Dataset>
+            Dimensions:  (antenna: N_ant, spatial: 3)
+            Coordinates:
+            * antenna  (antenna) int64 0 1 2 3 4 5 6 7 ... N_ant
+            * spatial  (spatial) <U1 'x' 'y' 'z'
+            Data variables:
+                enu      (antenna, spatial) float64 East-North-Up coordinates relative to eloc
+                ecef     (antenna, spatial) float64 ECEF XYZ coordinates (XYZ - eloc.XYZ0)
+            Attributes:
+                identifier:               Antenna names / identifiers
+                flags:                    Flags if antenna is bad
+                array_origin_geocentric:  Array origin (ECEF)
+                array_origin_geodetic:    Array origin (lat/lon/height) 
+    """
     lat_rad = eloc.lat.to('rad').value
     lon_rad = eloc.lon.to('rad').value
     x0, y0, z0 = [_.to('m').value for _ in eloc.to_geocentric()]
+
+    antpos_enu   = np.column_stack((antpos['E'], antpos['N'], antpos['U']))  
     antpos_ecef  = uvutils.ECEF_from_ENU(antpos_enu, lat_rad, lon_rad, eloc.height)  - (x0, y0, z0)
     
     data_vars = {
@@ -38,7 +72,7 @@ def create_antenna_data_array(platform_yaml_file: str) -> (EarthLocation, xp.Dat
     
     attrs = {
         'identifier': xp.DataArray(antpos['name'], dims=('antenna'), attrs={'description': 'Antenna name/identifier'}),
-        'flags': xp.DataArray(antpos_flags, dims=('antenna'), attrs={'description': 'Data quality issue flag'}),
+        'flags': xp.DataArray(antpos['flagged'], dims=('antenna'), attrs={'description': 'Data quality issue flag'}),
     }
     
     coords = {
@@ -65,14 +99,38 @@ def create_antenna_data_array(platform_yaml_file: str) -> (EarthLocation, xp.Dat
     
     dant = xp.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
     
-    return eloc, dant
+    return dant
 
-def create_visibility_array(fn_data: str, fn_config: str, eloc: EarthLocation) -> (Time, xp.DataArray):
-    md = load_observation_metadata(fn_data, fn_config)
+def create_visibility_array(data: np.ndarray, md: dict, eloc: EarthLocation) -> (Time, xp.DataArray):
+    """ Create visibility array out of data array + metadata 
     
-    h5 = h5py.File(fn_data, mode='r') 
-    d = h5['correlation_matrix']['data']
-        
+    Args:
+        data (np.array): Numpy array or duck-type similar data (e.g. h5py.dataset)
+        md (dict): Dictionary of metadata, as found in raw HDF5 file.
+        eloc (EarthLocation): Astropy EarthLocation for array center
+    
+    Returns:
+        t (Time): Astropy time array corresponding to timestamps
+        vis (xp.DataArray): xarray DataArray object, see notes below
+    
+    Notes:
+        <xarray.DataArray (time: N_time, frequency: N_freq, baseline: N_bl, polarization: N_pol)>
+            Coordinates:
+            * time          (time) object MultiIndex
+              * mjd           (time) time in MJD
+              * lst           (time) time in LST
+            * polarization  (polarization) <U2 'XX' 'XY' 'YX' 'YY'
+            * baseline      (baseline) object MultiIndex
+              * ant1          (baseline) int64 0 0 0 0 0 0 0 ... N_ant
+              * ant2          (baseline) int64 0 1 2 3 4 5 6 ... N_ant
+            * frequency     (frequency) float64 channel frequency values, in Hz   
+
+    Speed notes:
+        this code generates MJD and LST timestamps attached as coordinates, as well as an
+        astropy Time() array (which provides useful conversion between time formats that
+        DataArray does not). Conversion to/from datetime64 takes significantly longer than
+        generation from an array of MJD values.    
+    """
     # Coordinate - time
     t  = Time(np.arange(md['n_integrations'], dtype='float64') * md['tsamp'] + md['ts_start'], 
               format='unix', location=eloc)
@@ -100,34 +158,58 @@ def create_visibility_array(fn_data: str, fn_config: str, eloc: EarthLocation) -
         'frequency': f_coord
     }
     
-    dx = xp.DataArray(d, 
+    vis = xp.DataArray(data, 
                       coords=coords, 
                       dims=('time', 'frequency', 'baseline', 'polarization')
                      )
-    return t, dx
+    return t, vis
 
-       
-class UV(dict):
-    def __init__(self, fn_data, fn_config):
-        md = load_observation_metadata(fn_data, fn_config)
+
+def create_uv(fn_data: str, fn_config: str, from_platform_yaml: bool=False) -> UV:
+    """ Create UV from HDF5 data and config file
+    
+    Args:
+        fn_data (str): Path to HDF5 data
+        fn_config (str): Path to uv_config.yaml configuration file
+        from_platform_yaml (bool=False): If true, uv_config.yaml setting 'antenna_locations'
+                                         points to a mccs_platform.yaml file. Otherwise, a 
+                                         simple CSV text file is used.
         
-        eloc, antennas = create_antenna_data_array(md['antenna_locations_file'])
-        t, data = create_visibility_array(fn_data, fn_config, eloc)
-        
-        self.t            = t        
+    Returns:
+        uv (UV): A UV dataclass object with xarray datasets
+    
+    Notes:
+        class UV:
+            name: str
+            antennas: xp.Dataset
+            data: xp.DataArray
+            timestamps: Time
+            origin: EarthLocation
+            provenance: dict
+    """
+    md = load_observation_metadata(fn_data, fn_config)
 
-        self['name']     = md['telescope_name']
-        self['antennas'] = antennas
-        self['data']     = data
-        self['origin']   = eloc
-        self['provenance'] = {'data_filename': os.path.abspath(fn_data),
-                           'config_filename': os.path.abspath(fn_config),
-                           'input_metadata': md
-                          }
+    h5 = h5py.File(fn_data, mode='r') 
+    data = h5['correlation_matrix']['data']
 
-        self.antennas     = self['antennas']
-        self.data         = self['data']
-        self.provenance   = self['provenance']
-        self.name         = self['name']
-        self.origin       = self['origin']
+    if from_platform_yaml:
+        eloc, antpos = station_location_from_platform_yaml(md['antenna_locations_file'])
 
+    else:
+        # Telescope location
+        # Also instantiate an EarthLocation observer for LST / Zenith calcs
+        xyz = np.array(list(md[f'telescope_ECEF_{q}'] for q in ('X', 'Y', 'Z')))
+        eloc = EarthLocation.from_geocentric(*xyz, unit='m')
+
+        # Load baselines and antenna locations (ENU)
+        antpos = pd.read_csv(md['antenna_locations_file'], delimiter=' ')
+
+    antennas = create_antenna_data_array(antpos, eloc)
+    t, data  = create_visibility_array(data, md, eloc)
+    provenance = {'data_filename': os.path.abspath(fn_data),
+                  'config_filename': os.path.abspath(fn_config),
+                  'input_metadata': md}
+
+    uv = UV(md['telescope_name'], antennas, data, t, eloc, provenance)
+
+    return uv
