@@ -15,7 +15,8 @@ import healpy as hp
 from ska_sdp_datamodels.visibility import Visibility
 
 from aavs_uv.utils import  vis_arr_to_matrix
-from .coord_utils import phase_vector, skycoord_to_lmn, sky2hpix, hpix2sky, loc_xyz_ECEF_to_ENU
+from aavs_uv.datamodel import UV
+from .coord_utils import phase_vector, skycoord_to_lmn, sky2hpix, hpix2sky
 
 from astropy.constants import c
 SPEED_OF_LIGHT = c.value 
@@ -36,7 +37,7 @@ class RadioArray(object):
         generate_gsm()   - Generate and view a sky model using the GSM
     """
     
-    def __init__(self, vis: Visibility, conjugate_data: bool=False, verbose: bool=False):
+    def __init__(self, vis: UV, conjugate_data: bool=False, verbose: bool=False):
         """ Initialize RadioArray class (based on astropy EarthLocation)
         
         Args:
@@ -49,22 +50,21 @@ class RadioArray(object):
         self.vis = vis
         self.conjugate_data = conjugate_data
         self.verbose = verbose
-        self.name = vis.attrs['meta']['instrument']
+        self.name = vis.name
     
-        xyz0 = list(vis.configuration.attrs['location'].value)
-        self.earthloc = EarthLocation.from_geocentric(*xyz0, unit='m')
-        
-        # Convert antenna positions back into ENU
-        loc, enu = loc_xyz_ECEF_to_ENU(vis.configuration.attrs['location'], vis.configuration['xyz'])
-        self.xyz_enu  = enu 
-        self.xyz_ecef = vis.configuration['xyz'].data + xyz0
+        self.earthloc = vis.origin
+
+        xyz0 = vis.antennas.attrs['array_origin_geocentric'].data
+        self.xyz_enu  = vis.antennas.enu.data 
+        self.xyz_ecef = vis.antennas.ecef.data + xyz0
 
         self.n_ant = len(self.xyz_enu)
         
         # Setup frequency, time, and phase centre
-        self.f = Quantity(vis.coords['frequency'].data, 'Hz')
-        self.t = Time(vis.coords['time'] / 86400, format='mjd', scale='utc', location=self.earthloc)
-        self.phase_center = vis.phasecentre
+        self.f = Quantity(vis.data.coords['frequency'].data, 'Hz')
+        self.t = vis.timestamps
+
+        self.phase_center = vis.phase_center
 
         # Create workspace dictionary, for storing state
         self.workspace = {}
@@ -72,7 +72,7 @@ class RadioArray(object):
         self.workspace['f']       = self.f[0]
         self.workspace['t_idx']   = 0
         self.workspace['t']       = self.t[0]
-        self.workspace['pol']     = vis.coords['polarisation'][0]
+        self.workspace['pol']     = vis.data.coords['polarization'][0]
         self.workspace['pol_idx'] = 0
         self.workspace['c0']      = np.ones(self.n_ant, dtype='complex64')
         self.workspace['data']    = np.zeros((self.n_ant, self.n_ant), dtype='complex64')
@@ -82,9 +82,9 @@ class RadioArray(object):
         
         # Setup Global Sky Model
         self.gsm       = GSMObserver()
-        self.gsm.lat   = loc.lat.to('rad').value
-        self.gsm.lon   = loc.lon.to('rad').value
-        self.gsm.elev  = loc.height.to('m').value
+        self.gsm.lat   = vis.origin.lat.to('rad').value
+        self.gsm.lon   = vis.origin.lon.to('rad').value
+        self.gsm.elev  = vis.origin.height.to('m').value
         self.gsm.date  = self.t[0].datetime
 
         # Call update to load correlation matrix
@@ -147,12 +147,12 @@ class RadioArray(object):
             self.workspace['f_idx'] = f_idx
 
         if pol_idx is not None:
-            self.workspace['pol']     = self.vis.coords['polarisation'][pol_idx]
+            self.workspace['pol']     = self.vis.data.coords['polarization'][pol_idx]
             self.workspace['pol_idx'] = pol_idx
         
         # Extract time/pol/freq slice and convert to matrix
         w = self.workspace
-        d = self.vis.vis[w['t_idx'], :, w['f_idx'], w['pol_idx']]
+        d = self.vis.data[w['t_idx'], w['f_idx'], :,  w['pol_idx']]
         self.workspace['data'] = vis_arr_to_matrix(d, self.n_ant, 'upper', V=self.workspace['data'])
         
         if self.phase_center is not None:
@@ -226,29 +226,11 @@ class RadioArray(object):
         plt.ylabel(f"{y} [m]")
 
         if overlay_names:
-            names = self.vis.attrs['configuration']['names'].data
+            names = self.vis.antennas.attrs['identifier'].data
             for ii in range(self.n_ant):
                 plt.text(self.xyz_enu[:, enu_map[x]][ii], self.xyz_enu[:, enu_map[y]][ii], names[ii], fontsize=overlay_fontsize)
         plt.title(title)
-    
-    def plot_uvw(self, x: str='U', y: str='V', **kwargs):
-        """ Plot UVW coordinates
-        
-        Args:
-            x (str): One of 'U', 'V', or 'W'
-            y (str): One of 'U', 'V', or 'W'
-        """
-        uvw_map = {'U':0, 'V':1, 'W':2}
-        t_idx  = self.workspace['t_idx']
-        uvw = self.vis.uvw
-        
-        # Set plotting defaults
-        if 'marker' not in kwargs.keys(): kwargs['marker'] = '.'
-        if 'alpha' not in kwargs.keys(): kwargs['alpha']   = 0.05
 
-        plt.scatter(uvw[t_idx, :, uvw_map[x.upper()]], uvw[t_idx, :, uvw_map[y.upper()]], **kwargs)
-        plt.xlabel(f"{x} [m]")
-        plt.ylabel(f"{y} [m]")      
 
     def make_image(self, n_pix: int=128, update: bool=True) -> np.array:
         """ Make an image out of a beam grid 

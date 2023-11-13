@@ -6,11 +6,12 @@ from aavs_uv.postx.ant_array import RadioArray
 from aavs_uv.sdp_uv import hdf5_to_sdp_vis
 from aavs_uv.postx.allsky_viewer import AllSkyViewer
 from aavs_uv.postx.sky_model import generate_skycat
+from aavs_uv.datamodel.visibility import create_uv
 
 def setup_test():
     fn_data = '../../aavs3/2023.10.12-Ravi/correlation_burst_100_20231012_13426_0.hdf5'
     fn_yaml = '../config/aavs3/uv_config.yaml'
-    v = hdf5_to_sdp_vis(fn_data, fn_yaml)
+    v = create_uv(fn_data, fn_yaml)
 
     # RadioArray basics
     aa = RadioArray(v)
@@ -57,12 +58,6 @@ def test_postx_plotting():
     aa.plot_antennas(overlay_names=True)
     plt.show()
     aa.plot_antennas('E', 'U')
-    plt.show()
-
-    aa.plot_uvw('U', 'V')
-    plt.show()
-
-    aa.plot_uvw('V', 'W', alpha=0.1, c='#333333')
     plt.show()
 
     # Sky catalog

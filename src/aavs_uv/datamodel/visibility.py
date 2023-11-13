@@ -5,7 +5,7 @@ import xarray as xp
 import pandas as pd
 from dataclasses import dataclass
 
-from astropy.coordinates import EarthLocation
+from astropy.coordinates import EarthLocation, SkyCoord, AltAz, Angle
 from astropy.time import Time
 import pyuvdata.utils as uvutils
 
@@ -21,6 +21,7 @@ class UV:
     data: xp.DataArray      # An xarray DataArray (generated with create_visibility_array)
     timestamps: Time        # Astropy timestamps Time() array
     origin: EarthLocation   # Astropy EarthLocation for array origin
+    phase_center: SkyCoord  # Astropy SkyCoord corresponding to phase center
     provenance: dict        # Provenance/history information and other metadata
         
 
@@ -184,6 +185,7 @@ def create_uv(fn_data: str, fn_config: str, from_platform_yaml: bool=False) -> U
             data: xp.DataArray
             timestamps: Time
             origin: EarthLocation
+            phase_center: SkyCoord
             provenance: dict
     """
     md = load_observation_metadata(fn_data, fn_config)
@@ -203,12 +205,24 @@ def create_uv(fn_data: str, fn_config: str, from_platform_yaml: bool=False) -> U
         # Load baselines and antenna locations (ENU)
         antpos = pd.read_csv(md['antenna_locations_file'], delimiter=' ')
 
+
     antennas = create_antenna_data_array(antpos, eloc)
     t, data  = create_visibility_array(data, md, eloc)
     provenance = {'data_filename': os.path.abspath(fn_data),
                   'config_filename': os.path.abspath(fn_config),
                   'input_metadata': md}
 
-    uv = UV(md['telescope_name'], antennas, data, t, eloc, provenance)
+    # Compute zenith RA/DEC for phase center
+    zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'), obstime=t[0], location=t.location)
+    zen_sc = SkyCoord(zen_aa).icrs
+
+    # Create UV object
+    uv = UV(name=md['telescope_name'], 
+            antennas=antennas, 
+            data=data, 
+            timestamps=t, 
+            origin=eloc, 
+            phase_center=zen_sc,
+            provenance=provenance)
 
     return uv
