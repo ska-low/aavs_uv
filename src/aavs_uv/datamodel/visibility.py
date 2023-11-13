@@ -1,8 +1,9 @@
 import os
-
+import h5py
 import numpy as np
 import xarray as xp
 import pandas as pd
+from dataclasses import dataclass
 
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
@@ -10,9 +11,7 @@ import pyuvdata.utils as uvutils
 
 from aavs_uv.aavs_uv import load_observation_metadata
 from aavs_uv.io.mccs_yaml import station_location_from_platform_yaml
-import h5py
 
-from dataclasses import dataclass
 
 # Define the data class for UV data
 @dataclass 
