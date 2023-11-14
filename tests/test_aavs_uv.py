@@ -1,6 +1,6 @@
 from pyuvdata import UVData
 from pyuvdata.parameter import UVParameter
-from aavs_uv import hdf5_to_pyuvdata, phase_to_sun
+from aavs_uv.io import hdf5_to_pyuvdata, phase_to_sun
 import numpy as np
 from astropy.time import Time
 import glob, os

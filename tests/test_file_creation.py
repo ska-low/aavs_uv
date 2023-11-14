@@ -3,8 +3,7 @@ from astropy.time import Time
 
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
-from aavs_uv.aavs_uv import hdf5_to_pyuvdata, phase_to_sun
-from aavs_uv.sdp_uv import hdf5_to_sdp_vis 
+from aavs_uv.io import hdf5_to_pyuvdata, phase_to_sun, hdf5_to_sdp_vis
 
 def test_file_creation():
     try:

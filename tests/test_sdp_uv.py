@@ -1,5 +1,4 @@
-from aavs_uv.sdp_uv import hdf5_to_sdp_vis, uvdata_to_sdp_vis
-from aavs_uv.aavs_uv import hdf5_to_pyuvdata
+from aavs_uv.io import hdf5_to_sdp_vis, uvdata_to_sdp_vis, hdf5_to_pyuvdata
 
 def test_sdp_vis():
     """ Load data and test visibility generation  """

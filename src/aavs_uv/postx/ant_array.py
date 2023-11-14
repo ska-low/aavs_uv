@@ -1,7 +1,6 @@
 """
 Basic antenna array geometry class
 """
-import ephem
 import numpy as np
 from pygdsm import GSMObserver
 import pylab as plt
@@ -9,10 +8,8 @@ import pylab as plt
 from astropy.constants import c
 from astropy.units import Quantity
 from astropy.time import Time
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz, Angle
+from astropy.coordinates import SkyCoord, AltAz, Angle
 import healpy as hp
-
-from ska_sdp_datamodels.visibility import Visibility
 
 from aavs_uv.utils import  vis_arr_to_matrix
 from aavs_uv.datamodel import UV
@@ -28,12 +25,9 @@ class RadioArray(object):
     This class is a subclass of PyEphem's Observer(), and provides the following methods:
         
         get_zenith()     - get the ra/dec at zenith
-        load_fits_data() - load UVFITS data
-        load_h5_data()   - load data in HDF5 format
         update()         - Recompute coordinates for imaging/beamforming
         make_image()     - Make an image using post-correlation beamforming
         make_healpix()   - Generate a grid of beam on healpix coordinates using post-x beamforming
-        beamform()       - Generate a single beam using post-x beamforming
         generate_gsm()   - Generate and view a sky model using the GSM
     """
     
@@ -41,7 +35,7 @@ class RadioArray(object):
         """ Initialize RadioArray class (based on astropy EarthLocation)
         
         Args:
-            vis (Visibility):        SDP Data Model Visibility 
+            vis (UV):                datamodel visibility dataclass 
             conjugate_data (bool):   Flag to conjugate data (in case upper/lower triangle confusion)
             verbose (bool):          Print extra details to screen
         

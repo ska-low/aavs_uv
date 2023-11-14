@@ -108,13 +108,14 @@ class AllSkyViewer(object):
         """
         if data is None:
             data = self.observer.make_image(self.n_pix, update=True)
+
         # Update WCS and then create imshow
         self._update_wcs()
         if subplot_id is not None:
             plt.subplot(*subplot_id, projection=self.wcs)
         else:
             plt.subplot(projection=self.wcs)
-        plt.imshow(sfunc(data), **kwargs)
+        im = plt.imshow(sfunc(data), **kwargs)
         
         # Create title
         if title is None:
@@ -138,7 +139,7 @@ class AllSkyViewer(object):
         
         # Turn on colorbar if requested
         if colorbar is True:
-            plt.colorbar(orientation='horizontal')
+            plt.colorbar(im, orientation='horizontal')
             
         #plt.axis('off')
         if return_data:

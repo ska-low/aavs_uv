@@ -7,10 +7,8 @@ from dataclasses import dataclass
 
 from astropy.coordinates import EarthLocation, SkyCoord, AltAz, Angle
 from astropy.time import Time
+from astropy.units import Quantity
 import pyuvdata.utils as uvutils
-
-from aavs_uv.aavs_uv import load_observation_metadata
-from aavs_uv.io.mccs_yaml import station_location_from_platform_yaml
 
 
 # Define the data class for UV data
@@ -101,8 +99,11 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
     
     return dant
 
-def create_visibility_array(data: np.ndarray, md: dict, eloc: EarthLocation) -> (Time, xp.DataArray):
+def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthLocation) -> xp.DataArray:
     """ Create visibility array out of data array + metadata 
+
+    Takes a data array, frequency and time axes, and an EarthLocation. 
+    Currently assumes XX/XY/YX/YY polarization and upper triangle baseline coordinates. 
     
     Args:
         data (np.array): Numpy array or duck-type similar data (e.g. h5py.dataset)
@@ -111,6 +112,7 @@ def create_visibility_array(data: np.ndarray, md: dict, eloc: EarthLocation) -> 
     
     Returns:
         t (Time): Astropy time array corresponding to timestamps
+        f (Quantity): Astropy quantity array of frequency for channel centers
         vis (xp.DataArray): xarray DataArray object, see notes below
     
     Notes:
@@ -132,8 +134,7 @@ def create_visibility_array(data: np.ndarray, md: dict, eloc: EarthLocation) -> 
         generation from an array of MJD values.    
     """
     # Coordinate - time
-    t  = Time(np.arange(md['n_integrations'], dtype='float64') * md['tsamp'] + md['ts_start'], 
-              format='unix', location=eloc)
+    t.location = eloc
     lst = t.sidereal_time('apparent').to('hourangle')
     t_coord = pd.MultiIndex.from_arrays((t.mjd, lst.value), names=('mjd', 'lst'))
     
@@ -145,11 +146,8 @@ def create_visibility_array(data: np.ndarray, md: dict, eloc: EarthLocation) -> 
     pol_coord = np.array(('XX', 'XY', 'YX', 'YY'))
     
     # Coordinate - frequency
-    f_center  = (np.arange(md['n_chans'], dtype='float64') + 1) * md['channel_spacing'] * md['channel_id']
+    f_center  = f.to('Hz').value
     f_coord = xp.DataArray(f_center, dims=('frequency',), attrs={'unit': 'Hz', 'description': 'Frequency at channel center'})
-    # channel_bandwidth (ndarray) - 1D numpy array containing channel bandwidths in Hz
-    f_coord.attrs['channel_bandwidth'] = md['channel_width']
-    f_coord.attrs['channel_id'] = md['channel_id']
     
     coords={
         'time': t_coord,
@@ -162,67 +160,5 @@ def create_visibility_array(data: np.ndarray, md: dict, eloc: EarthLocation) -> 
                       coords=coords, 
                       dims=('time', 'frequency', 'baseline', 'polarization')
                      )
-    return t, vis
+    return vis
 
-
-def create_uv(fn_data: str, fn_config: str, from_platform_yaml: bool=False) -> UV:
-    """ Create UV from HDF5 data and config file
-    
-    Args:
-        fn_data (str): Path to HDF5 data
-        fn_config (str): Path to uv_config.yaml configuration file
-        from_platform_yaml (bool=False): If true, uv_config.yaml setting 'antenna_locations'
-                                         points to a mccs_platform.yaml file. Otherwise, a 
-                                         simple CSV text file is used.
-        
-    Returns:
-        uv (UV): A UV dataclass object with xarray datasets
-    
-    Notes:
-        class UV:
-            name: str
-            antennas: xp.Dataset
-            data: xp.DataArray
-            timestamps: Time
-            origin: EarthLocation
-            phase_center: SkyCoord
-            provenance: dict
-    """
-    md = load_observation_metadata(fn_data, fn_config)
-
-    h5 = h5py.File(fn_data, mode='r') 
-    data = h5['correlation_matrix']['data']
-
-    if from_platform_yaml:
-        eloc, antpos = station_location_from_platform_yaml(md['antenna_locations_file'])
-
-    else:
-        # Telescope location
-        # Also instantiate an EarthLocation observer for LST / Zenith calcs
-        xyz = np.array(list(md[f'telescope_ECEF_{q}'] for q in ('X', 'Y', 'Z')))
-        eloc = EarthLocation.from_geocentric(*xyz, unit='m')
-
-        # Load baselines and antenna locations (ENU)
-        antpos = pd.read_csv(md['antenna_locations_file'], delimiter=' ')
-
-
-    antennas = create_antenna_data_array(antpos, eloc)
-    t, data  = create_visibility_array(data, md, eloc)
-    provenance = {'data_filename': os.path.abspath(fn_data),
-                  'config_filename': os.path.abspath(fn_config),
-                  'input_metadata': md}
-
-    # Compute zenith RA/DEC for phase center
-    zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'), obstime=t[0], location=t.location)
-    zen_sc = SkyCoord(zen_aa).icrs
-
-    # Create UV object
-    uv = UV(name=md['telescope_name'], 
-            antennas=antennas, 
-            data=data, 
-            timestamps=t, 
-            origin=eloc, 
-            phase_center=zen_sc,
-            provenance=provenance)
-
-    return uv
