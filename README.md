@@ -8,12 +8,14 @@ Additionally, data can be loaded into the `Visibility` data model from [ska-sdp-
 
 ![aavsuv-overview](https://github.com/ska-sci-ops/aavs_uv/assets/713251/504127b2-5aa4-46f2-aac4-dd4df502a2d5)
 
+Some simple calibration and imaging utilities are currently in development (intended primarily for QA).
+
 ### File conversion: command-line script
 
 Once installed, a command-line utility, `aavs_uv`, will be available:
 
 ```
-./aavs_uv -h
+> aavs_uv -h
 
 usage: aavs_uv [-h] -o OUTPUT_FORMAT [-c ARRAY_CONFIG] [-n TELESCOPE_NAME] infile outfile
 
