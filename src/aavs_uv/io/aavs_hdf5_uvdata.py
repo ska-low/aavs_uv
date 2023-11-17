@@ -145,24 +145,24 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True, ma
 
     # Time axis
     # Compute JD from unix time and LST - we can do this as we set an EarthLocation on t0 Time
-    t    = Time(np.zeros(uv.Nblts, dtype='float64') + md['ts_start'], 
-                 format='unix', location=telescope_earthloc)
+    _t = np.arange(md['n_integrations'], dtype='float64') * md['tsamp'] + md['ts_start']
+    _t += md['tsamp'] / 2 # Time array is based on center of integration, so add tdelt / 2 
 
-    # Time array is based on center of integration, so we add tdelt / 2 to t0
-    tdelt  = TimeDelta(md['tsamp'], format='sec')
-    t    += tdelt / 2
-    
-    # And for each time step we add an integration time step 
-    # repeat each item in array (0, 1, N_int) for Nbl -> (0, 0, ..., 1, 1, ..., N_int, N_int, ...)
-    tsteps = TimeDelta(np.repeat(np.arange(md['n_integrations']), uv.Nbls) * md['tsamp'], format='sec')
-    t    += tsteps
-    
-    lst  = t.sidereal_time('apparent').to('rad').value
-    uv.time_array = t.jd
-    uv.lst_array = lst
-    uv.integration_time = np.zeros_like(uv.time_array) + md['tsamp']
-
+    t = Time(_t, format='unix', location=telescope_earthloc)
     t0 = t[0]
+
+    # Surprisingly, this line calculating sidereal time can be a bottleneck
+    # So we need to compute it before we apply np.repeat() or its much slower
+    lst_rad = t.sidereal_time('apparent').to('rad').value
+    
+    # repeat each item in array (0, 1, N_int) for Nbl -> (0, 0, ..., 1, 1, ..., N_int, N_int, ...)
+    t_jd    = Time(_t, format='unix').jd
+    t       = np.repeat(t_jd, uv.Nbls)
+    lst_rad = np.repeat(lst_rad,  uv.Nbls)
+    
+    uv.time_array = t
+    uv.lst_array = lst_rad
+    uv.integration_time = np.zeros_like(uv.time_array) + md['tsamp']
 
     # Reference date RDATE and corresponding Greenwich sidereal time at midnight GST0
     # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1305C13-L1305C85 
