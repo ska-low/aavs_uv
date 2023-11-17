@@ -319,4 +319,4 @@ class RadioArray(object):
         sky = self.gsm.generate(self.workspace['f'].to('MHz').value)
         pmap = hp.orthview(sky, half_sky=True, return_projected_map=True, flip='astro')
         plt.close()
-        return pmap[::-1]
+        return pmap

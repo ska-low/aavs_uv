@@ -16,7 +16,13 @@ def simulate_visibilities(ant_arr: RadioArray, sky_model: dict):
     Returns:
         model_vis_matrix (np.array): Model visibilities that should be expected given the known applied delays, (Nchan, Nant, Nant)
     """
+    phsmat = None
     for srcname, src in sky_model.items():
         phs = ant_arr._generate_phase_vector(src, conj=True).squeeze()
-        phsmat = np.outer(phs, np.conj(phs))
+        if hasattr(src, "mag"):
+            phs *= src.mag
+        if phsmat is None:
+            phsmat = np.outer(phs, np.conj(phs))
+        else:
+            phsmat += np.outer(phs, np.conj(phs))
     return phsmat

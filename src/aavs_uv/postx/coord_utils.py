@@ -97,10 +97,13 @@ def skycoord_to_lmn(src: SkyCoord, zen: SkyCoord) -> np.array:
         Following Eqn 3.1 in 
         http://math_research.uct.ac.za/~siphelo/admin/interferometry/3_Positional_Astronomy/3_4_Direction_Cosine_Coordinates.html
     """
-    DEC_rad = src.icrs.dec.to('rad').value
-    RA_rad  = src.icrs.ra.to('rad').value
+    if src.frame.name == 'galactic':
+        src = src.icrs
 
-    RA_delta_rad = RA_rad - zen.ra.to('rad').value
+    DEC_rad = src.dec.to('rad').value
+    RA_rad  = src.ra.to('rad').value
+
+    RA_delta_rad = RA_rad - zen.icrs.ra.to('rad').value
     DEC_rad_0 = zen.icrs.dec.to('rad').value
 
     l = np.cos(DEC_rad) * np.sin(RA_delta_rad)

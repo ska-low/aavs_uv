@@ -6,11 +6,11 @@ From https://github.com/OxfordSKA/bda/blob/master/pybda/stefcal.py
 """
 
 
-import numpy
+import numpy as np
 import numpy.linalg
 
 
-def stefcal(a, b, tol=1.0e-8, niter=50, gstart=None):
+def stefcal(a: np.array, b: np.array, tol: float=1.0e-8, niter: int=50, gstart: np.array=None) -> tuple:
     """
     Python implementation of StefCal calibration algorithm.
 
@@ -36,14 +36,14 @@ def stefcal(a, b, tol=1.0e-8, niter=50, gstart=None):
         nit (int): number of iterations required.
         dg (float): convergence achieved.
     """
-    a = numpy.asarray(a)
-    b = numpy.asarray(b)
+    a = np.asarray(a)
+    b = np.asarray(b)
     n = a.shape[0]
 
     if gstart is not None:
-        g = numpy.asarray(gstart)
+        g = np.asarray(gstart)
     else:
-        g = numpy.ones(n, numpy.complex128)
+        g = np.ones(n, np.complex128)
 
     dg = 1.0e30
     nit = niter
@@ -52,29 +52,28 @@ def stefcal(a, b, tol=1.0e-8, niter=50, gstart=None):
     f1 = omega
 
     for i in range(niter):
-        g_old = numpy.copy(g)
+        g_old = np.copy(g)
         for j in range(n):
-            z = numpy.conj(g_old) * b[:, j]
-            scalefactor = numpy.dot(numpy.conj(z), z)
+            z = np.conj(g_old) * b[:, j]
+            scalefactor = np.dot(np.conj(z), z)
             if scalefactor == 0:
                 scalefactor = 1
-            g[j] = numpy.dot(numpy.conj(z), a[:, j]) / scalefactor
-            #g[j] = numpy.dot(numpy.conj(z), a[:, j]) / \
-            #    numpy.dot(numpy.conj(z), z)
+            g[j] = np.dot(np.conj(z), a[:, j]) / scalefactor
+
         if i < 2:
-            dg = numpy.linalg.norm(g - g_old) / numpy.linalg.norm(g)
+            dg = np.linalg.norm(g - g_old) / np.linalg.norm(g)
             if dg <= tol:
                 nit = i
                 break
         elif i % 2 == 1:
-            dg = numpy.linalg.norm(g - g_old) / numpy.linalg.norm(g)
+            dg = np.linalg.norm(g - g_old) / np.linalg.norm(g)
             if dg <= tol:
                 nit = i
                 break
             else:
                 g = f0 * g + f1 * g_old
 
-    p = numpy.conj(g[0]) / numpy.abs(g[0])
+    p = np.conj(g[0]) / np.abs(g[0])
     g = p * g
 
     return g, nit, dg

@@ -17,14 +17,15 @@ class AllSkyViewer(object):
     """
     def __init__(self, observer: RadioArray=None, skycat: dict=None, ts: Time=None, f_mhz: float=None, n_pix: int=128):
         self.observer = observer
-        self.wcsd     = None      # populated by _update_wcs()
         self.skycat = skycat if skycat is not None else {}
-        
+    
         self.name = observer.name if hasattr(observer, 'name') else 'allsky'
 
         self.ts     = ts
         self.f_mhz  = f_mhz
         self.n_pix  = n_pix
+        self._update_wcs()
+
     
     def _update_wcs(self):
         """ Update World Coordinate System (WCS) information """
@@ -65,7 +66,6 @@ class AllSkyViewer(object):
         
         Args:
             src (SkyCoord): sky coordinate of interest
-            f_idx (int): Frequency index. TODO: remember why I added this arg? Potentially remove.
         """
         
         self._update_wcs()
@@ -109,6 +109,10 @@ class AllSkyViewer(object):
         if data is None:
             data = self.observer.make_image(self.n_pix, update=True)
 
+        if data.shape[0] != self.n_pix:
+            self.n_pix = data.shape[0]
+            self.update()
+
         # Update WCS and then create imshow
         self._update_wcs()
         if subplot_id is not None:
@@ -145,9 +149,9 @@ class AllSkyViewer(object):
         if return_data:
             return data
     
-    def mollview(self, hmap: np.array=None, sfunc=np.log, n_side=64, fov=np.pi/2, apply_mask=True):
+    def mollview(self, hmap: np.array=None, sfunc=np.log, n_side=64, fov=np.pi/2, apply_mask=True, **kwargs):
         """ Healpix view """
         if hmap is None:
             hmap = self.observer.make_healpix(n_side=n_side, fov=fov, apply_mask=apply_mask)
-        hp.mollview(sfunc(hmap), coord='G')
+        hp.mollview(sfunc(hmap), coord='G', **kwargs)
         hp.graticule(color='white')

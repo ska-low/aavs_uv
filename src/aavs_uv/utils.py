@@ -1,6 +1,6 @@
 import numpy as np
 
-def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=None):
+def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=None, conj=False):
     """ Convert 1D visibility array (lower/upper) triangular to correlation matrix 
     
     Args:
@@ -32,5 +32,8 @@ def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=N
         
     V[ix, iy] = d[:]
     V[iy, ix] = np.conj(d[:])
+
+    if conj:
+        V = np.conj(V)
     
     return V
