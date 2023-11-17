@@ -4,9 +4,10 @@ import os
 import time
 from loguru import logger
 
+from astropy.time import Time
 from aavs_uv import __version__
 from aavs_uv.utils import get_config_path
-from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis
+from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uv
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
 def parse_args(args):
@@ -70,6 +71,16 @@ def run(args=None):
     logger.info(f"Array config:  {array_config}")
     logger.info(f"Output path:   {args.outfile}")
     logger.info(f"Output format: {output_format} \n")
+
+    # Load file and read basic metadata
+    vis = hdf5_to_uv(args.infile, array_config)
+    logger.info(f"Data shape:     {vis.data.shape}")
+    logger.info(f"Data dims:      {vis.data.dims}")
+    logger.info(f"UTC start:      {vis.timestamps[0].iso}")
+    logger.info(f"MJD start:      {vis.timestamps[0].mjd}")
+    logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
+    logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
+    logger.info(f"Polarization:   {vis.data.polarization.data}\n")
 
     # begin timing
     t0 = time.time()
