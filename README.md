@@ -4,7 +4,11 @@ Utilities for handling UV data products for AAVS.
 
 These codes use the `UVData` class from [pyuvdata](https://pyuvdata.readthedocs.io) to convert the raw HDF5 correlator output files to science-ready data formats like UVFITS, MIRIAD, and CASA MeasurementSets.
 
-#### Main methods
+
+
+#### File conversion
+
+![aavsuv-overview](https://github.com/ska-sci-ops/aavs_uv/assets/713251/504127b2-5aa4-46f2-aac4-dd4df502a2d5)
 
 ```python 
 
