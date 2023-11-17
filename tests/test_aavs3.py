@@ -31,7 +31,7 @@ def _test_aavs3_dataset(fn_raw, yaml_raw):
         export_visibility_to_hdf5(sdp_vis, bn + '.sdpvis')
 
 if __name__ == "__main__":
-    yaml_raw = '../config/aavs3/uv_config.yaml'
+    yaml_raw = '../example-config/aavs3/uv_config.yaml'
     filelist = glob.glob('../data/aavs3/correlation_burst_*.hdf5')
     
     for fn_raw in filelist:

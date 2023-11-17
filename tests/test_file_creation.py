@@ -8,7 +8,7 @@ from aavs_uv.io import hdf5_to_pyuvdata, phase_to_sun, hdf5_to_sdp_vis
 def test_file_creation():
     try:
         # Files to open
-        yaml_raw = '../config/aavs2/uv_config.yaml'
+        yaml_raw = '../example-config/aavs2/uv_config.yaml'
         fn_raw   = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
 
         # Load raw data and phase to sun

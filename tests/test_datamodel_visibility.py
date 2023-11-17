@@ -10,7 +10,7 @@ from aavs_uv.datamodel.visibility import create_antenna_data_array, create_visib
 from aavs_uv.io import hdf5_to_uv, load_observation_metadata
 
 FN_DATA = '../data/2023_09_27_2x500/correlation_burst_100_20230927_35116_0.hdf5'
-FN_CONFIG = '../config/aavs3/uv_config.yaml'
+FN_CONFIG = '../example-config/aavs3/uv_config.yaml'
 
 def test_create_arrays():
     md             = load_observation_metadata(FN_DATA, FN_CONFIG)

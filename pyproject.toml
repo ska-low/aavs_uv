@@ -6,6 +6,9 @@ authors = ["Danny C. Price"]
 license = "Apache 2.0"
 repository = "https://github.com/ska-sci-ops/aavs_uv"
 documentation = "https://github.com/ska-sci-ops/aavs_uv"
+include = [
+  { path = "config"}
+]
 
 [tool.poetry.dependencies]
 python = ">=3.10"
@@ -15,7 +18,7 @@ h5py = ">=3.9"
 numpy = ">=1.25"
 pandas = ">=2.0"
 xarray = ">=2023.7"
-loguru = ">=0.7"
+loguru = ">=0.5"
 
 # optional dependencies; used by "extras"
 python-casacore = {version = "^3.5", optional = true}

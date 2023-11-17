@@ -7,7 +7,7 @@ from aavs_uv.io import hdf5_to_uv
 
 def setup_test():
     fn_data = '../../aavs3/2023.10.12-Ravi/correlation_burst_100_20231012_13426_0.hdf5'
-    fn_yaml = '../config/aavs3/uv_config.yaml'
+    fn_yaml = '../example-config/aavs3/uv_config.yaml'
     v = hdf5_to_uv(fn_data, fn_yaml)
 
     # RadioArray basics

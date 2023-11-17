@@ -7,7 +7,7 @@ from aavs_uv.postx import RadioArray, AllSkyViewer, generate_skycat
 from aavs_uv.calibration import simulate_visibilities, simple_stefcal
 
 FN_RAW   = '/Users/daniel.price/Data/aavs3/correlation_burst_204_20231027_18926_0.hdf5'
-YAML_RAW = '/Users/daniel.price/Data/aavs_uv/config/aavs3/uv_config.yaml'
+YAML_RAW = '../example-config/aavs3/uv_config.yaml'
 
 def test_calibration():
     vis = hdf5_to_uv(FN_RAW, YAML_RAW)
