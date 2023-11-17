@@ -1,15 +1,50 @@
-### aavs_uv
+## aavs_uv
 
 Utilities for handling UV data products for AAVS.
 
 These codes use the `UVData` class from [pyuvdata](https://pyuvdata.readthedocs.io) to convert the raw HDF5 correlator output files to science-ready data formats like UVFITS, MIRIAD, and CASA MeasurementSets.
 
-
-#### File conversion
+Additionally, data can be loaded into the `Visibility` data model from [ska-sdp-datamodels](https://developer.skao.int/projects/ska-sdp-datamodels/en/latest/), which is based on [xarray](https://docs.xarray.dev/en/stable/). 
 
 ![aavsuv-overview](https://github.com/ska-sci-ops/aavs_uv/assets/713251/504127b2-5aa4-46f2-aac4-dd4df502a2d5)
 
+### File conversion: command-line script
+
+Once installed, a command-line utility, `aavs_uv`, will be available:
+
+```
+./aavs_uv -h
+
+usage: aavs_uv [-h] -o OUTPUT_FORMAT [-c ARRAY_CONFIG] [-n TELESCOPE_NAME] infile outfile
+
+AAVS UV file conversion utility
+
+positional arguments:
+  infile                Input filename
+  outfile               Output filename
+
+options:
+  -h, --help            show this help message and exit
+  -o OUTPUT_FORMAT, --output_format OUTPUT_FORMAT
+                        Output file format (uvfits, miriad, ms, uvh5, sdp)
+  -c ARRAY_CONFIG, --array_config ARRAY_CONFIG
+                        Array configuration YAML file. If supplied, will override aavs_uv internal array configs.
+  -n TELESCOPE_NAME, --telescope_name TELESCOPE_NAME
+                        Telescope name, e.g. 'aavs3'. If supplied, will attempt to use aavs_uv internal array config.
+```
+
+The converter needs a [yaml configuration file](https://github.com/ska-sci-ops/aavs_uv/tree/main/example-config), which can be supplied with the `-c` argument, or internal defaults can be used instead via the `-n` argument (for '-n aavs2' and '-n aavs3'):
+
+```
+# Convert AAVS3 HDF5 data into a MeasurementSet
+> aavs_uv -n aavs3 -o ms correlator_data.hdf5 my_new_measurement_set.ms
+```
+
+### File conversion: Python API
+
 ```python 
+
+from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis
 
 def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
     """ Convert AAVS2/3 HDF5 correlator output to UVData object
@@ -37,26 +72,6 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str) -> Visibility:
         The AAVS DAQ receiver code in aavs-system has some info on the HDF5 format, here: 
         https://gitlab.com/ska-telescope/aavs-system/-/blob/master/python/pydaq/persisters/corr.py
     """
-
-def phase_to_sun(uv: UVData, t0: Time) -> UVData:
-    """ Phase UVData to sun, based on timestamp 
-
-    Computes the sun's RA/DEC in GCRS for the given time, then applies phasing.
-    This will then recompute UVW and apply phase corrections to data.
-
-    Note: 
-        Phase center is set to 'sidereal', i.e. fixed RA and DEC, not 'ephem', so that
-        we can apply calibration solutions taken at time t0 (where the Sun was when calibration
-        was run, not where it is now!)
-
-    Args:
-        uv (UVData): UVData object to apply phasing to (needs to have a phase center defined)
-        t0 (Time): Astropy Time() to use to compute Sun's RA/DEC
-
-    Returns:
-        uv (UVData): Same UVData as input, but with new phase center applied
-    """
-
 ```
 
 #### Dependencies
@@ -67,5 +82,6 @@ h5py
 astropy
 pyuvdata
 numpy
+loguru
 ska_sdp_datamodels
 ```
