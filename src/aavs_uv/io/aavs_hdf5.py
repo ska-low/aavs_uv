@@ -2,6 +2,7 @@ import os
 import h5py
 import numpy as np
 import pandas as pd
+from loguru import logger
 
 from astropy.time import Time
 from astropy.units import Quantity
@@ -10,12 +11,28 @@ from astropy.coordinates import SkyCoord, AltAz, EarthLocation, Angle
 from aavs_uv.io.mccs_yaml import station_location_from_platform_yaml
 from aavs_uv.io.yaml import load_yaml
 from aavs_uv.datamodel.visibility import UV, create_antenna_data_array, create_visibility_array
+from aavs_uv.utils import get_config_path
 
 
-def load_observation_metadata(filename: str, yaml_config: str):
-    """ Load observation metadata """
+def load_observation_metadata(filename: str, yaml_config: str=None, load_config: str=None) -> dict:
+    """ Load observation metadata from correlator output HDF5
+    
+    Args:
+        filename (str): Path to HDF5 file 
+        yaml_config (str): Path to YAML station configuration file
+        load_config (str): Name of config to load from aavs_uv package
+    
+    Notes:
+        One of either `yaml_config` or `load_config` should be set. If `yaml_config`
+        is set, it will take precedence over internal config
+    """
     # Load metadata from config and HDF5 file
     md      = get_hdf5_metadata(filename)
+
+    if yaml_config is None:
+        logger.info(f'Using internal config {load_config}')
+        yaml_config = get_config_path(load_config)
+
     md_yaml = load_yaml(yaml_config)
     md.update(md_yaml)
 
@@ -23,7 +40,7 @@ def load_observation_metadata(filename: str, yaml_config: str):
     config_abspath = os.path.dirname(os.path.abspath(yaml_config))
     md['antenna_locations_file'] = os.path.join(config_abspath, md['antenna_locations_file'])
     md['baseline_order_file']  = os.path.join(config_abspath, md['baseline_order_file'])
-
+    md['station_config_file']  = os.path.abspath(yaml_config)
     return md
 
 
@@ -45,7 +62,8 @@ def get_hdf5_metadata(filename: str) -> dict:
     return metadata
 
 
-def hdf5_to_uv(fn_data: str, fn_config: str, from_platform_yaml: bool=False) -> UV:
+def hdf5_to_uv(fn_data: str, fn_config: str=None, 
+               from_platform_yaml: bool=False, telescope_name: str=None) -> UV:
     """ Create UV from HDF5 data and config file
     
     Args:
@@ -54,6 +72,8 @@ def hdf5_to_uv(fn_data: str, fn_config: str, from_platform_yaml: bool=False) -> 
         from_platform_yaml (bool=False): If true, uv_config.yaml setting 'antenna_locations'
                                          points to a mccs_platform.yaml file. Otherwise, a 
                                          simple CSV text file is used.
+        telescope_name (str=None): If set, aavs_uv will try and use internal config file
+                                   for telescope_name, e.g. 'aavs2' or 'aavs3'
         
     Returns:
         uv (UV): A UV dataclass object with xarray datasets
@@ -79,7 +99,7 @@ def hdf5_to_uv(fn_data: str, fn_config: str, from_platform_yaml: bool=False) -> 
             channel_id
             channel_width
     """
-    md = load_observation_metadata(fn_data, fn_config)
+    md = load_observation_metadata(fn_data, fn_config, load_config=telescope_name)
     h5   = h5py.File(fn_data, mode='r') 
     data = h5['correlation_matrix']['data']
 
@@ -108,7 +128,7 @@ def hdf5_to_uv(fn_data: str, fn_config: str, from_platform_yaml: bool=False) -> 
     data.frequency.attrs['channel_id']        = md['channel_id']
 
     provenance = {'data_filename': os.path.abspath(fn_data),
-                  'config_filename': os.path.abspath(fn_config),
+                  'config_filename': md['station_config_file'],
                   'input_metadata': md}
 
     # Compute zenith RA/DEC for phase center
