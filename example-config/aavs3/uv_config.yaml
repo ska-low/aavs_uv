@@ -4,9 +4,25 @@
 history: Created with aavs_uv 1.0.0 
 instrument: aavs3
 telescope_name: aavs3
-telescope_ECEF_X: -2559365.6735293902
-telescope_ECEF_Y: 5095376.895164881
-telescope_ECEF_Z: -2849123.777644051
+
+# Array ECEF location, from
+# https://gitlab.com/ska-telescope/ska-low-aavs3/-/blob/main/helmfile.d/values/aavs3.yaml
+# platform:
+#  metadata:
+#    version: 0.0.7
+# name: aavs3
+# reference:
+#  datum: WGS84
+#  epoch: "2024.0"
+#  latitude: -26.704078296
+#  longitude: 116.670233065
+#  ellipsoidal_height: 359.495
+#
+# Calculated using astropy.coordinates.EarthLocation.from_geodetic()
+# (-2559377.99363595, 5095349.74793982, -2849124.06772244)
+telescope_ECEF_X: -2559377.99363595
+telescope_ECEF_Y: 5095349.74793982
+telescope_ECEF_Z: -2849124.06772244
 channel_spacing: 781250.0           # Channel spacing in Hz
 channel_width: 925926.0             # 781250 Hz * 32/27 oversampling gives channel width
 antenna_locations_file: antenna_locations.txt
