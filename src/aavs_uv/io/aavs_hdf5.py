@@ -11,7 +11,7 @@ from astropy.coordinates import SkyCoord, AltAz, EarthLocation, Angle
 from aavs_uv.io.mccs_yaml import station_location_from_platform_yaml
 from aavs_uv.io.yaml import load_yaml
 from aavs_uv.datamodel.visibility import UV, create_antenna_data_array, create_visibility_array
-from aavs_uv.utils import get_config_path
+from aavs_uv.utils import get_config_path, get_software_versions
 
 
 def load_observation_metadata(filename: str, yaml_config: str=None, load_config: str=None) -> dict:
@@ -122,6 +122,8 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
 
     antennas = create_antenna_data_array(antpos, eloc)
     data     = create_visibility_array(data, f, t, eloc)
+    data.attrs['unit'] = md['vis_units']
+    
 
     # channel_bandwidth channel bandwidth in Hz
     data.frequency.attrs['channel_bandwidth'] = md['channel_width']
@@ -129,6 +131,7 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
 
     provenance = {'data_filename': os.path.abspath(fn_data),
                   'config_filename': md['station_config_file'],
+                  'aavs_uv_config': get_software_versions(),
                   'input_metadata': md}
 
     # Compute zenith RA/DEC for phase center

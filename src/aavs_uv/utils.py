@@ -36,6 +36,30 @@ def get_config_path(name: str) -> str:
     return get_resource_path(relative_path)
 
 
+def get_software_versions() -> dict:
+    """ Return version of main software packages """
+    from aavs_uv import __version__ as aavs_uv_version
+    from astropy import __version__ as astropy_version
+    from numpy import __version__ as numpy_version
+    from pyuvdata import __version__ as pyuvdata_version
+    from xarray import __version__ as xarray_version
+    from pandas import __version__ as pandas_version
+    from h5py import __version__ as h5py_version
+
+    software = {
+        'aavs_uv': aavs_uv_version,
+        'astropy': astropy_version,
+        'numpy': numpy_version,
+        'pyuvdata': pyuvdata_version,
+        'xarray': xarray_version,
+        'pandas': pandas_version,
+        'h5py': h5py_version
+    }
+    return software
+
+    
+
+
 def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=None, conj=False):
     """ Convert 1D visibility array (lower/upper) triangular to correlation matrix 
     

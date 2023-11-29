@@ -4,7 +4,7 @@ Simple sky model class for ephemeris using pyephem
 import ephem
 import numpy as np
 
-from astropy.coordinates import SkyCoord, get_body
+from astropy.coordinates import SkyCoord, get_body, get_sun
 from .ant_array import RadioArray
 
 class RadioSource(SkyCoord):
@@ -44,3 +44,31 @@ def generate_skycat_solarsys(observer: RadioArray):
         'Moon': RadioSource(moon_gcrs.ra, moon_gcrs.dec, mag=1.0),
     }
     return skycat
+
+def sun_model(aa, t_idx=0) -> np.array:
+    """ Generate sun flux model at given frequencies.
+
+    Flux model values taken from Table 2 of Macario et al (2022).
+    A 5th order polynomial is used to interpolate between frequencies.
+
+    Args:
+        aa (RadioArray): RadioArray to use for ephemeris / freq setup
+        t_idx (int): timestep to use
+
+    Returns:
+        S (RadioSource): Model flux, in Jy
+
+    Citation:
+        Characterization of the SKA1-Low prototype station Aperture Array Verification System 2 
+        Macario et al (2022) 
+        JATIS, 8, 011014. doi:10.1117/1.JATIS.8.1.011014 
+        https://ui.adsabs.harvard.edu/abs/2022JATIS...8a1014M/abstract
+    """
+    f_i = (50, 100, 150, 200, 300)        # Frequency in MHz
+    α_i = (2.15, 1.86, 1.61, 1.50, 1.31)  # Spectral index 
+    S_i = (5400, 24000, 5100, 81000, 149000)    # Flux in Jy
+    
+    p_S = np.poly1d(np.polyfit(f_i, S_i, 5))
+    sun = RadioSource(get_sun(aa.workspace['t']), mag=p_S(aa.workspace['f'].to('MHz').value))
+
+    return sun

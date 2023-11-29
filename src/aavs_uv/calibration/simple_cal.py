@@ -19,6 +19,32 @@ def create_baseline_matrix(xyz: np.array) -> np.ndarray:
         bls[:, ii] = np.sqrt(np.sum((xyz - xyz[ii])**2, axis=1))
     return bls
 
+def sun_model(f: np.array) -> np.array:
+    """ Generate sun flux model at given frequencies.
+
+    Flux model values taken from Table 2 of Macario et al (2022).
+    A 5th order polynomial is used to interpolate between frequencies.
+
+    Args:
+        f (np.array): Frequency, in MHz
+
+    Returns:
+        S (np.array): Model flux, in Jy
+
+    Citation:
+        Characterization of the SKA1-Low prototype station Aperture Array Verification System 2 
+        Macario et al (2022) 
+        JATIS, 8, 011014. doi:10.1117/1.JATIS.8.1.011014 
+        https://ui.adsabs.harvard.edu/abs/2022JATIS...8a1014M/abstract
+    """
+    f_i = (50, 100, 150, 200, 300)        # Frequency in MHz
+    α_i = (2.15, 1.86, 1.61, 1.50, 1.31)  # Spectral index 
+    S_i = (5400, 24000, 81000, 149000)    # Flux in Jy
+    
+    p_S = np.poly1d(np.polyfit(f_i, S_i, 5))
+
+    return p_S(f)
+
 def simple_stefcal(aa: RadioArray, model: dict, t_idx: int=0, f_idx: int=0, pol_idx: int=0) -> (RadioArray, np.array):
     """ Apply stefcal to calibrate UV data 
     

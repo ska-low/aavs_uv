@@ -52,12 +52,18 @@ def uv_to_uv5(uv: aavs_uv.datamodel.UV, filename: str):
         g_vis_d = g_vis.create_group('dims')
 
         _create_dset(g_vis, 'data', uv.data)
+        dims = ('time', 'frequency', 'baseline', 'polarization')
+        g_vis['data'].attrs['dims'] = dims
 
         for coord in ('mjd', 'lst', 'polarization', 'ant1', 'ant2', 'frequency'):
             _create_dset(g_vis_c, coord, uv.data.coords[coord])
 
-        dims = ('time', 'frequency', 'baseline', 'polarization')
-        g_vis.attrs['dims'] = dims
+        g_vis_c['mjd'].attrs['description'] = 'Modified Julian Date'
+        g_vis_c['lst'].attrs['description'] = 'Local apparent sidereal time'
+        g_vis_c['polarization'].attrs['description'] = 'Polarization products'
+        g_vis_c['ant1'].attrs['description'] = 'Baseline antenna 1 index'
+        g_vis_c['ant2'].attrs['description'] = 'Baseline antenna 2 index'
+
 
         for ii, dim in enumerate(dims):
             g_vis_d.attrs[dim] = uv.data.shape[ii]        
@@ -72,6 +78,7 @@ def uv_to_uv5(uv: aavs_uv.datamodel.UV, filename: str):
         
         for dset_name in ('enu', 'ecef'):
             _create_dset(g_ant, dset_name, uv.antennas[dset_name])
+            g_ant[dset_name].attrs['dims'] = ('antenna', 'spatial')
             
         for coord in ('antenna', 'spatial'):
             _create_dset(g_ant_c, coord, uv.antennas.coords[coord])                
@@ -94,7 +101,10 @@ def uv_to_uv5(uv: aavs_uv.datamodel.UV, filename: str):
         d_pc_ra = g_pc.create_dataset('ra',   data=ra)
         d_pc_dec = g_pc.create_dataset('dec', data=dec)
         d_pc_ra.attrs['unit']  = 'hourangle'
+        d_pc_ra.attrs['description']  = 'Right Ascension (J2000)'
         d_pc_dec.attrs['unit'] = 'deg'
+        d_pc_dec.attrs['description'] = 'Declination (J2000)'
+
 
         ##############
         # PROVENANCE #
@@ -161,7 +171,9 @@ def uv5_to_uv(filename: str) -> aavs_uv.datamodel.UV:
         }
     
         antennas = xp.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
-
+        
+        # Small bytes -> string fixup
+        antennas.attrs['array_origin_geodetic'].attrs['unit'] = antennas.attrs['array_origin_geodetic'].attrs['unit'].astype('str')
 
         ################
         # VISIBILITIES #

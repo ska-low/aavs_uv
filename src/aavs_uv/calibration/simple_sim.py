@@ -1,7 +1,9 @@
 import numpy as np
 from astropy.constants import c
+from astropy.coordinates import get_sun
 from aavs_uv.utils import  vis_arr_to_matrix
 from aavs_uv.postx.ant_array import RadioArray
+from aavs_uv.postx.sky_model import RadioSource
 
 LIGHT_SPEED = c.to('m/s').value
 cos, sin = np.cos, np.sin
@@ -20,9 +22,12 @@ def simulate_visibilities(ant_arr: RadioArray, sky_model: dict):
     for srcname, src in sky_model.items():
         phs = ant_arr._generate_phase_vector(src, conj=True).squeeze()
         if hasattr(src, "mag"):
-            phs *= src.mag
+            phs *= np.sqrt(src.mag)
+
         if phsmat is None:
             phsmat = np.outer(phs, np.conj(phs))
         else:
             phsmat += np.outer(phs, np.conj(phs))
     return phsmat
+
+
