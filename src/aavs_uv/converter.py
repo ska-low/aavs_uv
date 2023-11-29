@@ -4,10 +4,10 @@ import os
 import time
 from loguru import logger
 
-from astropy.time import Time
+from astropy.time import Time, TimeDelta
 from aavs_uv import __version__
 from aavs_uv.utils import get_config_path
-from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uv
+from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uv, phase_to_sun
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
 def parse_args(args):
@@ -27,7 +27,13 @@ def parse_args(args):
                    "--telescope_name",
                    help="Telescope name, e.g. 'aavs3'. If supplied, will attempt to use aavs_uv internal array config.",
                    required=False)
-
+    p.add_argument("-s", 
+                   "--phase-to-sun",
+                   help="Re-phase to point toward Sun (the sun must be visible!). If flag not set, data will be phased toward zenith.",
+                   required=False,
+                   action="store_true",
+                   default=False)
+    
     args = p.parse_args(args)
     return args
 
@@ -88,6 +94,12 @@ def run(args=None):
     if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
         logger.info(f"Loading {args.infile}")
         uv = hdf5_to_pyuvdata(args.infile, array_config)
+
+        if args.phase_to_sun:
+            logger.info(f"Phasing to sun")
+            ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
+            uv = phase_to_sun(uv, ts0)
+
         tr = time.time()
 
         _writers = {

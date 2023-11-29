@@ -40,6 +40,17 @@ def test_custom_config():
         if os.path.exists("test.sdp"):
             os.remove("test.sdp")
 
+def test_phase_to_sun():
+    try:
+        cmd = [
+        "-o", "uvfits", "-s", "-n", "aavs3",
+        "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
+        "test.uvfits"]
+        run(cmd)
+    finally:
+        if os.path.exists("test.uvfits"):
+            os.remove("test.uvfits")    
+
 def test_errors():
         # Create command-line args
         cmd = ["-c", "carmen/santiago", 
@@ -51,6 +62,8 @@ def test_errors():
         run(cmd)
 
 if __name__ == "__main__":
+    test_phase_to_sun()
     test_custom_config()
     test_errors()
     test_converter()
+    
