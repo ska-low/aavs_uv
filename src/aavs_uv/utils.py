@@ -57,8 +57,6 @@ def get_software_versions() -> dict:
     }
     return software
 
-    
-
 
 def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=None, conj=False):
     """ Convert 1D visibility array (lower/upper) triangular to correlation matrix 
