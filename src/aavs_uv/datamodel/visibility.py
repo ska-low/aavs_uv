@@ -21,7 +21,7 @@ class UV:
     origin: EarthLocation   # Astropy EarthLocation for array origin
     phase_center: SkyCoord  # Astropy SkyCoord corresponding to phase center
     provenance: dict        # Provenance/history information and other metadata
-        
+
 
 def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.Dataset:
     """ Create an xarray Dataset for antenna locations 
@@ -98,6 +98,7 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
     dant = xp.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
     
     return dant
+
 
 def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthLocation) -> xp.DataArray:
     """ Create visibility array out of data array + metadata 
