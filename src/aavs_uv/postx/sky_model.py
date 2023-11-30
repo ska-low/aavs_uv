@@ -68,7 +68,7 @@ def sun_model(aa, t_idx=0) -> np.array:
     α_i = (2.15, 1.86, 1.61, 1.50, 1.31)  # Spectral index 
     S_i = (5400, 24000, 5100, 81000, 149000)    # Flux in Jy
     
-    p_S = np.poly1d(np.polyfit(f_i, S_i, 5))
+    p_S = np.poly1d(np.polyfit(f_i, S_i, 2))
     sun = RadioSource(get_sun(aa.workspace['t']), mag=p_S(aa.workspace['f'].to('MHz').value))
 
     return sun
