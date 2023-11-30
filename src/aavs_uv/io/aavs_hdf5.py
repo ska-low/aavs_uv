@@ -63,7 +63,7 @@ def get_hdf5_metadata(filename: str) -> dict:
 
 
 def hdf5_to_uv(fn_data: str, fn_config: str=None, 
-               from_platform_yaml: bool=False, telescope_name: str=None) -> UV:
+               from_platform_yaml: bool=False, telescope_name: str=None, conj: bool=True) -> UV:
     """ Create UV from HDF5 data and config file
     
     Args:
@@ -74,7 +74,8 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
                                          simple CSV text file is used.
         telescope_name (str=None): If set, aavs_uv will try and use internal config file
                                    for telescope_name, e.g. 'aavs2' or 'aavs3'
-        
+        conj (bool): Conjugate visibility data (default True). 
+
     Returns:
         uv (UV): A UV dataclass object with xarray datasets
     
@@ -121,7 +122,7 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
     f     = Quantity(f_arr, unit='Hz')
 
     antennas = create_antenna_data_array(antpos, eloc)
-    data     = create_visibility_array(data, f, t, eloc)
+    data     = create_visibility_array(data, f, t, eloc, conj=conj)
     data.attrs['unit'] = md['vis_units']
     
 
@@ -129,8 +130,10 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
     data.frequency.attrs['channel_bandwidth'] = md['channel_width']
     data.frequency.attrs['channel_id']        = md['channel_id']
 
-    provenance = {'data_filename': os.path.abspath(fn_data),
-                  'config_filename': md['station_config_file'],
+    provenance = {'input_files': {
+                        'data_filename': os.path.abspath(fn_data),
+                        'config_filename': md['station_config_file'],
+                        },
                   'aavs_uv_config': get_software_versions(),
                   'input_metadata': md}
 

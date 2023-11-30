@@ -33,6 +33,8 @@ def get_config_path(name: str) -> str:
         abs_path (str): Absolute path to config file.
     """
     relative_path = f"config/{name}/uv_config.yaml"
+    if name is None:
+        raise RuntimeError("A path / telescope_name must be set.")
     return get_resource_path(relative_path)
 
 

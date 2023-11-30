@@ -100,7 +100,7 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
     return dant
 
 
-def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthLocation) -> xp.DataArray:
+def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthLocation, conj: bool=True) -> xp.DataArray:
     """ Create visibility array out of data array + metadata 
 
     Takes a data array, frequency and time axes, and an EarthLocation. 
@@ -110,6 +110,8 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
         data (np.array): Numpy array or duck-type similar data (e.g. h5py.dataset)
         md (dict): Dictionary of metadata, as found in raw HDF5 file.
         eloc (EarthLocation): Astropy EarthLocation for array center
+        conj (bool): Conjugate visibility data (default True). 
+
     
     Returns:
         t (Time): Astropy time array corresponding to timestamps
@@ -157,6 +159,9 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
         'frequency': f_coord
     }
     
+    if conj:
+        data = np.conj(data)
+
     vis = xp.DataArray(data, 
                       coords=coords, 
                       dims=('time', 'frequency', 'baseline', 'polarization')
