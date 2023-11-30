@@ -2,7 +2,7 @@
 import glob
 import os
 import warnings
-
+from loguru import logger
 from pprint import pprint
 
 # Basic science stuff
@@ -52,25 +52,27 @@ def phase_to_sun(uv: UVData, t0: Time) -> UVData:
     return uv
 
 
-def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True, max_int: int=None) -> pyuvdata.UVData:
+def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=None, phase_to_t0: bool=True, max_int: int=None, conj: bool=True) -> pyuvdata.UVData:
     """ Convert AAVS2/3 HDF5 correlator output to UVData object
 
     Args:
-        filename (str): Name of file to open
-        yaml_config (str): YAML configuration file with basic telescope info.
-                           See README for more information
+        filename (str):     Name of file to open
+        yaml_config (str):  YAML configuration file with basic telescope info.
+                            See README for more information
         phase_to_t0 (bool): Instead of phasing to Zenith, phase all timestamps to 
                             the RA/DEC position of zenith at the first timestamp (t0).
                             This is needed if writing UVFITS files, but not if you
                             are doing snapshot imaging of each timestep. Default True.
         max_int (int):      Maximum number of intergrations to read. Default None (read all)
+        conj (bool):        Conjugate visibility data (default True). 
+
     Returns:
         uv (pyuvdata.UVData): A UVData object that can be used to create 
                               UVFITS/MIRIAD/UVH5/etc files
     """
 
     # Load metadata
-    md = load_observation_metadata(filename, yaml_config)
+    md = load_observation_metadata(filename, yaml_config, load_config=telescope_name)
     
     # Create empty UVData object
     uv = pyuvdata.UVData()
@@ -226,6 +228,10 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str, phase_to_t0: bool=True, ma
             uv.data_array[..., 2] = xy
             uv.data_array[..., 3] = yx
             uv.polarization_array = _pol_types['linear']
+
+        if conj:
+            logger.info('Conjugating data')
+            uv.data_array = np.conj(uv.data_array)
 
         # Add optional arrays
         uv.flag_array = np.zeros_like(uv.data_array, dtype='bool')

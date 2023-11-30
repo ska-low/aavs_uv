@@ -33,6 +33,12 @@ def parse_args(args):
                    required=False,
                    action="store_true",
                    default=False)
+    p.add_argument("-j", 
+                   "--no_conj",
+                   help="Do not conjugate visibility data (note AAVS2 and AAVS3 require conjugation)",
+                   required=False,
+                   action="store_true",
+                   default=False)
     
     args = p.parse_args(args)
     return args
@@ -93,7 +99,8 @@ def run(args=None):
 
     if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
         logger.info(f"Loading {args.infile}")
-        uv = hdf5_to_pyuvdata(args.infile, array_config)
+        conj = False if args.no_conj else True
+        uv = hdf5_to_pyuvdata(args.infile, array_config, conj=conj)
 
         if args.phase_to_sun:
             logger.info(f"Phasing to sun")
