@@ -149,9 +149,17 @@ class AllSkyViewer(object):
         if return_data:
             return data
     
-    def mollview(self, hmap: np.array=None, sfunc=np.log, n_side=64, fov=np.pi/2, apply_mask=True, **kwargs):
+    def mollview(self, hmap: np.array=None, sfunc=np.abs, n_side=64, fov=np.pi/2, apply_mask=True, title=None, **kwargs):
         """ Healpix view """
         if hmap is None:
             hmap = self.observer.make_healpix(n_side=n_side, fov=fov, apply_mask=apply_mask)
-        hp.mollview(sfunc(hmap), coord='G', **kwargs)
+
+        # Create title
+        if title is None:
+            ts = self.observer.workspace['t']
+            f  = self.observer.workspace['f']
+            lst_str = str(ts.sidereal_time('apparent'))
+            title = f'{self.name}:  {ts.iso} | LST: {lst_str}  |  freq: {f.to("MHz").value:.3f} MHz'
+
+        hp.mollview(sfunc(hmap), coord='G', title=title, **kwargs)
         hp.graticule(color='white')
