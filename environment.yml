@@ -1,0 +1,37 @@
+name: aavs
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  # Base
+  - python
+  - mamba
+  - pip 
+  - poetry
+  - pytz
+  - tzdata
+  - python-dateutil
+  - urllib3
+  # Scientific
+  - numpy
+  - scipy
+  - xarray
+  # astro
+  - astropy
+  - astroplan
+  - pyerfa
+  - casacore
+  - python-casacore
+  - healpy
+  - pygdsm
+  # I/O
+  - h5py
+  - pyyaml
+  - msgpack-numpy
+  # test + logging
+  - loguru
+  - pytest
+  - pytest-cov 
+  # Docs
+  - sphinx
+  - sphinx-rtd-theme

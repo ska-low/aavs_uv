@@ -79,11 +79,13 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str) -> Visibility:
 #### Dependencies
 
 ```
+numpy
 pandas
 h5py
 astropy
 pyuvdata
-numpy
+pygdsm
 loguru
-ska_sdp_datamodels
+ska-sdp-datamodels
+ska-sdp-func-python
 ```
