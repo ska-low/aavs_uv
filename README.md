@@ -76,16 +76,30 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str) -> Visibility:
     """
 ```
 
-#### Dependencies
+### Installation
+
+#### Mamba / conda
+
+To help install into a fresh conda environment, a [environment.yml](https://github.com/ska-sci-ops/aavs_uv/blob/main/environment.yml) is provided. To create a new environment, download this repo then run:
 
 ```
-numpy
-pandas
-h5py
-astropy
-pyuvdata
-pygdsm
-loguru
-ska-sdp-datamodels
-ska-sdp-func-python
+conda env create -f environment.yml
 ```
+
+This will create an environment called `aavs`, which you enter by typing `conda activate aavs`. You can then activate this and install via:
+
+```
+conda activate aavs
+pip install .
+```
+Pip will then install `aavs_uv` and the few final packages that are not available in the conda-forge package manager (e.g. `pygdsm`, `pyuvdata`, `ska-sdp-datamodels`).
+
+#### Pip / manual
+
+If you have an existing Python 3 installation, you can install with pip via:
+
+```
+pip install git+https://github.com/ska-sci-ops/aavs_uv/edit/main/README.md
+```
+
+Alternatively, download this repository and install using `pip install .`. A list of required packages can be found in the [pyproject.toml](https://github.com/ska-sci-ops/aavs_uv/blob/main/pyproject.toml#L13). 
