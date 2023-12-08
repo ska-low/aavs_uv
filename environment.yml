@@ -16,6 +16,7 @@ dependencies:
   - numpy
   - scipy
   - xarray
+  - ducc0
   # astro
   - astropy
   - astroplan
@@ -23,7 +24,6 @@ dependencies:
   - casacore
   - python-casacore
   - healpy
-  - pygdsm
   # I/O
   - h5py
   - pyyaml
@@ -35,3 +35,7 @@ dependencies:
   # Docs
   - sphinx
   - sphinx-rtd-theme
+  # C/C++ compilation (use conda gcc instead of system, which can be ancient)
+  - gcc
+  - gxx
+  - openmp
