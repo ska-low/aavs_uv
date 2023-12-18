@@ -64,17 +64,18 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, c
         (uv.data.baseline.ant1.values, uv.data.baseline.ant2.values), names=("antenna1", "antenna2")
     )
 
+    # Time and frequency
     t  = uv.timestamps
+    t_int = np.ones_like(t) * md['tsamp']
     fc = uv.data.frequency.values
     fbw = np.ones_like(fc) * uv.data.attrs['frequency']['channel_width']
-
+    
+    # Phase center 
     zen_sc = uv.phase_center.icrs
     source_name = f"Zenith_at_mjd_{t[0].mjd}"
 
+    # UVW coordinates
     uvw = calc_uvw(uv)
-
-    #integration_time (float, optional) – Only used in the specific case where times only has one element
-    t_int = md['tsamp'] if md['n_integrations'] == 1 else None
 
     # Load data from file
     vis_data = uv.data.transpose('time', 'baseline', 'frequency', 'polarization').values

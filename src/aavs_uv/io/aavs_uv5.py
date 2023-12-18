@@ -32,10 +32,19 @@ def uv_to_uv5(uv: aavs_uv.datamodel.UV, filename: str):
         data = _str2bytes(dobj.values)
         dset = group.create_dataset(name, data=data)
         for k, v in dobj.attrs.items():
-            try:
-                dset.attrs[k] = v
-            except TypeError:
-                dset.attrs[k] = v.astype('bytes')
+            
+            if isinstance(v, dict):
+                for kk, vv in v.items():
+                    _k = f'_{k}_kk'
+                    try:
+                        dset.attrs[_k] = vv
+                    except TypeError:
+                        dset.attrs[_k] = vv.astype('bytes')
+            else:
+                try:
+                    dset.attrs[k] = v
+                except TypeError:
+                    dset.attrs[k] = v.astype('bytes')
 
     with h5py.File(filename, mode='w') as h:
         # Basic metadata 
