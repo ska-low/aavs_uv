@@ -63,7 +63,7 @@ def get_hdf5_metadata(filename: str) -> dict:
 
 
 def hdf5_to_uv(fn_data: str, fn_config: str=None, 
-               from_platform_yaml: bool=False, telescope_name: str=None, conj: bool=True) -> UV:
+               telescope_name: str=None, conj: bool=True, from_platform_yaml: bool=False) -> UV:
     """ Create UV from HDF5 data and config file
     
     Args:
@@ -116,7 +116,8 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
         # Load baselines and antenna locations (ENU)
         antpos = pd.read_csv(md['antenna_locations_file'], delimiter=' ')
 
-    t     = Time(np.arange(md['n_integrations'], dtype='float64') * md['tsamp'] + md['ts_start'], 
+    # Generate time - note addition of ts/2 to move to center of integration
+    t     = Time(np.arange(md['n_integrations'], dtype='float64') * md['tsamp'] + md['ts_start'] +  md['tsamp']/2, 
                  format='unix', location=eloc)
     f_arr = (np.arange(md['n_chans'], dtype='float64') + 1) * md['channel_spacing'] * md['channel_id']
     f     = Quantity(f_arr, unit='Hz')
@@ -124,7 +125,16 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
     antennas = create_antenna_data_array(antpos, eloc)
     data     = create_visibility_array(data, f, t, eloc, conj=conj)
     data.attrs['unit'] = md['vis_units']
-    
+
+    # Add extra info about time resolution and frequency resolution from input metadata
+    data.attrs['time'] = {'resolution': md['tsamp'], 'unit': 's'}
+    data.attrs['frequency'] = {'resolution': md['channel_spacing'], 
+                              'unit': 'Hz',
+                              'channel_spacing': md['channel_spacing'],
+                              'channel_width': md['channel_width']
+                             }
+    if md['channel_width'] > md['channel_spacing']:
+        data.attrs['frequency']['oversampled'] = True
 
     # channel_bandwidth channel bandwidth in Hz
     data.frequency.attrs['channel_bandwidth'] = md['channel_width']

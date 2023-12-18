@@ -189,7 +189,10 @@ class RadioArray(object):
 
         # geometric delay to phase weights
         c = phase_vector(t_g, self.workspace['f'].to('Hz').value) * self.workspace['c0']
-        
+
+        # Apply n factor to account for projection (Carozzi and Woan 2009 )
+        c = np.einsum('ij,ijp->ijp', ng, c, optimize=True)
+
         self.workspace['cgrid'] = c
         self.workspace['cgrid_conj'] = np.conj(c)
     
@@ -293,6 +296,9 @@ class RadioArray(object):
             t_g = np.einsum('id,pd', lmn, self.xyz_enu, optimize=True) / SPEED_OF_LIGHT
             c = phase_vector(t_g, ws['f'].to('Hz').value)
 
+            # Apply n factor to account for projection (Carozzi and Woan 2009 )
+            c = np.einsum('i,ip->ip', lmn[:, 2], c, optimize=True)
+
             ws['hpx']['mask'] = mask
             ws['hpx']['lmn'] = lmn
             ws['hpx']['phs_vector'] = c * ws['c0']    # Correct for vis phase center (i.e.the Sun)
@@ -300,8 +306,9 @@ class RadioArray(object):
         
         mask = ws['hpx']['mask']       # Horizon mask
         c = ws['hpx']['phs_vector']    # Pointing phase vector
-        
+    
         B = np.abs(np.einsum('ip,pq,iq->i', c, ws['data'], np.conj(c), optimize=True))
+
 
         hpdata = np.zeros_like(pix0)
 
