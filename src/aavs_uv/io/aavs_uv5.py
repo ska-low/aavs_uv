@@ -126,9 +126,10 @@ def uv_to_uv5(uv: aavs_uv.datamodel.UV, filename: str):
         d_pc_dec.attrs['description'] = 'Declination (J2000)'
 
 
-        ##############
-        # PROVENANCE #
-        ##############
+        ########################
+        # PROVENANCE / CONTEXT #
+        ########################
+
         g_prov = h.create_group('provenance')
         for k, v in uv.provenance.items():
             if isinstance(v, dict):
@@ -137,11 +138,21 @@ def uv_to_uv5(uv: aavs_uv.datamodel.UV, filename: str):
                     g_prov_a.attrs[sk] = sv
             else:
                 g_prov.attrs[k] = v
+
+        g_cont = h.create_group('context')
+        for k, v in uv.context.items():
+            if isinstance(v, dict):
+                g_cont_a = g_cont.create_group(k)
+                for sk, sv in v.items():
+                    g_cont_a.attrs[sk] = sv
+            else:
+                g_cont.attrs[k] = v
         
         # Group descriptions
-        h['antennas'].attrs['description']      = 'Antenna array spatial coordinate details.'
+        h['antennas'].attrs['description']     = 'Antenna array spatial coordinate details.'
         h['phase_center'].attrs['description'] = 'Array phase center / pointing information.'
         h['provenance'].attrs['description']   = 'History and data provenance.'
+        h['context'].attrs['description']      = 'Contextual information about observation.'
         h['visibilities'].attrs['description'] = 'Visibility data. (inter-antenna cross-correlations).'
 
 
@@ -178,21 +189,21 @@ def uv5_to_uv(filename: str) -> aavs_uv.datamodel.UV:
         }
     
         attrs = {
-            'identifier': xp.DataArray(h['antennas']['attrs']['identifier'][:].astype('str'), 
+            'identifier': xp.DataArray(h['antennas/attrs/identifier'][:].astype('str'), 
                                     dims=('antenna'), 
-                                    attrs=dict(h['antennas']['attrs']['identifier'].attrs.items())
+                                    attrs=dict(h['antennas/attrs/identifier'].attrs.items())
                                     ),
-            'flags': xp.DataArray(h['antennas']['attrs']['flags'][:], 
+            'flags': xp.DataArray(h['antennas/attrs/flags'][:], 
                                 dims=('antenna'), 
-                                attrs=dict(h['antennas']['attrs']['flags'].attrs.items())
+                                attrs=dict(h['antennas/attrs/flags'].attrs.items())
                                 ),
-            'array_origin_geocentric': xp.DataArray(h['antennas']['attrs']['array_origin_geocentric'][:], 
+            'array_origin_geocentric': xp.DataArray(h['antennas/attrs/array_origin_geocentric'][:], 
                                 dims=('spatial'), 
-                                attrs=dict(h['antennas']['attrs']['array_origin_geocentric'].attrs.items())
+                                attrs=dict(h['antennas/attrs/array_origin_geocentric'].attrs.items())
                                 ),
-            'array_origin_geodetic': xp.DataArray(h['antennas']['attrs']['array_origin_geodetic'][:], 
+            'array_origin_geodetic': xp.DataArray(h['antennas/attrs/array_origin_geodetic'][:], 
                                 dims=('spatial'), 
-                                attrs=dict(h['antennas']['attrs']['array_origin_geodetic'].attrs.items())
+                                attrs=dict(h['antennas/attrs/array_origin_geodetic'].attrs.items())
                                 )
         }
     
@@ -237,6 +248,11 @@ def uv5_to_uv(filename: str) -> aavs_uv.datamodel.UV:
                         attrs=attrs
                         )
         
+        # Copy over attributes
+        for c in coords.keys():
+            for k, v in h[f'visibilities/coords/{c}'].attrs.items():
+                vis.coords[c].attrs[k] = v
+
 
         ################
         # PHASE CENTER #
@@ -246,21 +262,26 @@ def uv5_to_uv(filename: str) -> aavs_uv.datamodel.UV:
                                 unit=(h['phase_center']['ra'].attrs['unit'], 
                                       h['phase_center']['dec'].attrs['unit']))
 
-        ##############
-        # PROVENANCE #
-        ##############
+        ########################
+        # PROVENANCE / CONTEXT #
+        ########################
         provenance = dict(h['provenance'].attrs.items())
         for k, v in h['provenance'].items():
-                provenance[k] = dict(v.attrs.items())
+            provenance[k] = dict(v.attrs.items())
+
+        context = dict(h['context'].attrs.items())
+        for k, v in h['context'].items():
+            context[k] = dict(v.attrs.items())
 
         # Add time and earth location
         eloc = EarthLocation.from_geocentric(*h['antennas']['attrs']['array_origin_geocentric'][:], 
                                         unit=h['antennas']['attrs']['array_origin_geocentric'].attrs['unit'])    
-        t = Time(mjd, format='mjd', location=eloc)
+        t = Time(mjd, format='unix', location=eloc)
 
 
         uv = UV(name=h.attrs['name'], 
             antennas=antennas, 
+            context=context,
             data=vis, 
             timestamps=t, 
             origin=eloc, 

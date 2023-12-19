@@ -10,7 +10,7 @@ from astropy.coordinates import SkyCoord, AltAz, EarthLocation, Angle
 
 from aavs_uv.io.mccs_yaml import station_location_from_platform_yaml
 from aavs_uv.io.yaml import load_yaml
-from aavs_uv.datamodel.visibility import UV, create_antenna_data_array, create_visibility_array
+from aavs_uv.datamodel.visibility import UV, create_antenna_data_array, create_visibility_array, create_empty_context_dict
 from aavs_uv.utils import get_config_path, get_software_versions
 
 
@@ -63,7 +63,7 @@ def get_hdf5_metadata(filename: str) -> dict:
 
 
 def hdf5_to_uv(fn_data: str, fn_config: str=None, 
-               telescope_name: str=None, conj: bool=True, from_platform_yaml: bool=False) -> UV:
+               telescope_name: str=None, conj: bool=True, from_platform_yaml: bool=False, context: dict=None) -> UV:
     """ Create UV from HDF5 data and config file
     
     Args:
@@ -75,6 +75,8 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
         telescope_name (str=None): If set, aavs_uv will try and use internal config file
                                    for telescope_name, e.g. 'aavs2' or 'aavs3'
         conj (bool): Conjugate visibility data (default True). 
+        context (dict): Dictionary with observation context information 
+                        should include 'intent', 'notes', 'observer' and 'date' as keys.
 
     Returns:
         uv (UV): A UV dataclass object with xarray datasets
@@ -83,6 +85,7 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
         The dataclass is defined as:
         class UV:
             name: str
+            context: dict
             antennas: xp.Dataset - dimensions ('antenna', 'spatial')
             data: xp.DataArray   - dimensions ('time', 'frequency', 'baseline', 'polarization')
             timestamps: Time     
@@ -150,9 +153,13 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
     zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'), obstime=t[0], location=t.location)
     zen_sc = SkyCoord(zen_aa).icrs
 
+    # Create empty context dictionary if not passed
+    context_dict = create_empty_context_dict() if context is None else context
+
     # Create UV object
     uv = UV(name=md['telescope_name'], 
             antennas=antennas, 
+            context=context_dict,
             data=data, 
             timestamps=t, 
             origin=eloc, 

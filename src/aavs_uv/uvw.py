@@ -11,6 +11,7 @@ def calc_uvw(uv: UV) -> np.array:
 
     Returns:
         uvw (np.array): Numpy array of UVW coordinates, in meters.
+                        Shape is (n_timestep, n_baseline, 3)
 
     Notes:
         Computes UVW coordinates relative to the phase center for the array. 
@@ -21,7 +22,9 @@ def calc_uvw(uv: UV) -> np.array:
         The code uses methods from pyuvdata.utils, and does the following:
             * Computes apparent RA and DEC values for phase center (uvutils.transform_icrs_to_app)
             * Computes corresponding position angle for frame (uvutils.transform_icrs_to_app)
-            * Comptues UVW coordinates (uvutils.calc_uvw)
+            * Computes UVW coordinates (uvutils.calc_uvw)
+        
+            
     """
     n_bl = len(uv.data.baseline)
     n_ts = len(uv.timestamps)

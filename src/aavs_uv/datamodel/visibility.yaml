@@ -1,5 +1,6 @@
 uvx:
-  antennas:
+  - context
+  - antennas:
     - attrs: 
       - array_origin_geocentric
       - array_origin_geodetic
@@ -11,7 +12,7 @@ uvx:
     - dims: 
       - ecef 
       - enu
-  visibilities:
+  - visibilities:
     - attrs
     - data
     - coords:
@@ -29,10 +30,11 @@ uvx:
       - frequency
       - polarization
       - time
-  phase_center:
+  - phase_center:
     - ra
     - dec
-  provenance:
+  - provenance:
     - aavs_uv_config
     - input_metadata
     - input_files 
+
