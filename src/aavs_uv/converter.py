@@ -191,7 +191,7 @@ def run(args=None):
         
         elif output_format == 'uvx':
             logger.info(f"Loading {fn_in}")
-            vis = hdf5_to_uv(fn_in, array_config, conj=False, context=context)
+            vis = hdf5_to_uv(fn_in, array_config, conj=conj, context=context)
             tr = time.time()
             logger.info(f"Creating {args.output_format} file: {fn_out}")
             uv_to_uv5(vis, fn_out)

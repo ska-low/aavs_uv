@@ -276,7 +276,7 @@ def uv5_to_uv(filename: str) -> aavs_uv.datamodel.UV:
         # Add time and earth location
         eloc = EarthLocation.from_geocentric(*h['antennas']['attrs']['array_origin_geocentric'][:], 
                                         unit=h['antennas']['attrs']['array_origin_geocentric'].attrs['unit'])    
-        t = Time(mjd, format='unix', location=eloc)
+        t = Time(unix, format='unix', location=eloc)
 
 
         uv = UV(name=h.attrs['name'], 
