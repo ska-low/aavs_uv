@@ -13,6 +13,7 @@ from aavs_uv.io.yaml import load_yaml
 from aavs_uv.datamodel.visibility import UV, create_antenna_data_array, create_visibility_array, create_empty_context_dict, create_empty_provenance_dict
 from aavs_uv.utils import get_config_path, get_software_versions
 
+from aavs_uv import __version__ as aavs_uv_version
 
 def load_observation_metadata(filename: str, yaml_config: str=None, load_config: str=None) -> dict:
     """ Load observation metadata from correlator output HDF5
@@ -35,6 +36,8 @@ def load_observation_metadata(filename: str, yaml_config: str=None, load_config:
 
     md_yaml = load_yaml(yaml_config)
     md.update(md_yaml)
+
+    md['history'] = f'Created with aavs_uv {aavs_uv_version}'
 
     # Update path to antenna location files to use absolute path
     config_abspath = os.path.dirname(os.path.abspath(yaml_config))
