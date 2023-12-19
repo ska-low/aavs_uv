@@ -1,0 +1,38 @@
+uvx:
+  antennas:
+    - attrs: 
+      - array_origin_geocentric
+      - array_origin_geodetic
+      - flags
+      - identifier
+    - coords:
+      - antenna
+      - spatial
+    - dims: 
+      - ecef 
+      - enu
+  visibilities:
+    - attrs
+    - data
+    - coords:
+      - time:
+        - lst
+        - mjd
+        - unix
+      - frequency
+      - baseline:
+          - ant1
+          - ant2
+      - polarization
+    - dims:
+      - baseline
+      - frequency
+      - polarization
+      - time
+  phase_center:
+    - ra
+    - dec
+  provenance:
+    - aavs_uv_config
+    - input_metadata
+    - input_files 
