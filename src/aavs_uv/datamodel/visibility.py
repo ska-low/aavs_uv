@@ -15,12 +15,32 @@ import pyuvdata.utils as uvutils
 @dataclass 
 class UV:
     name: str               # Antenna array name, e.g. AAVS3
+    context: dict           # Contextual information (observation intent, notes, observer name)
     antennas: xp.Dataset    # An xarray dataset (generated with create_antenna_data_array)
     data: xp.DataArray      # An xarray DataArray (generated with create_visibility_array)
     timestamps: Time        # Astropy timestamps Time() array
     origin: EarthLocation   # Astropy EarthLocation for array origin
     phase_center: SkyCoord  # Astropy SkyCoord corresponding to phase center
     provenance: dict        # Provenance/history information and other metadata
+
+
+def create_empty_context_dict():
+    context = {
+        'intent': '',
+        'date': '',
+        'notes': '',
+        'observer': ''
+    }
+    return context
+
+
+def create_empty_provenance_dict():
+    provenance = {
+        'aavs_uv_config': {},
+        'input_files': {},
+        'input_metadata': {}
+    }
+    return provenance
 
 
 def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.Dataset:
@@ -139,7 +159,7 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
     # Coordinate - time
     t.location = eloc
     lst = t.sidereal_time('apparent').to('hourangle')
-    t_coord = pd.MultiIndex.from_arrays((t.mjd, lst.value), names=('mjd', 'lst'))
+    t_coord = pd.MultiIndex.from_arrays((t.mjd, lst.value, t.unix), names=('mjd', 'lst', 'unix'))
     
     # Coordinate - baseline
     ix, iy = np.triu_indices(256)

@@ -3,10 +3,9 @@ import numpy as np
 import pandas as pd
 import h5py
 
-from astropy.coordinates import EarthLocation, AltAz, Angle, SkyCoord
+from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 
-import pyuvdata.utils as uvutils
 from pyuvdata import UVData
 
 from ska_sdp_datamodels.visibility import Visibility, create_visibility
