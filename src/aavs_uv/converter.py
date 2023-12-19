@@ -154,40 +154,43 @@ def run(args=None):
 
     ######
     # Start main conversion loop
+    # begin timing
+    t0, tr, tw = time.time(), 0, 0
     for fn_in, fn_out in tqdm(zip(filelist, filelist_out)):
         
         # Create subdirectories as needed
         if args.batch or args.megabatch:
-            subdir = os.path.dirname(fn_in)
+            subdir = os.path.dirname(fn_out)
             if not os.path.exists(subdir):
                 logger.info(f"Creating sub-directory {subdir}")
                 os.mkdir(subdir)
 
         # Load file and read basic metadata
         vis = hdf5_to_uv(fn_in, array_config, conj=False)  # Conj=False flag so data is not read into memory
-        logger.info(f"Data shape:     {vis.data.shape}")
-        logger.info(f"Data dims:      {vis.data.dims}")
-        logger.info(f"UTC start:      {vis.timestamps[0].iso}")
-        logger.info(f"MJD start:      {vis.timestamps[0].mjd}")
-        logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
-        logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
-        logger.info(f"Polarization:   {vis.data.polarization.data}\n")
 
-        # begin timing
-        t0 = time.time()
+        # Print basic info to screen (skip if in batch mode)
+        if not args.batch or args.megabatch:
+            logger.info(f"Loading {fn_in}")
+            logger.info(f"Data shape:     {vis.data.shape}")
+            logger.info(f"Data dims:      {vis.data.dims}")
+            logger.info(f"UTC start:      {vis.timestamps[0].iso}")
+            logger.info(f"MJD start:      {vis.timestamps[0].mjd}")
+            logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
+            logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
+            logger.info(f"Polarization:   {vis.data.polarization.data}\n")
 
         if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
-            logger.info(f"Loading {fn_in}")
-            
+           
+            tr0 = time.time()
             uv = hdf5_to_pyuvdata(fn_in, array_config, conj=conj)
 
             if args.phase_to_sun:
                 logger.info(f"Phasing to sun")
                 ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
                 uv = phase_to_sun(uv, ts0)
+            tr += time.time() - tr0
 
-            tr = time.time()
-
+            tw0 = time.time()
             _writers = {
                 'uvfits': uv.write_uvfits,
                 'miriad': uv.write_miriad,
@@ -199,28 +202,31 @@ def run(args=None):
             writer = _writers[output_format]
             logger.info(f"Creating {args.output_format} file: {fn_out}")
             writer(fn_out)
-            tw = time.time()
+            tw += time.time() - tw0
         
         elif output_format == 'sdp':
-            logger.info(f"Loading {fn_in}")
+            tr0 = time.time()
             if context is not None:
                 vis = hdf5_to_sdp_vis(fn_in, array_config, scan_intent=context['intent'], execblock_id=context['execution_block'])
             else:
                 vis = hdf5_to_sdp_vis(fn_in, array_config)
-            tr = time.time()
+            tr += time.time() - tr0
+
+            tw0 = time.time()
             logger.info(f"Creating {args.output_format} file: {fn_out}")
             export_visibility_to_hdf5(vis, fn_out)
-            tw = time.time()
+            tw += time.time() - tw0
         
         elif output_format == 'uvx':
-            logger.info(f"Loading {fn_in}")
+            tr0 = time.time()
             vis = hdf5_to_uv(fn_in, array_config, conj=conj, context=context)
-            tr = time.time()
+            tr += time.time() - tr0
+            tw0 = time.time()
             logger.info(f"Creating {args.output_format} file: {fn_out}")
             uv_to_uv5(vis, fn_out)
-            tw = time.time()
-
-        logger.info(f"Done. Time taken: Read: {tr-t0:.2f} s Write: {tw-tr:.2f} s Total: {tw-t0:.2f} s")
+            tw += time.time() - tw0
+    t1 = time.time()
+    logger.info(f"Done. Time taken: Read: {tr:.2f} s Write: {tw:.2f} s Total: {t1 - t0:.2f} s")
 
 if __name__ == "__main__":
     print(sys.argv[1:])
