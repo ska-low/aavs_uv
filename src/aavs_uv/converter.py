@@ -138,12 +138,16 @@ def run(args=None):
             filelist = sorted(glob.glob(os.path.join(args.infile, f'*.{args.file_ext}')))
         else:
             filelist = sorted(glob.glob(os.path.join(args.infile, f'*/*.{args.file_ext}'), recursive=True))
-
+            
         filelist_out = []
         for fn in filelist:
             bn = os.path.basename(fn)
             bn_out = os.path.splitext(bn)[0] + ext_lut[output_format]
-            filelist_out.append(os.path.join(args.outfile, bn_out))
+            if args.megabatch:
+                subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn_in)))
+                filelist_out.append(os.path.join(args.outfile, subdir, bn_out))
+            else:
+                filelist_out.append(os.path.join(args.outfile, bn_out))
     else:
         filelist     = [args.infile]
         filelist_out = [args.outfile]
@@ -154,7 +158,7 @@ def run(args=None):
         
         # Create subdirectories as needed
         if args.batch or args.megabatch:
-            subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn_out)))
+            subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn_in)))
             if not os.path.exists(subdir):
                 logger.info(f"Creating sub-directory {subdir}")
                 os.mkdir(subdir)
