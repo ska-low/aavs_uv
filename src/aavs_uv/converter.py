@@ -10,6 +10,7 @@ from astropy.time import Time, TimeDelta
 from aavs_uv import __version__
 from aavs_uv.utils import get_config_path
 from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uv, phase_to_sun, uv_to_uv5
+from aavs_uv.io.yaml import load_yaml
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
 logger.remove()
@@ -56,6 +57,11 @@ def parse_args(args):
                    help="File extension to search for in batch mode ",
                    required=False,
                    default="hdf5")
+    p.add_argument("-i", 
+                   "--context_yaml",
+                   help="Path to observation context YAML (for SDP / UVX formats)",
+                   required=False,
+                   default=None)
     
     args = p.parse_args(args)
     return args
@@ -102,6 +108,10 @@ def run(args=None):
     logger.info(f"Output format:    {output_format} \n")
     logger.info(f"Conjugating data: {conj} \n")
 
+    # Check if context yaml was included
+    context = load_yaml(args.context_yaml) if args.context_yaml is not None else None
+
+    # Setup filelist, globbing for files if in batch mode
     if args.batch:
         ext_lut = {
             'ms': '.ms', 
@@ -127,6 +137,8 @@ def run(args=None):
         filelist     = [args.infile]
         filelist_out = [args.outfile]
 
+    ######
+    # Start main conversion loop
     for fn_in, fn_out in tqdm(zip(filelist, filelist_out)):
         # Load file and read basic metadata
         vis = hdf5_to_uv(fn_in, array_config, conj=False)  # Conj=False flag so data is not read into memory
@@ -168,7 +180,10 @@ def run(args=None):
         
         elif output_format == 'sdp':
             logger.info(f"Loading {fn_in}")
-            vis = hdf5_to_sdp_vis(fn_in, array_config)
+            if context is not None:
+                vis = hdf5_to_sdp_vis(fn_in, array_config, scan_intent=context['intent'], execblock_id=context['execution_block'])
+            else:
+                vis = hdf5_to_sdp_vis(fn_in, array_config)
             tr = time.time()
             logger.info(f"Creating {args.output_format} file: {fn_out}")
             export_visibility_to_hdf5(vis, fn_out)
@@ -176,7 +191,7 @@ def run(args=None):
         
         elif output_format == 'uvx':
             logger.info(f"Loading {fn_in}")
-            vis = hdf5_to_uv(fn_in, array_config, conj=False)
+            vis = hdf5_to_uv(fn_in, array_config, conj=False, context=context)
             tr = time.time()
             logger.info(f"Creating {args.output_format} file: {fn_out}")
             uv_to_uv5(vis, fn_out)

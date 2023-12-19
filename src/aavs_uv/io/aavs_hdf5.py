@@ -10,7 +10,7 @@ from astropy.coordinates import SkyCoord, AltAz, EarthLocation, Angle
 
 from aavs_uv.io.mccs_yaml import station_location_from_platform_yaml
 from aavs_uv.io.yaml import load_yaml
-from aavs_uv.datamodel.visibility import UV, create_antenna_data_array, create_visibility_array, create_empty_context_dict
+from aavs_uv.datamodel.visibility import UV, create_antenna_data_array, create_visibility_array, create_empty_context_dict, create_empty_provenance_dict
 from aavs_uv.utils import get_config_path, get_software_versions
 
 
@@ -63,7 +63,8 @@ def get_hdf5_metadata(filename: str) -> dict:
 
 
 def hdf5_to_uv(fn_data: str, fn_config: str=None, 
-               telescope_name: str=None, conj: bool=True, from_platform_yaml: bool=False, context: dict=None) -> UV:
+               telescope_name: str=None, conj: bool=True, 
+               from_platform_yaml: bool=False, context: dict=None) -> UV:
     """ Create UV from HDF5 data and config file
     
     Args:
@@ -141,13 +142,14 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
     
     if md['channel_width'] > md['channel_spacing']:
         data.frequency.attrs['oversampled'] = True
-
-    provenance = {'input_files': {
+    
+    provenance = create_empty_provenance_dict()
+    provenance.update({'input_files': {
                         'data_filename': os.path.abspath(fn_data),
                         'config_filename': md['station_config_file'],
                         },
                   'aavs_uv_config': get_software_versions(),
-                  'input_metadata': md}
+                  'input_metadata': md})
 
     # Compute zenith RA/DEC for phase center
     zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'), obstime=t[0], location=t.location)

@@ -29,7 +29,8 @@ def create_empty_context_dict():
         'intent': '',
         'date': '',
         'notes': '',
-        'observer': ''
+        'observer': '',
+        'execution_block': '',
     }
     return context
 

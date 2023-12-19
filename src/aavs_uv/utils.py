@@ -47,6 +47,7 @@ def get_software_versions() -> dict:
     from xarray import __version__ as xarray_version
     from pandas import __version__ as pandas_version
     from h5py import __version__ as h5py_version
+    from erfa import __version__ as erfa_version
 
     software = {
         'aavs_uv': aavs_uv_version,
@@ -55,7 +56,8 @@ def get_software_versions() -> dict:
         'pyuvdata': pyuvdata_version,
         'xarray': xarray_version,
         'pandas': pandas_version,
-        'h5py': h5py_version
+        'h5py': h5py_version,
+        'erfa': erfa_version
     }
     return software
 
