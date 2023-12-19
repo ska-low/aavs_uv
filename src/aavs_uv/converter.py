@@ -145,7 +145,7 @@ def run(args=None):
             bn_out = os.path.splitext(bn)[0] + ext_lut[output_format]
             if args.megabatch:
                 subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn)))
-                filelist_out.append(os.path.join(args.outfile, subdir, bn_out))
+                filelist_out.append(os.path.join(subdir, bn_out))
             else:
                 filelist_out.append(os.path.join(args.outfile, bn_out))
     else:
