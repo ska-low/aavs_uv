@@ -67,7 +67,7 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, c
     t  = uv.timestamps
     t_int = np.ones_like(t) * md['tsamp']
     fc = uv.data.frequency.values
-    fbw = np.ones_like(fc) * uv.data.attrs['frequency']['channel_width']
+    fbw = np.ones_like(fc) * uv.data.frequency.attrs['channel_bandwidth']
     
     # Phase center 
     zen_sc = uv.phase_center.icrs
