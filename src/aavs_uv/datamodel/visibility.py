@@ -139,7 +139,7 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
     # Coordinate - time
     t.location = eloc
     lst = t.sidereal_time('apparent').to('hourangle')
-    t_coord = pd.MultiIndex.from_arrays((t.mjd, lst.value), names=('mjd', 'lst'))
+    t_coord = pd.MultiIndex.from_arrays((t.mjd, lst.value, t.unix), names=('mjd', 'lst', 'unix'))
     
     # Coordinate - baseline
     ix, iy = np.triu_indices(256)

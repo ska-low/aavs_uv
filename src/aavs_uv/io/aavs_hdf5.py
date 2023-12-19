@@ -127,18 +127,17 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
     data.attrs['unit'] = md['vis_units']
 
     # Add extra info about time resolution and frequency resolution from input metadata
-    data.attrs['time'] = {'resolution': md['tsamp'], 'unit': 's'}
-    data.attrs['frequency'] = {'resolution': md['channel_spacing'], 
-                              'unit': 'Hz',
-                              'channel_spacing': md['channel_spacing'],
-                              'channel_width': md['channel_width']
-                             }
-    if md['channel_width'] > md['channel_spacing']:
-        data.attrs['frequency']['oversampled'] = True
+    data.time.attrs['resolution']             = md['tsamp']
+    data.time.attrs['resolution_unit']        = 's'
 
-    # channel_bandwidth channel bandwidth in Hz
+    data.frequency.attrs['resolution']        = md['channel_spacing']
+    data.frequency.attrs['channel_spacing']   = md['channel_spacing']
     data.frequency.attrs['channel_bandwidth'] = md['channel_width']
     data.frequency.attrs['channel_id']        = md['channel_id']
+    data.frequency.attrs['resolution_unit']   = 'Hz'
+    
+    if md['channel_width'] > md['channel_spacing']:
+        data.frequency.attrs['oversampled'] = True
 
     provenance = {'input_files': {
                         'data_filename': os.path.abspath(fn_data),
