@@ -144,7 +144,7 @@ def run(args=None):
             bn = os.path.basename(fn)
             bn_out = os.path.splitext(bn)[0] + ext_lut[output_format]
             if args.megabatch:
-                subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn_in)))
+                subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn)))
                 filelist_out.append(os.path.join(args.outfile, subdir, bn_out))
             else:
                 filelist_out.append(os.path.join(args.outfile, bn_out))
@@ -158,7 +158,7 @@ def run(args=None):
         
         # Create subdirectories as needed
         if args.batch or args.megabatch:
-            subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn_in)))
+            subdir = os.path.dirname(fn_in)
             if not os.path.exists(subdir):
                 logger.info(f"Creating sub-directory {subdir}")
                 os.mkdir(subdir)
