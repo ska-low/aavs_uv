@@ -19,6 +19,7 @@ numpy = ">=1.24"
 pandas = ">=2.0"
 xarray = ">=2023.7"
 loguru = ">=0.5"
+tqdm = ">4.0"
 
 # optional dependencies; used by "extras"
 python-casacore = {version = "^3.5", optional = true}

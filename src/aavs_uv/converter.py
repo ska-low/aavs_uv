@@ -2,13 +2,18 @@ import argparse
 import sys
 import os
 import time
+import glob
 from loguru import logger
+from tqdm import tqdm
 
 from astropy.time import Time, TimeDelta
 from aavs_uv import __version__
 from aavs_uv.utils import get_config_path
-from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uv, phase_to_sun
+from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uv, phase_to_sun, uv_to_uv5
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
+
+logger.remove()
+logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
 
 def parse_args(args):
     """ Parse command-line arguments """
@@ -17,7 +22,7 @@ def parse_args(args):
     p.add_argument("outfile", help="Output filename")
     p.add_argument("-o", 
                    "--output_format", 
-                   help="Output file format (uvfits, miriad, ms, uvh5, sdp)",
+                   help="Output file format (uvx, uvfits, miriad, ms, uvh5, sdp)",
                    required=True)
     p.add_argument("-c",
                    "--array_config",
@@ -39,6 +44,18 @@ def parse_args(args):
                    required=False,
                    action="store_true",
                    default=False)
+    p.add_argument("-b",
+                   "--batch",
+                   help="Batch mode. Input and output are treated as directories, and all subfiles are converted.",
+                   required=False,
+                   action="store_true",
+                   default=False
+                   )
+    p.add_argument("-x",
+                   "--file_ext",
+                   help="File extension to search for in batch mode ",
+                   required=False,
+                   default="hdf5")
     
     args = p.parse_args(args)
     return args
@@ -56,7 +73,7 @@ def run(args=None):
     else:
         array_config = args.array_config
     
-
+    conj = False if args.no_conj else True
     output_format = args.output_format.lower()
 
     # Check input file exists
@@ -71,7 +88,7 @@ def run(args=None):
         config_error_found = True
     
     # Check output format
-    if output_format not in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5', 'sdp'):
+    if output_format not in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5', 'sdp', 'uvx'):
         logger.error(f"Output format not valid: {output_format}")
         config_error_found = True       
     
@@ -79,58 +96,93 @@ def run(args=None):
         logger.error("Errors found. Please check arguments.")
         return
     
-    logger.info(f"Input path:    {args.infile}")
-    logger.info(f"Array config:  {array_config}")
-    logger.info(f"Output path:   {args.outfile}")
-    logger.info(f"Output format: {output_format} \n")
+    logger.info(f"Input path:       {args.infile}")
+    logger.info(f"Array config:     {array_config}")
+    logger.info(f"Output path:      {args.outfile}")
+    logger.info(f"Output format:    {output_format} \n")
+    logger.info(f"Conjugating data: {conj} \n")
 
-    # Load file and read basic metadata
-    vis = hdf5_to_uv(args.infile, array_config)
-    logger.info(f"Data shape:     {vis.data.shape}")
-    logger.info(f"Data dims:      {vis.data.dims}")
-    logger.info(f"UTC start:      {vis.timestamps[0].iso}")
-    logger.info(f"MJD start:      {vis.timestamps[0].mjd}")
-    logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
-    logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
-    logger.info(f"Polarization:   {vis.data.polarization.data}\n")
-
-    # begin timing
-    t0 = time.time()
-
-    if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
-        logger.info(f"Loading {args.infile}")
-        conj = False if args.no_conj else True
-        uv = hdf5_to_pyuvdata(args.infile, array_config, conj=conj)
-
-        if args.phase_to_sun:
-            logger.info(f"Phasing to sun")
-            ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
-            uv = phase_to_sun(uv, ts0)
-
-        tr = time.time()
-
-        _writers = {
-            'uvfits': uv.write_uvfits,
-            'miriad': uv.write_miriad,
-            'mir':    uv.write_miriad,
-            'ms':     uv.write_ms,
-            'uvh5':   uv.write_uvh5
+    if args.batch:
+        ext_lut = {
+            'ms': '.ms', 
+            'uvfits': '.uvfits',
+            'miriad': '.uv',
+            'mir': '.uv',
+            'sdp': '.sdph5',
+            'uvx': '.uvx5',
+            'uvh5': '.uvh5'
         }
 
-        writer = _writers[output_format]
-        logger.info(f"Creating {args.output_format} file: {args.outfile}")
-        writer(args.outfile)
-        tw = time.time()
-    
-    elif output_format == 'sdp':
-        logger.info(f"Loading {args.infile}")
-        vis = hdf5_to_sdp_vis(args.infile, array_config)
-        tr = time.time()
-        logger.info(f"Creating {args.output_format} file: {args.outfile}")
-        export_visibility_to_hdf5(vis, args.outfile)
-        tw = time.time()
+        if not os.path.exists(args.outfile):
+            logger.info(f"Creating directory {args.outfile}")
+            os.mkdir(args.outfile)
 
-    logger.info(f"Done. Time taken: Read: {tr-t0:.2f} s Write: {tw-tr:.2f} s Total: {tw-t0:.2f} s")
+        filelist = sorted(glob.glob(os.path.join(args.infile, f'*.{args.file_ext}')))
+        filelist_out = []
+        for fn in filelist:
+            bn = os.path.basename(fn)
+            bn_out = os.path.splitext(bn)[0] + ext_lut[output_format]
+            filelist_out.append(os.path.join(args.outfile, bn_out))
+    else:
+        filelist     = [args.infile]
+        filelist_out = [args.outfile]
+
+    for fn_in, fn_out in tqdm(zip(filelist, filelist_out)):
+        # Load file and read basic metadata
+        vis = hdf5_to_uv(fn_in, array_config, conj=False)  # Conj=False flag so data is not read into memory
+        logger.info(f"Data shape:     {vis.data.shape}")
+        logger.info(f"Data dims:      {vis.data.dims}")
+        logger.info(f"UTC start:      {vis.timestamps[0].iso}")
+        logger.info(f"MJD start:      {vis.timestamps[0].mjd}")
+        logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
+        logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
+        logger.info(f"Polarization:   {vis.data.polarization.data}\n")
+
+        # begin timing
+        t0 = time.time()
+
+        if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
+            logger.info(f"Loading {fn_in}")
+            
+            uv = hdf5_to_pyuvdata(fn_in, array_config, conj=conj)
+
+            if args.phase_to_sun:
+                logger.info(f"Phasing to sun")
+                ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
+                uv = phase_to_sun(uv, ts0)
+
+            tr = time.time()
+
+            _writers = {
+                'uvfits': uv.write_uvfits,
+                'miriad': uv.write_miriad,
+                'mir':    uv.write_miriad,
+                'ms':     uv.write_ms,
+                'uvh5':   uv.write_uvh5,
+            }
+
+            writer = _writers[output_format]
+            logger.info(f"Creating {args.output_format} file: {fn_out}")
+            writer(fn_out)
+            tw = time.time()
+        
+        elif output_format == 'sdp':
+            logger.info(f"Loading {fn_in}")
+            vis = hdf5_to_sdp_vis(fn_in, array_config)
+            tr = time.time()
+            logger.info(f"Creating {args.output_format} file: {fn_out}")
+            export_visibility_to_hdf5(vis, fn_out)
+            tw = time.time()
+        
+        elif output_format == 'uvx':
+            logger.info(f"Loading {fn_in}")
+            vis = hdf5_to_uv(fn_in, array_config, conj=False)
+            tr = time.time()
+            logger.info(f"Creating {args.output_format} file: {fn_out}")
+            uv_to_uv5(vis, fn_out)
+            tw = time.time()
+
+        logger.info(f"Done. Time taken: Read: {tr-t0:.2f} s Write: {tw-tr:.2f} s Total: {tw-t0:.2f} s")
 
 if __name__ == "__main__":
     print(sys.argv[1:])
