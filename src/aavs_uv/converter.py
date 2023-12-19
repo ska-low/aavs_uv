@@ -52,6 +52,13 @@ def parse_args(args):
                    action="store_true",
                    default=False
                    )
+    p.add_argument("-B",
+                   "--megabatch",
+                   help="MEGA batch mode. Runs on subdirectories too, e.g. eb-aavs3/2023_12_12/*.hdf5.",
+                   required=False,
+                   action="store_true",
+                   default=False
+                   )
     p.add_argument("-x",
                    "--file_ext",
                    help="File extension to search for in batch mode ",
@@ -112,7 +119,7 @@ def run(args=None):
     context = load_yaml(args.context_yaml) if args.context_yaml is not None else None
 
     # Setup filelist, globbing for files if in batch mode
-    if args.batch:
+    if args.batch or args.megabatch:
         ext_lut = {
             'ms': '.ms', 
             'uvfits': '.uvfits',
@@ -127,7 +134,11 @@ def run(args=None):
             logger.info(f"Creating directory {args.outfile}")
             os.mkdir(args.outfile)
 
-        filelist = sorted(glob.glob(os.path.join(args.infile, f'*.{args.file_ext}')))
+        if args.batch:
+            filelist = sorted(glob.glob(os.path.join(args.infile, f'*.{args.file_ext}')))
+        else:
+            filelist = sorted(glob.glob(os.path.join(args.infile, f'*/*.{args.file_ext}'), recursive=True))
+
         filelist_out = []
         for fn in filelist:
             bn = os.path.basename(fn)
@@ -140,6 +151,14 @@ def run(args=None):
     ######
     # Start main conversion loop
     for fn_in, fn_out in tqdm(zip(filelist, filelist_out)):
+        
+        # Create subdirectories as needed
+        if args.batch or args.megabatch:
+            subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn_out)))
+            if not os.path.exists(subdir):
+                logger.info(f"Creating sub-directory {subdir}")
+                os.mkdir(subdir)
+
         # Load file and read basic metadata
         vis = hdf5_to_uv(fn_in, array_config, conj=False)  # Conj=False flag so data is not read into memory
         logger.info(f"Data shape:     {vis.data.shape}")

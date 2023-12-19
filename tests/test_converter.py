@@ -72,6 +72,15 @@ def test_batch():
         run(cmd)
     finally:
         pass # do not delete dir for now
+    try:
+        cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
+               "-B", 
+               "-o", "uvx", 
+               "../../example-data/aavs2_2x500ms", # Note double ../.. for -B MEGABATCH test 
+               "test-batch-data"]
+        run(cmd)
+    finally:
+        pass # do not delete dir for now
 
 def test_context():
     try:
