@@ -158,7 +158,7 @@ def run(args=None):
         
         # Create subdirectories as needed
         if args.batch or args.megabatch:
-            subdir = os.path.dirname(args.outfile, os.path.basename(os.path.dirname(fn_in)))
+            subdir = os.path.dirname(fn_in)
             if not os.path.exists(subdir):
                 logger.info(f"Creating sub-directory {subdir}")
                 os.mkdir(subdir)
