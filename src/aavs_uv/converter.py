@@ -169,7 +169,7 @@ def run(args=None):
         vis = hdf5_to_uv(fn_in, array_config, conj=False)  # Conj=False flag so data is not read into memory
 
         # Print basic info to screen (skip if in batch mode)
-        if not args.batch or args.megabatch:
+        if not args.batch and not args.megabatch:
             logger.info(f"Loading {fn_in}")
             logger.info(f"Data shape:     {vis.data.shape}")
             logger.info(f"Data dims:      {vis.data.dims}")
