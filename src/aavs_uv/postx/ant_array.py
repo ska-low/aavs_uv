@@ -197,13 +197,25 @@ class RadioArray(object):
         self.workspace['cgrid_conj'] = np.conj(c)
     
 
-    def plot_corr_matrix(self, log: bool=True):
+    def plot_corr_matrix(self, log: bool=True, **kwargs):
         """ Plot correlation matrix """
         data = np.log(np.abs(self.workspace['data'])) if log else np.abs(self.workspace['data'])
-        plt.imshow(data, aspect='auto')
+        pol_label = self.vis.data.polarization.values[self.workspace['pol_idx']]
+        plt.imshow(data, aspect='auto', **kwargs)
+        plt.title(pol_label)
         plt.xlabel("Antenna P")
         plt.ylabel("Antenna Q")
         plt.colorbar()
+    
+    def plot_corr_matrix_4pol(self, **kwargs):
+        """ Plot correlation matrix, for all pols """
+        plt.figure(figsize=(10, 10))
+        for ii in range(4):
+            plt.subplot(2,2,ii+1)
+            self.update(pol_idx=ii)
+            self.plot_corr_matrix(**kwargs)
+        plt.tight_layout()
+        plt.show()
     
 
     def plot_antennas(self, x: str='E', y: str='N', overlay_names: bool=False, overlay_fontsize: str='x-small', **kwargs):
