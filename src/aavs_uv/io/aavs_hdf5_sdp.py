@@ -13,7 +13,7 @@ from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame, PolarisationFrame
 
 from aavs_uv.io.aavs_hdf5 import hdf5_to_uv
-from aavs_uv.uvw import calc_uvw
+from aavs_uv.uvw import calc_uvw, calc_zenith_tracking_phase_corr
 
 def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, conj: bool=True,
                     scan_id: int=0, scan_intent: str="", execblock_id: str="") -> Visibility:
@@ -78,6 +78,9 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, c
 
     # Load data from file
     vis_data = uv.data.transpose('time', 'baseline', 'frequency', 'polarization').values
+    phs_corr = calc_zenith_tracking_phase_corr(uv)
+    
+    vis_data *= phs_corr
 
     # Create SDP visibility
     v = Visibility.constructor(
@@ -87,7 +90,7 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, c
             vis=vis_data,
             weight=np.ones(vis_data.shape),
             baselines=baselines,
-            flags=np.ones(vis_data.shape, dtype="int"),
+            flags=np.zeros(vis_data.shape, dtype="int"),
             integration_time=t_int,
             channel_bandwidth=fbw,
             polarisation_frame=pol_frame,
