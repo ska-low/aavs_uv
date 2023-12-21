@@ -14,7 +14,7 @@ def station_location_from_platform_yaml(fn_yaml: str) -> (EarthLocation, pd.Data
     Returns:
         (earth_loc, ant_enu): astropy EarthLocation and antenna ENU locations in m
     """
-    d =load_yaml(fn_yaml)
+    d = load_yaml(fn_yaml)
     d_station = d['platform']['array']['station_clusters']['a1']['stations']['1']
 
     # Generate pandas dataframe of antenna positions

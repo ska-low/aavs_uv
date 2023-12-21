@@ -12,7 +12,7 @@ from astropy.coordinates import SkyCoord, AltAz, Angle
 import healpy as hp
 
 from aavs_uv.utils import  vis_arr_to_matrix
-from aavs_uv.datamodel import UV
+from aavs_uv.datamodel import UVX
 from .coord_utils import phase_vector, skycoord_to_lmn, sky2hpix, hpix2sky
 
 from astropy.constants import c
@@ -31,7 +31,7 @@ class RadioArray(object):
         generate_gsm()   - Generate and view a sky model using the GSM
     """
     
-    def __init__(self, vis: UV, conjugate_data: bool=False, verbose: bool=False):
+    def __init__(self, vis: UVX, conjugate_data: bool=False, verbose: bool=False):
         """ Initialize RadioArray class (based on astropy EarthLocation)
         
         Args:

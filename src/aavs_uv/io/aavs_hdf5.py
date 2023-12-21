@@ -10,7 +10,7 @@ from astropy.coordinates import SkyCoord, AltAz, EarthLocation, Angle
 
 from aavs_uv.io.mccs_yaml import station_location_from_platform_yaml
 from aavs_uv.io.yaml import load_yaml
-from aavs_uv.datamodel.visibility import UV, create_antenna_data_array, create_visibility_array, create_empty_context_dict, create_empty_provenance_dict
+from aavs_uv.datamodel.uvx import UVX, create_antenna_data_array, create_visibility_array, create_empty_context_dict, create_empty_provenance_dict
 from aavs_uv.utils import get_config_path, get_software_versions
 
 from aavs_uv import __version__ as aavs_uv_version
@@ -65,9 +65,9 @@ def get_hdf5_metadata(filename: str) -> dict:
     return metadata
 
 
-def hdf5_to_uv(fn_data: str, fn_config: str=None, 
+def hdf5_to_uvx(fn_data: str, fn_config: str=None, 
                telescope_name: str=None, conj: bool=True, 
-               from_platform_yaml: bool=False, context: dict=None) -> UV:
+               from_platform_yaml: bool=False, context: dict=None) -> UVX:
     """ Create UV from HDF5 data and config file
     
     Args:
@@ -162,7 +162,7 @@ def hdf5_to_uv(fn_data: str, fn_config: str=None,
     context_dict = create_empty_context_dict() if context is None else context
 
     # Create UV object
-    uv = UV(name=md['telescope_name'], 
+    uv = UVX(name=md['telescope_name'], 
             antennas=antennas, 
             context=context_dict,
             data=data, 

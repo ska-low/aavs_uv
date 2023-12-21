@@ -9,7 +9,7 @@ from tqdm import tqdm
 from astropy.time import Time, TimeDelta
 from aavs_uv import __version__
 from aavs_uv.utils import get_config_path
-from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uv, phase_to_sun, uv_to_uv5
+from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uvx, phase_to_sun, write_uvx
 from aavs_uv.io.yaml import load_yaml
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
@@ -166,7 +166,7 @@ def run(args=None):
                 os.mkdir(subdir)
 
         # Load file and read basic metadata
-        vis = hdf5_to_uv(fn_in, array_config, conj=False)  # Conj=False flag so data is not read into memory
+        vis = hdf5_to_uvx(fn_in, array_config, conj=False)  # Conj=False flag so data is not read into memory
 
         # Print basic info to screen (skip if in batch mode)
         if not args.batch and not args.megabatch:
@@ -219,16 +219,16 @@ def run(args=None):
         
         elif output_format == 'uvx':
             tr0 = time.time()
-            vis = hdf5_to_uv(fn_in, array_config, conj=conj, context=context)
+            vis = hdf5_to_uvx(fn_in, array_config, conj=conj, context=context)
             tr += time.time() - tr0
             tw0 = time.time()
             logger.info(f"Creating {args.output_format} file: {fn_out}")
-            uv_to_uv5(vis, fn_out)
+            write_uvx(vis, fn_out)
             tw += time.time() - tw0
     t1 = time.time()
     logger.info(f"Done. Time taken: Read: {tr:.2f} s Write: {tw:.2f} s Total: {t1 - t0:.2f} s")
 
-if __name__ == "__main__":
+if __name__ == "__main__": #pragma: no cover
     print(sys.argv[1:])
     args = parse_args(sys.argv[1:])
     run(args)

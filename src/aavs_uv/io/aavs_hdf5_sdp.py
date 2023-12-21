@@ -12,7 +12,7 @@ from ska_sdp_datamodels.visibility import Visibility, create_visibility
 from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame, PolarisationFrame
 
-from aavs_uv.io.aavs_hdf5 import hdf5_to_uv
+from aavs_uv.io.aavs_hdf5 import hdf5_to_uvx
 from aavs_uv.uvw import calc_uvw, calc_zenith_tracking_phase_corr
 
 def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, conj: bool=True,
@@ -42,7 +42,7 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, c
         https://gitlab.com/ska-telescope/aavs-system/-/blob/master/python/pydaq/persisters/corr.py
 
     """
-    uv = hdf5_to_uv(fn_raw, yaml_raw, telescope_name=telescope_name, conj=conj)
+    uv = hdf5_to_uvx(fn_raw, yaml_raw, telescope_name=telescope_name, conj=conj)  
     md = uv.provenance['input_metadata']
 
     

@@ -2,7 +2,7 @@ import os
 import numpy as np
 from pyuvdata import UVData
 
-from aavs_uv.io import hdf5_to_uv, hdf5_to_pyuvdata, hdf5_to_sdp_vis
+from aavs_uv.io import hdf5_to_uvx, hdf5_to_pyuvdata, hdf5_to_sdp_vis
 from aavs_uv.converter import parse_args, run
 
 FN_RAW   = 'test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
@@ -11,17 +11,17 @@ YAML_RAW = '../example-config/aavs2/uv_config.yaml'
 def test_conj():
     """ Test data conjugation is working """
     print("Testing conjgation: aavs UV")
-    vis  = hdf5_to_uv(FN_RAW, telescope_name='aavs2')
-    visc = hdf5_to_uv(FN_RAW, YAML_RAW, conj=True)
-    visn = hdf5_to_uv(FN_RAW, YAML_RAW, conj=False)
+    vis  = hdf5_to_uvx(FN_RAW, telescope_name='aavs2')
+    visc = hdf5_to_uvx(FN_RAW, YAML_RAW, conj=True)
+    visn = hdf5_to_uvx(FN_RAW, YAML_RAW, conj=False)
 
     assert np.allclose(vis.data, visc.data)
     assert np.allclose(visc.data, np.conj(visn.data))
 
     print("Testing conjgation: SDP vis")
-    sdp = hdf5_to_sdp_vis(FN_RAW, telescope_name='aavs2')
-    sdpc = hdf5_to_sdp_vis(FN_RAW, YAML_RAW, conj=True)
-    sdpn = hdf5_to_sdp_vis(FN_RAW, YAML_RAW, conj=False)
+    sdp = hdf5_to_sdp_vis(FN_RAW, telescope_name='aavs2', apply_phasing=False)
+    sdpc = hdf5_to_sdp_vis(FN_RAW, YAML_RAW, conj=True, apply_phasing=False)
+    sdpn = hdf5_to_sdp_vis(FN_RAW, YAML_RAW, conj=False, apply_phasing=False)
 
     assert np.allclose(sdp.vis, sdpc.vis)
     assert np.allclose(sdp.vis, np.conj(sdpn.vis))
@@ -61,5 +61,5 @@ def test_converter():
             os.remove("test_noconj.uvfits")   
 
 if __name__ == "__main__":
-    test_converter()
+    #test_converter()
     test_conj()

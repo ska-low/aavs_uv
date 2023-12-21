@@ -1,11 +1,12 @@
-from aavs_uv.io import hdf5_to_uv, uv5_to_uv, uv_to_uv5
+from aavs_uv.io import hdf5_to_uvx, read_uvx, write_uvx
 
 def test_roundtrip():
-    fn = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
-    uv = hdf5_to_uv(fn, telescope_name='aavs2')
 
-    uv_to_uv5(uv, 'test.h5')
-    uv2 = uv5_to_uv('test.h5')
+    fn = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
+    uv = hdf5_to_uvx(fn, telescope_name='aavs2')
+
+    write_uvx(uv, 'test.h5')
+    uv2 = read_uvx('test.h5')
 
     # CHECK CONTEXT PASSING MAKES IT THROUGH ROUNDTRIP
     context = {
@@ -15,9 +16,9 @@ def test_roundtrip():
         'notes': 'Commissioning observation'
     }
 
-    uv = hdf5_to_uv(fn, telescope_name='aavs2', context=context)
-    uv_to_uv5(uv, 'test.h5')
-    uv2 = uv5_to_uv('test.h5')
+    uv = hdf5_to_uvx(fn, telescope_name='aavs2', context=context)
+    write_uvx(uv, 'test.h5')
+    uv2 = read_uvx('test.h5')
 
     for k, v in uv.context.items():
         assert k in uv2.context.keys()

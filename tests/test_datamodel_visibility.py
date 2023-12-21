@@ -6,8 +6,8 @@ from astropy.coordinates import EarthLocation
 from astropy.time import Time
 from astropy.units import Quantity
 
-from aavs_uv.datamodel.visibility import create_antenna_data_array, create_visibility_array
-from aavs_uv.io import hdf5_to_uv, load_observation_metadata
+from aavs_uv.datamodel.uvx import create_antenna_data_array, create_visibility_array
+from aavs_uv.io import hdf5_to_uvx, load_observation_metadata
 
 FN_DATA = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
 FN_CONFIG = '../example-config/aavs3/uv_config.yaml'
@@ -32,7 +32,7 @@ def test_create_arrays():
     print(data)
 
 def test_create_uv():
-    aavs = hdf5_to_uv(FN_DATA, FN_CONFIG)
+    aavs = hdf5_to_uvx(FN_DATA, FN_CONFIG)
     print(aavs)
 
 if __name__ == "__main__":

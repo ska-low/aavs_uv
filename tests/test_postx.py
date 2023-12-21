@@ -3,12 +3,15 @@ import pylab as plt
 from astropy.coordinates import SkyCoord
 
 from aavs_uv.postx import RadioArray, AllSkyViewer, generate_skycat
-from aavs_uv.io import hdf5_to_uv
+from aavs_uv.postx.sky_model import sun_model
+
+from aavs_uv.io import hdf5_to_uvx
 
 def setup_test():
+
     fn_data = 'test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
     fn_yaml = '../example-config/aavs2/uv_config.yaml'
-    v = hdf5_to_uv(fn_data, fn_yaml)
+    v = hdf5_to_uvx(fn_data, fn_yaml)
 
     # RadioArray basics
     aa = RadioArray(v)
@@ -36,7 +39,8 @@ def test_postx():
 
     # Sky catalog
     skycat = generate_skycat(aa)
-
+    sun = sun_model(aa, 0)
+    
     # AllSkyViewer
     asv = AllSkyViewer(aa, skycat=skycat)
     asv.load_skycat(skycat)
@@ -51,6 +55,7 @@ def test_postx_plotting():
 
     # RadioArray - plotting
     aa.plot_corr_matrix()
+    aa.plot_corr_matrix_4pol()
     plt.show()
     aa.plot_antennas(overlay_names=True)
     plt.show()
