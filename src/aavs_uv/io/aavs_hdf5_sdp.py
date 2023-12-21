@@ -16,7 +16,8 @@ from aavs_uv.io.aavs_hdf5 import hdf5_to_uv
 from aavs_uv.uvw import calc_uvw, calc_zenith_tracking_phase_corr
 
 def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, conj: bool=True,
-                    scan_id: int=0, scan_intent: str="", execblock_id: str="") -> Visibility:
+                    scan_id: int=0, scan_intent: str="", execblock_id: str="", flip_uvw=True, 
+                    apply_phasing: bool=True) -> Visibility:
     """ Generate a SDP Visibility object from a AAVS2 HDF5 file
 
     Args:
@@ -25,6 +26,11 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, c
         telescope_name (str=None): If set, aavs_uv will try and use internal config file
                                    for telescope_name, e.g. 'aavs2' or 'aavs3'
         conj (bool): Conjugate visibility data (default True). 
+        flip_uvw (bool): Negate UVW coordinates (uvw *= -1). Default True, as needed to match
+                         SDP convention (as of 2023/12).
+        apply_phasing (bool): Apply phasing (zenith tracking corrections) to visibility data. 
+                              Default True. Needs to be applied for valid SDP data, generally
+                              only set to False for testing purposes. 
         scan_id (int): Optional -- add scan ID to file.
         scan_intent (str): Optional -- add description / intent of observation
         execblock_id (str): optional -- add the execution block ID, e.g. eb-aavs-20231219-00001
@@ -75,12 +81,15 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, c
 
     # UVW coordinates
     uvw = calc_uvw(uv)
+    if flip_uvw:
+        uvw *= -1
 
     # Load data from file
     vis_data = uv.data.transpose('time', 'baseline', 'frequency', 'polarization').values
     phs_corr = calc_zenith_tracking_phase_corr(uv)
     
-    vis_data *= phs_corr
+    if apply_phasing:
+        vis_data *= phs_corr
 
     # Create SDP visibility
     v = Visibility.constructor(
