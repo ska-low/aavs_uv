@@ -11,28 +11,6 @@ sin, cos = np.sin, np.cos
 SPEED_OF_LIGHT = c.value
 
 
-def compute_w(xyz: np.array, H: float, d: float, conjugate: bool=False, in_seconds: bool=True) -> np.array:
-    """ Compute geometric delay τ, equivalent to w term, for antenna array
-    
-    Args:
-        xyz (np.array): Array of antenna XYZ locations, normally ENU coordinates
-        H (float): Hourangle of pointing direction
-        d (float): Declination of pointing direction
-        conjugate (bool): Return -w if conjugate is true (default False)
-        in_seconds (bool): Return data in seconds (True, default) or in meters (False)
-    
-    Returns:
-        w (np.array): Array of w (geometric delay) terms, one per antenna
-    """
-    x, y, z = np.split(xyz, 3, axis=1)
-    sh, sd = sin(H), sin(d)
-    ch, cd = cos(H), cos(d)
-    w  = cd * ch * x - cd * sh * y + sd * z
-    w = -w if conjugate else w
-    w = w / SPEED_OF_LIGHT if in_seconds else w
-    return w.squeeze()
-
-
 def phase_vector(w: np.array, f: float, conj: bool=False) -> np.array:
     """ Compute Nx1 phase weight vector e(2πi w f) """
     c0 = np.exp(1j * 2 * np.pi * w * f)

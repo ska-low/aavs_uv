@@ -1,8 +1,8 @@
-from aavs_uv.io import hdf5_to_uv, read_uvx, write_uvx
+from aavs_uv.io import hdf5_to_uvx, read_uvx, write_uvx
 
 def test_roundtrip():
     fn = '../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
-    uv = hdf5_to_uv(fn, telescope_name='aavs2')
+    uv = hdf5_to_uvx(fn, telescope_name='aavs2')
 
     write_uvx(uv, 'test.h5')
     uv2 = read_uvx('test.h5')
@@ -15,7 +15,7 @@ def test_roundtrip():
         'notes': 'Commissioning observation'
     }
 
-    uv = hdf5_to_uv(fn, telescope_name='aavs2', context=context)
+    uv = hdf5_to_uvx(fn, telescope_name='aavs2', context=context)
     write_uvx(uv, 'test.h5')
     uv2 = read_uvx('test.h5')
 

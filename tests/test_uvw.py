@@ -1,14 +1,14 @@
-from aavs_uv.io import hdf5_to_uv, hdf5_to_pyuvdata
+from aavs_uv.io import hdf5_to_uvx, hdf5_to_pyuvdata
 from aavs_uv.uvw import calc_uvw
 import numpy as np
 from pyuvdata import utils as uvutils
 
 def test_uvw():
     fn = '../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
-    uv = hdf5_to_uv(fn, telescope_name='aavs2')
+    uv = hdf5_to_uvx(fn, telescope_name='aavs2')
 
     uvd = hdf5_to_pyuvdata(fn, telescope_name='aavs2')
-    uv = hdf5_to_uv(fn, telescope_name='aavs2')
+    uv = hdf5_to_uvx(fn, telescope_name='aavs2')
 
     # Checks comparing internal calls within calc_uvw
     n_bl = len(uv.data.baseline)

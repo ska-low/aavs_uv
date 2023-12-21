@@ -70,17 +70,16 @@ def test_batch():
                "../example-data/aavs2_2x500ms",
                "test-batch-data"]
         run(cmd)
-    finally:
-        pass # do not delete dir for now
-    try:
+
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
                "-B", 
                "-o", "uvx", 
-               "../../example-data/aavs2_2x500ms", # Note double ../.. for -B MEGABATCH test 
+               "test-data/", # Note -B MEGABATCH test 
                "test-batch-data"]
         run(cmd)
     finally:
-        pass # do not delete dir for now
+        if os.path.exists('test-batch-data'):
+            os.system('rm -rf test-batch-data')
 
 def test_context():
     try:
