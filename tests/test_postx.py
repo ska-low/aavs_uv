@@ -8,8 +8,9 @@ from aavs_uv.postx.sky_model import sun_model
 from aavs_uv.io import hdf5_to_uvx
 
 def setup_test():
-    fn_data = '../../aavs3/2023.10.12-Ravi/correlation_burst_100_20231012_13426_0.hdf5'
-    fn_yaml = '../example-config/aavs3/uv_config.yaml'
+
+    fn_data = 'test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
+    fn_yaml = '../example-config/aavs2/uv_config.yaml'
     v = hdf5_to_uvx(fn_data, fn_yaml)
 
     # RadioArray basics

@@ -129,7 +129,7 @@ def get_aavs2_correlator_filelist(filepath: str) -> list:
 
 def test0():
     """ Test basic data loading using get_aavs2_correlator_filelist """
-    filepath    = '../data/2023_08_23-13.53/'
+    filepath    = 'test-data/aavs2_1x1000ms/'
     yaml_config = '../example-config/aavs2/uv_config.yaml'
     filelist = get_aavs2_correlator_filelist(filepath)
     uv = hdf5_to_pyuvdata(filelist[0], yaml_config)

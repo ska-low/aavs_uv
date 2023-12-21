@@ -1,7 +1,8 @@
 from aavs_uv.io import hdf5_to_uvx, read_uvx, write_uvx
 
 def test_roundtrip():
-    fn = '../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
+
+    fn = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
     uv = hdf5_to_uvx(fn, telescope_name='aavs2')
 
     write_uvx(uv, 'test.h5')

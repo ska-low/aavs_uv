@@ -18,7 +18,7 @@ def test_sdp_vis_conj():
     assert np.allclose(np.conj(v1.vis.values), v2.vis.values)
 
 def test_uvdata_to_sdp_vis():
-    fn_raw = '/Users/daniel.price/Data/aavs_uv/example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
+    fn_raw = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
     yaml_raw = '../example-config/aavs2/uv_config.yaml'
 
     uv = hdf5_to_pyuvdata(fn_raw, yaml_raw)
