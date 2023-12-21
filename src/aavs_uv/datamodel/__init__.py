@@ -1,1 +1,1 @@
-from .visibility import UV
+from .visibility import UVX

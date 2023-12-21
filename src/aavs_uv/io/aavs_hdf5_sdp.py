@@ -42,7 +42,7 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, c
         https://gitlab.com/ska-telescope/aavs-system/-/blob/master/python/pydaq/persisters/corr.py
 
     """
-    uv = hdf5_to_uv(fn_raw, yaml_raw, telescope_name=telescope_name, conj=conj)
+    uv = hdf5_to_uv(fn_raw, yaml_raw, telescope_name=telescope_name, conj=False)  # Conjugation done after phasing
     md = uv.provenance['input_metadata']
 
     
@@ -90,6 +90,9 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, c
     
     if apply_phasing:
         vis_data *= phs_corr
+    
+    if conj:
+        vis_data = np.conj(vis_data)
 
     # Create SDP visibility
     v = Visibility.constructor(

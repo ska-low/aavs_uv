@@ -1,11 +1,11 @@
 import numpy as np
 from pyuvdata import utils as uvutils
 
-from aavs_uv.datamodel import UV
+from aavs_uv.datamodel import UVX
 from astropy.constants import c
 LIGHT_SPEED = c.value
 
-def calc_zenith_apparent_coords(uv: UV) -> (np.array, np.array, np.array):
+def calc_zenith_apparent_coords(uv: UVX) -> (np.array, np.array, np.array):
     """ Calculate the apparent RA/DEC coordinates of the array zenith 
     
     Args:
@@ -44,7 +44,7 @@ def calc_zenith_apparent_coords(uv: UV) -> (np.array, np.array, np.array):
 
     return app_ras, app_decs, frame_pos_angle
 
-def calc_uvw(uv: UV) -> np.array:
+def calc_uvw(uv: UVX) -> np.array:
     """ Calculate the UVW coordinates for a UV array
     
     Args:
@@ -92,7 +92,7 @@ def calc_uvw(uv: UV) -> np.array:
     
     return uvw.reshape((n_ts, n_bl, 3))
 
-def calc_zenith_tracking_phase_corr(uv: UV) -> np.array:
+def calc_zenith_tracking_phase_corr(uv: UVX) -> np.array:
     """ Calculate phase corrections to phase to zenith at t0 and then track it.
     
     Args:

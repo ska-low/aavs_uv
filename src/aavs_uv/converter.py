@@ -9,7 +9,7 @@ from tqdm import tqdm
 from astropy.time import Time, TimeDelta
 from aavs_uv import __version__
 from aavs_uv.utils import get_config_path
-from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uv, phase_to_sun, uv_to_uv5
+from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uv, phase_to_sun, write_uvx
 from aavs_uv.io.yaml import load_yaml
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
@@ -223,7 +223,7 @@ def run(args=None):
             tr += time.time() - tr0
             tw0 = time.time()
             logger.info(f"Creating {args.output_format} file: {fn_out}")
-            uv_to_uv5(vis, fn_out)
+            write_uvx(vis, fn_out)
             tw += time.time() - tw0
     t1 = time.time()
     logger.info(f"Done. Time taken: Read: {tr:.2f} s Write: {tw:.2f} s Total: {t1 - t0:.2f} s")

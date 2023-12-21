@@ -1,6 +1,6 @@
 from aavs_uv.converter import parse_args, run
 from aavs_uv.utils import get_resource_path
-from aavs_uv.io import uv5_to_uv
+from aavs_uv.io import read_uvx
 import os
 
 def test_converter():
@@ -96,7 +96,7 @@ def test_context():
                "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
                "test.sdp"]
         run(cmd)
-        uv = uv5_to_uv("test.uvx5")
+        uv = read_uvx("test.uvx5")
         print(uv.context)
         assert(uv.context['intent'] == "Test routine for AAVS_UV package")
     finally:

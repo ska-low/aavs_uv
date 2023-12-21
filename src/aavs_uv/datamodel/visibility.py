@@ -13,7 +13,7 @@ import pyuvdata.utils as uvutils
 
 # Define the data class for UV data
 @dataclass 
-class UV:
+class UVX:
     name: str               # Antenna array name, e.g. AAVS3
     context: dict           # Contextual information (observation intent, notes, observer name)
     antennas: xp.Dataset    # An xarray dataset (generated with create_antenna_data_array)

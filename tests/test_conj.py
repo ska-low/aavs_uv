@@ -19,9 +19,16 @@ def test_conj():
     assert np.allclose(visc.data, np.conj(visn.data))
 
     print("Testing conjgation: SDP vis")
-    sdp = hdf5_to_sdp_vis(FN_RAW, telescope_name='aavs2')
-    sdpc = hdf5_to_sdp_vis(FN_RAW, YAML_RAW, conj=True)
-    sdpn = hdf5_to_sdp_vis(FN_RAW, YAML_RAW, conj=False)
+    sdp = hdf5_to_sdp_vis(FN_RAW, telescope_name='aavs2', apply_phasing=False)
+    sdpc = hdf5_to_sdp_vis(FN_RAW, YAML_RAW, conj=True, apply_phasing=False)
+    sdpn = hdf5_to_sdp_vis(FN_RAW, YAML_RAW, conj=False, apply_phasing=False)
+
+    assert np.allclose(sdp.vis, sdpc.vis)
+    assert np.allclose(sdp.vis, np.conj(sdpn.vis))
+
+    sdp = hdf5_to_sdp_vis(FN_RAW, telescope_name='aavs2', apply_phasing=True)
+    sdpc = hdf5_to_sdp_vis(FN_RAW, YAML_RAW, conj=True, apply_phasing=True)
+    sdpn = hdf5_to_sdp_vis(FN_RAW, YAML_RAW, conj=False, apply_phasing=True)
 
     assert np.allclose(sdp.vis, sdpc.vis)
     assert np.allclose(sdp.vis, np.conj(sdpn.vis))
@@ -61,5 +68,5 @@ def test_converter():
             os.remove("test_noconj.uvfits")   
 
 if __name__ == "__main__":
-    test_converter()
+    #test_converter()
     test_conj()
