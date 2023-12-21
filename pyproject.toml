@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "aavs-uv"
-version = "1.5.1"
+version = "1.5.1]2"
 description = "SKA-low Aperture Array Verification Systems (AAVS) Interferometry UV utilities."
 authors = ["Danny C. Price"]
-license = "Apache 2.0"
+license = "BSD"
 repository = "https://github.com/ska-sci-ops/aavs_uv"
 documentation = "https://github.com/ska-sci-ops/aavs_uv"
 include = [
