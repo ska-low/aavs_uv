@@ -12,6 +12,7 @@ from tqdm import tqdm
 import dask
 from dask.distributed import LocalCluster
 from dask.diagnostics import ProgressBar, ResourceProfiler, Profiler
+from dask.bag import from_delayed
 
 from astropy.time import Time, TimeDelta
 from aavs_uv import __version__
@@ -191,7 +192,7 @@ def convert_single_file_dask(args, fn_in, fn_out, array_config, output_format, c
         logger.add(sys.stderr, format="<m><b>" + worker_id + "</b></m> | <g>{time:HH:mm:ss.S}</g> | <w><b>{level}</b></w> | {message}", 
                    colorize=True)
 
-    convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context)
+    return convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 def run(args=None):
     """ Command-line utility for file conversion """
@@ -294,24 +295,26 @@ def run(args=None):
                 res = convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
     else:
-
+        # Create a local cluster and setup workers
+        logger.info(f"Starting dash LocalCluster with {args.num_workers} workers (multi-process)")
         cluster = LocalCluster(n_workers=args.num_workers, threads_per_worker=2)
         client = cluster.get_client()
         logger.info(f"Starting dash Client on {client.dashboard_link}")
-
-        logger.info(f"Starting conversion on {len(filelist)} files, using {args.num_workers} worker processes (multi-process)")
+        logger.info(f"Starting conversion on {len(filelist)} files")
+        
         ## Setup dask and form delayed queue of tasks
-        dask_result_queue = []
+        dask_delayed_list = []
         for fn_in, fn_out in zip(filelist, filelist_out):
             res = convert_single_file_dask(args, fn_in, fn_out, array_config, output_format, conj, context)
-            dask_result_queue.append(res)
+            dask_delayed_list.append(res)
+        dask_bag = from_delayed(dask_delayed_list)
 
         # Run compute and measure progress
         with ResourceProfiler() as rprof, Profiler() as prof, ProgressBar() as pbar:
             with warnings.catch_warnings() as wc:
                 if not args.verbose:
                     warnings.simplefilter("ignore")
-                dask.compute(dask_result_queue)
+                dask_bag.compute()
 
         if args.profile:
             reset_logger()
