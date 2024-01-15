@@ -104,11 +104,47 @@ def test_context():
         if os.path.exists("test.uvx5"):
             os.remove("test.uvx5")
 
+def test_dask():
+    try:
+        # Change number of workers
+        cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
+               "-i", "test-data/context.yml", 
+               "-o", "sdp", 
+               "-N", "8",
+               "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
+               "test.sdp"]
+        run(cmd)
+        # Verbose
+        cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
+               "-i", "test-data/context.yml", 
+               "-o", "sdp", 
+               "-N", "1",
+               "-v",
+               "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
+               "test.sdp"]
+        run(cmd)
+        # Profiler
+        cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
+               "-i", "test-data/context.yml", 
+               "-o", "uvx", 
+               "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
+               "-P",
+               "test.uvx5"]
+        run(cmd)
+        uv = read_uvx("test.uvx5")
+
+    finally:
+        if os.path.exists("test.sdp"):
+            os.remove("test.sdp")
+        if os.path.exists("test.uvx5"):
+            os.remove("test.uvx5")
+
 if __name__ == "__main__":
-    test_batch()
-    test_context()
-    test_phase_to_sun()
-    test_custom_config()
-    test_errors()
-    test_converter()
+    test_dask()
+    #test_batch()
+    #test_context()
+    #test_phase_to_sun()
+    #test_custom_config()
+    #test_errors()
+    #test_converter()
     
