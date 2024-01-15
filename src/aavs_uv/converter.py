@@ -96,7 +96,6 @@ def parse_args(args):
     args = p.parse_args(args)
     return args
 
-@dask.delayed
 def convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context):
         # Create subdirectories as needed
         if args.batch or args.megabatch:
@@ -167,6 +166,10 @@ def convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, 
             tw = time.time() - tw0    
 
         return (fn_in, tr, tw)
+
+@dask.delayed
+def convert_single_file_dask(args, fn_in, fn_out, array_config, output_format, conj, context):
+    convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 def run(args=None):
     """ Command-line utility for file conversion """
@@ -256,39 +259,51 @@ def run(args=None):
     ######
     # Start main conversion loop
     
-    ## Setup dask and form delayed queue of tasks
-    dask_result_queue = []
-    for fn_in, fn_out in zip(filelist, filelist_out):
-        res = convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context)
-        dask_result_queue.append(res)
-
-    logger.info(f"Starting conversion on {len(filelist)} files, using {args.num_workers} worker processes")
+    
     
     if not args.verbose:
         logger.remove()
 
-    # Run compute and measure progress
-    with ResourceProfiler() as rprof, Profiler() as prof, ProgressBar() as pbar:
+    if args.num_workers == 1:
         with warnings.catch_warnings() as wc:
             if not args.verbose:
                 warnings.simplefilter("ignore")
-            dask.compute(dask_result_queue, n_workers=args.num_workers)
+                
+            for fn_in, fn_out in zip(filelist, filelist_out):
+                logger.info(f"Starting conversion on {len(filelist)} files (single-process)")
+                res = convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
-    if args.profile:
-        reset_logger()
-        from bokeh.plotting import save, output_file
-        logger.opt(ansi=True).info("\n <m><b>################# Profiler #################</b></m>")
-        logger.info("Resources:")
-        pprint.pprint(rprof.results)
-        logger.info("Tasks:")
-        pprint.pprint(prof.results)
-        bp = prof.visualize()
-        output_file("profile.html")
-        save(bp)
-        output_file("resource_profile.html")
-        brp = rprof.visualize()
-        save(brp)
-        logger.info("Profiling info saved to profile.html")
+    else:
+        logger.info(f"Starting conversion on {len(filelist)} files, using {args.num_workers} worker processes (multi-process)")
+        ## Setup dask and form delayed queue of tasks
+        dask_result_queue = []
+        for fn_in, fn_out in zip(filelist, filelist_out):
+            res = convert_single_file_dask(args, fn_in, fn_out, array_config, output_format, conj, context)
+            dask_result_queue.append(res)
+
+        # Run compute and measure progress
+        with ResourceProfiler() as rprof, Profiler() as prof, ProgressBar() as pbar:
+            with warnings.catch_warnings() as wc:
+                if not args.verbose:
+                    warnings.simplefilter("ignore")
+                dask.compute(dask_result_queue, n_workers=args.num_workers)
+
+        if args.profile:
+            reset_logger()
+            from bokeh.plotting import save, output_file
+            logger.opt(ansi=True).info("\n <m><b>################# Profiler #################</b></m>")
+            logger.info("Resources:")
+            pprint.pprint(rprof.results)
+            logger.info("Tasks:")
+            pprint.pprint(prof.results)
+            bp = prof.visualize()
+            output_file("profile.html")
+            save(bp)
+            output_file("resource_profile.html")
+            brp = rprof.visualize()
+            save(brp)
+            logger.info("Profiling info saved to profile.html")
+    else:
 
 if __name__ == "__main__": #pragma: no cover
     print(sys.argv[1:])
