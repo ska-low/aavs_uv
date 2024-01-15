@@ -3,11 +3,15 @@ import sys
 import os
 import time
 import glob
+
+import warnings
 from loguru import logger
 import pprint
+
+from tqdm import tqdm
 import dask
+from dask.distributed import LocalCluster
 from dask.diagnostics import ProgressBar, ResourceProfiler, Profiler
-import warnings
 
 from astropy.time import Time, TimeDelta
 from aavs_uv import __version__
@@ -78,7 +82,8 @@ def parse_args(args):
                    "--num-workers",
                    help="Number of parallel processors (i.e. number of files to read in parallel).",
                    required=False,
-                   default=4
+                   default=1,
+                   type=int
                    )
     p.add_argument("-v",
                    "--verbose",
@@ -140,8 +145,12 @@ def convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, 
 
             writer = _writers[output_format]
             logger.info(f"Creating {args.output_format} file: {fn_out}")
-            writer(fn_out)
+            if os.path.exists(fn_out):
+                logger.warning(f"File exists, skipping: {fn_out}")
+            else:
+                writer(fn_out)
             tw = time.time() - tw0
+            del uv
         
         elif output_format == 'sdp':
             tr0 = time.time()
@@ -155,6 +164,7 @@ def convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, 
             logger.info(f"Creating {args.output_format} file: {fn_out}")
             export_visibility_to_hdf5(vis, fn_out)
             tw = time.time() - tw0
+            del vis
         
         elif output_format == 'uvx':
             tr0 = time.time()
@@ -164,6 +174,7 @@ def convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, 
             logger.info(f"Creating {args.output_format} file: {fn_out}")
             write_uvx(vis, fn_out)
             tw = time.time() - tw0    
+            del vis
 
         return (fn_in, tr, tw)
 
@@ -258,22 +269,25 @@ def run(args=None):
 
     ######
     # Start main conversion loop
-    
-    
-    
+
     if not args.verbose:
         logger.remove()
 
-    if args.num_workers == 1:
+    if args.num_workers <= 1:
         with warnings.catch_warnings() as wc:
             if not args.verbose:
                 warnings.simplefilter("ignore")
-                
-            for fn_in, fn_out in zip(filelist, filelist_out):
-                logger.info(f"Starting conversion on {len(filelist)} files (single-process)")
+
+            logger.info(f"Starting conversion on {len(filelist)} files (single-process)")
+            for fn_in, fn_out in tqdm(zip(filelist, filelist_out)):
                 res = convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
     else:
+
+        cluster = LocalCluster()
+        client = cluster.get_client(n_workers=args.num_workers, threads_per_worker=2)
+        logger.info(f"Starting dash Client on {client.dashboard_link}")
+
         logger.info(f"Starting conversion on {len(filelist)} files, using {args.num_workers} worker processes (multi-process)")
         ## Setup dask and form delayed queue of tasks
         dask_result_queue = []
@@ -286,7 +300,7 @@ def run(args=None):
             with warnings.catch_warnings() as wc:
                 if not args.verbose:
                     warnings.simplefilter("ignore")
-                dask.compute(dask_result_queue, n_workers=args.num_workers)
+                dask.compute(dask_result_queue)
 
         if args.profile:
             reset_logger()
@@ -303,7 +317,6 @@ def run(args=None):
             brp = rprof.visualize()
             save(brp)
             logger.info("Profiling info saved to profile.html")
-    else:
 
 if __name__ == "__main__": #pragma: no cover
     print(sys.argv[1:])
