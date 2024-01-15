@@ -102,6 +102,7 @@ def parse_args(args):
     return args
 
 def convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context):
+        
         # Create subdirectories as needed
         if args.batch or args.megabatch:
             subdir = os.path.dirname(fn_out)
@@ -180,6 +181,16 @@ def convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, 
 
 @dask.delayed
 def convert_single_file_dask(args, fn_in, fn_out, array_config, output_format, conj, context):
+    from loguru import logger  # Import needed for dask
+    
+    logger.remove()
+    
+    if args.verbose:
+        worker = dask.distributed.get_worker()
+        worker_id = f"Worker {worker.name}"
+        logger.add(sys.stderr, format="<m><b>" + worker_id + "</b></m> | <g>{time:HH:mm:ss.S}</g> | <w><b>{level}</b></w> | {message}", 
+                   colorize=True)
+
     convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 def run(args=None):
@@ -284,8 +295,8 @@ def run(args=None):
 
     else:
 
-        cluster = LocalCluster()
-        client = cluster.get_client(n_workers=args.num_workers, threads_per_worker=2)
+        cluster = LocalCluster(n_workers=args.num_workers, threads_per_worker=2)
+        client = cluster.get_client()
         logger.info(f"Starting dash Client on {client.dashboard_link}")
 
         logger.info(f"Starting conversion on {len(filelist)} files, using {args.num_workers} worker processes (multi-process)")
