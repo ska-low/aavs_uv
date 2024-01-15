@@ -12,11 +12,13 @@ dependencies:
   - tzdata
   - python-dateutil
   - urllib3
+  - tqdm
   # Scientific
   - numpy
   - scipy
   - xarray
   - ducc0
+  - dask
   # astro
   - astropy
   - astroplan
