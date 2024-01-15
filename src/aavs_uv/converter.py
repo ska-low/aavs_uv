@@ -4,7 +4,10 @@ import os
 import time
 import glob
 from loguru import logger
-from tqdm import tqdm
+import pprint
+import dask
+from dask.diagnostics import ProgressBar, ResourceProfiler, Profiler
+import warnings
 
 from astropy.time import Time, TimeDelta
 from aavs_uv import __version__
@@ -13,8 +16,10 @@ from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uvx, phase_to_
 from aavs_uv.io.yaml import load_yaml
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
-logger.remove()
-logger.add(lambda msg: tqdm.write(msg, end=""), colorize=True)
+def reset_logger():
+    """ Reset loguru logger and setup output format """
+    logger.remove()
+    logger.add(sys.stderr, format="<g>{time:HH:mm:ss.S}</g> | <w><b>{level}</b></w> | {message}", colorize=True)
 
 def parse_args(args):
     """ Parse command-line arguments """
@@ -69,42 +74,138 @@ def parse_args(args):
                    help="Path to observation context YAML (for SDP / UVX formats)",
                    required=False,
                    default=None)
+    p.add_argument("-N",
+                   "--num-workers",
+                   help="Number of parallel processors (i.e. number of files to read in parallel).",
+                   required=False,
+                   default=4
+                   )
+    p.add_argument("-v",
+                   "--verbose",
+                   help="Run with verbose output.",
+                   action="store_true",
+                   default=False
+                   )
+    p.add_argument("-P",
+                   "--profile",
+                   help="Run Dask resource profiler.",
+                   action="store_true",
+                   default=False
+                   )
     
     args = p.parse_args(args)
     return args
 
+@dask.delayed
+def convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context):
+        # Create subdirectories as needed
+        if args.batch or args.megabatch:
+            subdir = os.path.dirname(fn_out)
+            if not os.path.exists(subdir):
+                logger.info(f"Creating sub-directory {subdir}")
+                os.mkdir(subdir)
+
+        # Load file and read basic metadata
+        vis = hdf5_to_uvx(fn_in, array_config, conj=False)  # Conj=False flag so data is not read into memory
+
+        # Print basic info to screen (skip if in batch mode)
+        if not args.batch and not args.megabatch:
+            logger.info(f"Loading {fn_in}")
+            logger.info(f"Data shape:     {vis.data.shape}")
+            logger.info(f"Data dims:      {vis.data.dims}")
+            logger.info(f"UTC start:      {vis.timestamps[0].iso}")
+            logger.info(f"MJD start:      {vis.timestamps[0].mjd}")
+            logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
+            logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
+            logger.info(f"Polarization:   {vis.data.polarization.data}\n")
+
+        if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
+           
+            tr0 = time.time()
+            uv = hdf5_to_pyuvdata(fn_in, array_config, conj=conj)
+
+            if args.phase_to_sun:
+                logger.info(f"Phasing to sun")
+                ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
+                uv = phase_to_sun(uv, ts0)
+            tr = time.time() - tr0
+
+            tw0 = time.time()
+            _writers = {
+                'uvfits': uv.write_uvfits,
+                'miriad': uv.write_miriad,
+                'mir':    uv.write_miriad,
+                'ms':     uv.write_ms,
+                'uvh5':   uv.write_uvh5,
+            }
+
+            writer = _writers[output_format]
+            logger.info(f"Creating {args.output_format} file: {fn_out}")
+            writer(fn_out)
+            tw = time.time() - tw0
+        
+        elif output_format == 'sdp':
+            tr0 = time.time()
+            if context is not None:
+                vis = hdf5_to_sdp_vis(fn_in, array_config, scan_intent=context['intent'], execblock_id=context['execution_block'])
+            else:
+                vis = hdf5_to_sdp_vis(fn_in, array_config)
+            tr = time.time() - tr0
+
+            tw0 = time.time()
+            logger.info(f"Creating {args.output_format} file: {fn_out}")
+            export_visibility_to_hdf5(vis, fn_out)
+            tw = time.time() - tw0
+        
+        elif output_format == 'uvx':
+            tr0 = time.time()
+            vis = hdf5_to_uvx(fn_in, array_config, conj=conj, context=context)
+            tr = time.time() - tr0
+            tw0 = time.time()
+            logger.info(f"Creating {args.output_format} file: {fn_out}")
+            write_uvx(vis, fn_out)
+            tw = time.time() - tw0    
+
+        return (fn_in, tr, tw)
 
 def run(args=None):
     """ Command-line utility for file conversion """
     args = parse_args(args)
+    config_error_found = False
 
+    # Reset logger
+    reset_logger()
     logger.info(f"aavs_uv {__version__}")
+    
+    # Load array configuration
+    array_config = args.array_config
 
     if args.telescope_name:
         logger.info(f"Telescope name: {args.telescope_name}")
         array_config = get_config_path(args.telescope_name)
+   
+    if array_config is None:
+        logger.error(f"No telescope name or array config file passed. Please re-run with -n or -c flag set")
+        config_error_found = True
     else:
-        array_config = args.array_config
-    
+        if not os.path.exists(array_config):
+            logger.error(f"Cannot find array config: {array_config}")
+            config_error_found = True
+
     conj = False if args.no_conj else True
     output_format = args.output_format.lower()
 
     # Check input file exists
-    config_error_found = False
     if not os.path.exists(args.infile):
         logger.error(f"Cannot find input file: {args.infile}")
         config_error_found = True
-           
-    # Check array config file exists
-    if not os.path.exists(array_config):
-        logger.error(f"Cannot find array config: {array_config}")
-        config_error_found = True
-    
+              
     # Check output format
     if output_format not in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5', 'sdp', 'uvx'):
         logger.error(f"Output format not valid: {output_format}")
         config_error_found = True       
     
+    # Raise error and quit if config issues exist
     if config_error_found:
         logger.error("Errors found. Please check arguments.")
         return
@@ -154,79 +255,40 @@ def run(args=None):
 
     ######
     # Start main conversion loop
-    # begin timing
-    t0, tr, tw = time.time(), 0, 0
-    for fn_in, fn_out in tqdm(zip(filelist, filelist_out)):
-        
-        # Create subdirectories as needed
-        if args.batch or args.megabatch:
-            subdir = os.path.dirname(fn_out)
-            if not os.path.exists(subdir):
-                logger.info(f"Creating sub-directory {subdir}")
-                os.mkdir(subdir)
+    
+    ## Setup dask and form delayed queue of tasks
+    dask_result_queue = []
+    for fn_in, fn_out in zip(filelist, filelist_out):
+        res = convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context)
+        dask_result_queue.append(res)
 
-        # Load file and read basic metadata
-        vis = hdf5_to_uvx(fn_in, array_config, conj=False)  # Conj=False flag so data is not read into memory
+    logger.info(f"Starting conversion on {len(filelist)} files, using {args.num_workers} worker processes")
+    
+    if not args.verbose:
+        logger.remove()
 
-        # Print basic info to screen (skip if in batch mode)
-        if not args.batch and not args.megabatch:
-            logger.info(f"Loading {fn_in}")
-            logger.info(f"Data shape:     {vis.data.shape}")
-            logger.info(f"Data dims:      {vis.data.dims}")
-            logger.info(f"UTC start:      {vis.timestamps[0].iso}")
-            logger.info(f"MJD start:      {vis.timestamps[0].mjd}")
-            logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
-            logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
-            logger.info(f"Polarization:   {vis.data.polarization.data}\n")
+    # Run compute and measure progress
+    with ResourceProfiler() as rprof, Profiler() as prof, ProgressBar() as pbar:
+        with warnings.catch_warnings() as wc:
+            if not args.verbose:
+                warnings.simplefilter("ignore")
+            dask.compute(dask_result_queue, n_workers=args.num_workers)
 
-        if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
-           
-            tr0 = time.time()
-            uv = hdf5_to_pyuvdata(fn_in, array_config, conj=conj)
-
-            if args.phase_to_sun:
-                logger.info(f"Phasing to sun")
-                ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
-                uv = phase_to_sun(uv, ts0)
-            tr += time.time() - tr0
-
-            tw0 = time.time()
-            _writers = {
-                'uvfits': uv.write_uvfits,
-                'miriad': uv.write_miriad,
-                'mir':    uv.write_miriad,
-                'ms':     uv.write_ms,
-                'uvh5':   uv.write_uvh5,
-            }
-
-            writer = _writers[output_format]
-            logger.info(f"Creating {args.output_format} file: {fn_out}")
-            writer(fn_out)
-            tw += time.time() - tw0
-        
-        elif output_format == 'sdp':
-            tr0 = time.time()
-            if context is not None:
-                vis = hdf5_to_sdp_vis(fn_in, array_config, scan_intent=context['intent'], execblock_id=context['execution_block'])
-            else:
-                vis = hdf5_to_sdp_vis(fn_in, array_config)
-            tr += time.time() - tr0
-
-            tw0 = time.time()
-            logger.info(f"Creating {args.output_format} file: {fn_out}")
-            export_visibility_to_hdf5(vis, fn_out)
-            tw += time.time() - tw0
-        
-        elif output_format == 'uvx':
-            tr0 = time.time()
-            vis = hdf5_to_uvx(fn_in, array_config, conj=conj, context=context)
-            tr += time.time() - tr0
-            tw0 = time.time()
-            logger.info(f"Creating {args.output_format} file: {fn_out}")
-            write_uvx(vis, fn_out)
-            tw += time.time() - tw0
-    t1 = time.time()
-    logger.info(f"Done. Time taken: Read: {tr:.2f} s Write: {tw:.2f} s Total: {t1 - t0:.2f} s")
+    if args.profile:
+        reset_logger()
+        from bokeh.plotting import save, output_file
+        logger.opt(ansi=True).info("\n <m><b>################# Profiler #################</b></m>")
+        logger.info("Resources:")
+        pprint.pprint(rprof.results)
+        logger.info("Tasks:")
+        pprint.pprint(prof.results)
+        bp = prof.visualize()
+        output_file("profile.html")
+        save(bp)
+        output_file("resource_profile.html")
+        brp = rprof.visualize()
+        save(brp)
+        logger.info("Profiling info saved to profile.html")
 
 if __name__ == "__main__": #pragma: no cover
     print(sys.argv[1:])
