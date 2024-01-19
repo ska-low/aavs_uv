@@ -106,6 +106,14 @@ def test_context():
 
 def test_dask():
     try:
+        # One worker
+        cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
+               "-i", "test-data/context.yml", 
+               "-o", "sdp", 
+               "-N", "2",
+               "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
+               "test.sdp"]
+        run(cmd)
         # Change number of workers
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
                "-i", "test-data/context.yml", 
@@ -123,15 +131,6 @@ def test_dask():
                "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
                "test.sdp"]
         run(cmd)
-        # Profiler
-        cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
-               "-i", "test-data/context.yml", 
-               "-o", "uvx", 
-               "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
-               "-P",
-               "test.uvx5"]
-        run(cmd)
-        uv = read_uvx("test.uvx5")
 
     finally:
         if os.path.exists("test.sdp"):
@@ -141,10 +140,10 @@ def test_dask():
 
 if __name__ == "__main__":
     test_dask()
-    #test_batch()
-    #test_context()
-    #test_phase_to_sun()
-    #test_custom_config()
-    #test_errors()
-    #test_converter()
+    test_batch()
+    test_context()
+    test_phase_to_sun()
+    test_custom_config()
+    test_errors()
+    test_converter()
     
