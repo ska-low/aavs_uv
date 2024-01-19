@@ -8,11 +8,8 @@ import warnings
 from loguru import logger
 import pprint
 
-from tqdm import tqdm
-import dask
-from dask.distributed import LocalCluster
-from dask.diagnostics import ProgressBar, ResourceProfiler, Profiler
-from dask.bag import from_sequence
+from .parallelize import task, run_in_parallel
+from .utils import reset_logger
 
 from astropy.time import Time, TimeDelta
 from aavs_uv import __version__
@@ -21,10 +18,6 @@ from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uvx, phase_to_
 from aavs_uv.io.yaml import load_yaml
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
-def reset_logger():
-    """ Reset loguru logger and setup output format """
-    logger.remove()
-    logger.add(sys.stderr, format="<g>{time:HH:mm:ss.S}</g> | <w><b>{level}</b></w> | {message}", colorize=True)
 
 def parse_args(args):
     """ Parse command-line arguments """
@@ -92,108 +85,104 @@ def parse_args(args):
                    action="store_true",
                    default=False
                    )
-    p.add_argument("-P",
-                   "--profile",
-                   help="Run Dask resource profiler.",
-                   action="store_true",
-                   default=False
+    p.add_argument("-p",
+                   "--parallel_backend",
+                   help="Joblib backend to use: 'loky' (default) or 'dask' ",
+                   required=False,
+                   default="loky")
+    p.add_argument("-M",
+                   "--max_int",
+                   help="Set a maximum number of integrations to read. Useful for huge files.",
+                   required=False,
+                   default=None,
+                   type=int
                    )
-    
+
     args = p.parse_args(args)
     return args
 
-def convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context):
+
+def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context):
+    """ Convert a file """
+    # Create subdirectories as needed
+    if args.batch or args.megabatch:
+        subdir = os.path.dirname(fn_out)
+        if not os.path.exists(subdir):
+            logger.info(f"Creating sub-directory {subdir}")
+            os.mkdir(subdir)
+
+    # Load file and read basic metadata
+    vis = hdf5_to_uvx(fn_in, array_config, conj=False)  # Conj=False flag so data is not read into memory
+
+    # Print basic info to screen (skip if in batch mode)
+    if not args.batch and not args.megabatch:
+        logger.info(f"Loading {fn_in}")
+        logger.info(f"Data shape:     {vis.data.shape}")
+        logger.info(f"Data dims:      {vis.data.dims}")
+        logger.info(f"UTC start:      {vis.timestamps[0].iso}")
+        logger.info(f"MJD start:      {vis.timestamps[0].mjd}")
+        logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
+        logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
+        logger.info(f"Polarization:   {vis.data.polarization.data}\n")
+
+    if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
         
-        # Create subdirectories as needed
-        if args.batch or args.megabatch:
-            subdir = os.path.dirname(fn_out)
-            if not os.path.exists(subdir):
-                logger.info(f"Creating sub-directory {subdir}")
-                os.mkdir(subdir)
+        tr0 = time.time()
+        uv = hdf5_to_pyuvdata(fn_in, array_config, conj=conj, max_int=args.max_int)
 
-        # Load file and read basic metadata
-        vis = hdf5_to_uvx(fn_in, array_config, conj=False)  # Conj=False flag so data is not read into memory
+        if args.phase_to_sun:
+            logger.info(f"Phasing to sun")
+            ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
+            uv = phase_to_sun(uv, ts0)
+        tr = time.time() - tr0
 
-        # Print basic info to screen (skip if in batch mode)
-        if not args.batch and not args.megabatch:
-            logger.info(f"Loading {fn_in}")
-            logger.info(f"Data shape:     {vis.data.shape}")
-            logger.info(f"Data dims:      {vis.data.dims}")
-            logger.info(f"UTC start:      {vis.timestamps[0].iso}")
-            logger.info(f"MJD start:      {vis.timestamps[0].mjd}")
-            logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
-            logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
-            logger.info(f"Polarization:   {vis.data.polarization.data}\n")
+        tw0 = time.time()
+        _writers = {
+            'uvfits': uv.write_uvfits,
+            'miriad': uv.write_miriad,
+            'mir':    uv.write_miriad,
+            'ms':     uv.write_ms,
+            'uvh5':   uv.write_uvh5,
+        }
 
-        if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
-           
-            tr0 = time.time()
-            uv = hdf5_to_pyuvdata(fn_in, array_config, conj=conj)
-
-            if args.phase_to_sun:
-                logger.info(f"Phasing to sun")
-                ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
-                uv = phase_to_sun(uv, ts0)
-            tr = time.time() - tr0
-
-            tw0 = time.time()
-            _writers = {
-                'uvfits': uv.write_uvfits,
-                'miriad': uv.write_miriad,
-                'mir':    uv.write_miriad,
-                'ms':     uv.write_ms,
-                'uvh5':   uv.write_uvh5,
-            }
-
-            writer = _writers[output_format]
-            logger.info(f"Creating {args.output_format} file: {fn_out}")
-            if os.path.exists(fn_out):
-                logger.warning(f"File exists, skipping: {fn_out}")
-            else:
-                writer(fn_out)
-            tw = time.time() - tw0
-            del uv
-        
-        elif output_format == 'sdp':
-            tr0 = time.time()
-            if context is not None:
-                vis = hdf5_to_sdp_vis(fn_in, array_config, scan_intent=context['intent'], execblock_id=context['execution_block'])
-            else:
-                vis = hdf5_to_sdp_vis(fn_in, array_config)
-            tr = time.time() - tr0
-
-            tw0 = time.time()
-            logger.info(f"Creating {args.output_format} file: {fn_out}")
-            export_visibility_to_hdf5(vis, fn_out)
-            tw = time.time() - tw0
-            del vis
-        
-        elif output_format == 'uvx':
-            tr0 = time.time()
-            vis = hdf5_to_uvx(fn_in, array_config, conj=conj, context=context)
-            tr = time.time() - tr0
-            tw0 = time.time()
-            logger.info(f"Creating {args.output_format} file: {fn_out}")
-            write_uvx(vis, fn_out)
-            tw = time.time() - tw0    
-            del vis
-
-        return (fn_in, tr, tw)
-
-@dask.delayed
-def convert_single_file_dask(fns, args, array_config, output_format, conj, context):
-    from loguru import logger  # Import needed for dask
-    logger.remove()
+        writer = _writers[output_format]
+        logger.info(f"Creating {args.output_format} file: {fn_out}")
+        if os.path.exists(fn_out):
+            logger.warning(f"File exists, skipping: {fn_out}")
+        else:
+            writer(fn_out)
+        tw = time.time() - tw0
+        del uv
     
-    fn_in, fn_out = fns
+    elif output_format == 'sdp':
+        tr0 = time.time()
+        if context is not None:
+            vis = hdf5_to_sdp_vis(fn_in, array_config, scan_intent=context['intent'], execblock_id=context['execution_block'])
+        else:
+            vis = hdf5_to_sdp_vis(fn_in, array_config)
+        tr = time.time() - tr0
 
-    if args.verbose:
-        worker = dask.distributed.get_worker()
-        worker_id = f"Worker {worker.name}"
-        logger.add(sys.stderr, format="<m><b>" + worker_id + "</b></m> | <g>{time:HH:mm:ss.S}</g> | <w><b>{level}</b></w> | {message}", 
-                   colorize=True)
+        tw0 = time.time()
+        logger.info(f"Creating {args.output_format} file: {fn_out}")
+        export_visibility_to_hdf5(vis, fn_out)
+        tw = time.time() - tw0
+        del vis
+    
+    elif output_format == 'uvx':
+        tr0 = time.time()
+        vis = hdf5_to_uvx(fn_in, array_config, conj=conj, context=context)
+        tr = time.time() - tr0
+        tw0 = time.time()
+        logger.info(f"Creating {args.output_format} file: {fn_out}")
+        write_uvx(vis, fn_out)
+        tw = time.time() - tw0    
+        del vis
 
-    return convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context)
+    return (fn_in, tr, tw)
+
+@task
+def convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, context):
+    convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 def run(args=None):
     """ Command-line utility for file conversion """
@@ -282,55 +271,27 @@ def run(args=None):
 
     ######
     # Start main conversion loop
+    with warnings.catch_warnings() as wc:
+        if not args.verbose:
+            warnings.simplefilter("ignore")
+            logger.remove()
 
-    if not args.verbose:
-        logger.remove()
+        logger.info(f"Starting conversion on {len(filelist)} files with {args.num_workers} workers")
 
-    if args.num_workers <= 1:
-        with warnings.catch_warnings() as wc:
-            if not args.verbose:
-                warnings.simplefilter("ignore")
+        if output_format == 'ms' and args.num_workers > 1:
+            logger.warning("MS output only supports serial processing (n_workers=1)")
 
-            logger.info(f"Starting conversion on {len(filelist)} files (single-process)")
-            for fn_in, fn_out in tqdm(zip(filelist, filelist_out)):
-                res = convert_single_file(args, fn_in, fn_out, array_config, output_format, conj, context)
+        if output_format != 'ms' and args.num_workers > 1:
+            # Create a list of tasks to run
+            task_list = []
+            for fn_in, fn_out in zip(filelist, filelist_out):
+                task_list.append(convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, context))
 
-    else:
-        # Create a local cluster and setup workers
-        logger.info(f"Starting dash LocalCluster with {args.num_workers} workers (multi-process)")
-        cluster = LocalCluster(n_workers=args.num_workers, threads_per_worker=1)
-        client = cluster.get_client()
-        logger.info(f"Starting dash Client on {client.dashboard_link}")
-        logger.info(f"Starting conversion on {len(filelist)} files")
-        
-        ## Setup dask and form delayed queue of tasks
-        npartitions = args.num_workers * 64
-        dask_bag = from_sequence(zip(filelist, filelist_out), npartitions=npartitions)
-        logger.info(f"Using dask bag: {dask_bag}")
-        dask_bag.map(convert_single_file_dask, args, array_config, output_format, conj, context)
-
-        # Run compute and measure progress
-        with ResourceProfiler() as rprof, Profiler() as prof, ProgressBar() as pbar:
-            with warnings.catch_warnings() as wc:
-                if not args.verbose:
-                    warnings.simplefilter("ignore")
-                dask_bag.compute(rerun_exceptions_locally=True)
-
-        if args.profile:
-            reset_logger()
-            from bokeh.plotting import save, output_file
-            logger.opt(ansi=True).info("\n <m><b>################# Profiler #################</b></m>")
-            logger.info("Resources:")
-            pprint.pprint(rprof.results)
-            logger.info("Tasks:")
-            pprint.pprint(prof.results)
-            bp = prof.visualize()
-            output_file("profile.html")
-            save(bp)
-            output_file("resource_profile.html")
-            brp = rprof.visualize()
-            save(brp)
-            logger.info("Profiling info saved to profile.html")
+            # Run the task list
+            run_in_parallel(task_list, n_workers=args.num_workers, backend=args.parallel_backend, verbose=args.verbose)
+        else:
+            for fn_in, fn_out in zip(filelist, filelist_out):
+                convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 if __name__ == "__main__": #pragma: no cover
     print(sys.argv[1:])

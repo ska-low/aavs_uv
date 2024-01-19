@@ -2,8 +2,21 @@ import numpy as np
 import os
 import aavs_uv
 from loguru import logger
+import sys
+from tqdm import tqdm
 
-
+def reset_logger(use_tqdm: bool=False, disable: bool=False, level="INFO"):
+    """ Reset loguru logger and setup output format """
+    
+    logger.remove()
+    logger_fmt = "<g>{time:HH:mm:ss.S}</g> | <w><b>{level}</b></w> | {message}"
+    if not disable:
+        if not use_tqdm:
+            logger.add(sys.stdout, format=logger_fmt, level=level, colorize=True)
+        else:
+            logger.add(lambda msg: tqdm.write(msg, end=""), format=logger_fmt, level=level, colorize=True)
+    return logger
+    
 def get_resource_path(relative_path: str) -> str:
     """ Get the path to an internal package resource (e.g. data file) 
     
