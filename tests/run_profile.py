@@ -8,8 +8,8 @@ from aavs_uv.io import hdf5_to_pyuvdata
 import os
 
 # use eith er pyinstrument or cprofile
-USE_PYINSTRUMENT = True
-USE_CPROFILE     = False
+USE_PYINSTRUMENT = False
+USE_CPROFILE     = True
 
 
 fn_h5 = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
             print("--- UVDATA to MS ---\n")
             with cProfile.Profile() as profile:
-                uv2.write_ms('test.ms')
+                uv2.write_miriad('test.miriad')
                 stats = pstats.Stats(profile).sort_stats('tottime')
                 stats.print_stats(100)
 
