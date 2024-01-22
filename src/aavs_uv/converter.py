@@ -181,7 +181,12 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
     return (fn_in, tr, tw)
 
 @task
-def convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, context):
+def convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, context, verbose):
+    if not verbose:
+        # Silence warnings from other packages (e.g. pyuvdata)
+        warnings.simplefilter("ignore")
+        reset_logger(use_tqdm=True, disable=True)
+        
     convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 def run(args=None):
@@ -278,14 +283,11 @@ def run(args=None):
 
         logger.info(f"Starting conversion on {len(filelist)} files with {args.num_workers} workers")
 
-        if output_format == 'ms' and args.num_workers > 1:
-            logger.warning("MS output only supports serial processing (n_workers=1)")
-
-        if output_format != 'ms' and args.num_workers > 1:
+        if args.num_workers > 1:
             # Create a list of tasks to run
             task_list = []
             for fn_in, fn_out in zip(filelist, filelist_out):
-                task_list.append(convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, context))
+                task_list.append(convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, context, args.verbose))
 
             # Run the task list
             run_in_parallel(task_list, n_workers=args.num_workers, backend=args.parallel_backend, verbose=args.verbose)
