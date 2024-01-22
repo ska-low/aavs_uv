@@ -104,6 +104,7 @@ def parse_args(args):
 
 def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context):
     """ Convert a file """
+
     # Create subdirectories as needed
     if args.batch or args.megabatch:
         subdir = os.path.dirname(fn_out)
@@ -124,6 +125,7 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
         logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
         logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
         logger.info(f"Polarization:   {vis.data.polarization.data}\n")
+
 
     if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
         
@@ -186,7 +188,7 @@ def convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, co
         # Silence warnings from other packages (e.g. pyuvdata)
         warnings.simplefilter("ignore")
         reset_logger(use_tqdm=True, disable=True)
-        
+
     convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 def run(args=None):
@@ -220,7 +222,17 @@ def run(args=None):
     if not os.path.exists(args.infile):
         logger.error(f"Cannot find input file: {args.infile}")
         config_error_found = True
-              
+    
+    # Check path points to a directory for batch mode, or a file for regular mode
+    if args.batch or args.megabatch:
+        if not os.path.isdir(args.infile):
+            logger.error("Input path must be a directory when using batch mode.")
+            config_error_found = True
+    else:
+        if os.path.isdir(args.infile):
+            logger.error("Input path point to a directory, but batch mode flag not set. Please pass -b (batch) or -B (megabatch) flags.")
+            config_error_found = True
+
     # Check output format
     if output_format not in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5', 'sdp', 'uvx'):
         logger.error(f"Output format not valid: {output_format}")

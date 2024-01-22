@@ -14,5 +14,8 @@ def test_run_in_parallel():
     run_in_parallel(task_list, n_workers=1)
     run_in_parallel(task_list, n_workers=4)
 
+    run_in_parallel(task_list, n_workers=2, backend='loky')
+    run_in_parallel(task_list, n_workers=2, backend='dask')
+
 if __name__ == "__main__":
     run_in_parallel()
