@@ -18,6 +18,15 @@ from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uvx, phase_to_
 from aavs_uv.io.yaml import load_yaml
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
+EXT_LUT = {
+    'ms': '.ms', 
+    'uvfits': '.uvfits',
+    'miriad': '.uv',
+    'mir': '.uv',
+    'sdp': '.sdph5',
+    'uvx': '.uvx5',
+    'uvh5': '.uvh5'
+}
 
 def parse_args(args):
     """ Parse command-line arguments """
@@ -72,7 +81,7 @@ def parse_args(args):
                    help="Path to observation context YAML (for SDP / UVX formats)",
                    required=False,
                    default=None)
-    p.add_argument("-N",
+    p.add_argument("-w",
                    "--num-workers",
                    help="Number of parallel processors (i.e. number of files to read in parallel).",
                    required=False,
@@ -90,9 +99,9 @@ def parse_args(args):
                    help="Joblib backend to use: 'loky' (default) or 'dask' ",
                    required=False,
                    default="loky")
-    p.add_argument("-M",
-                   "--max_int",
-                   help="Set a maximum number of integrations to read. Useful for huge files.",
+    p.add_argument("-N",
+                   "--n_int_per_file",
+                   help="Set number of integrations to write per file. Only valid for MS, Miriad, UVFITS, uvh5 output.",
                    required=False,
                    default=None,
                    type=int
@@ -128,33 +137,46 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
 
 
     if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
-        
-        tr0 = time.time()
-        uv = hdf5_to_pyuvdata(fn_in, array_config, conj=conj, max_int=args.max_int)
-
-        if args.phase_to_sun:
-            logger.info(f"Phasing to sun")
-            ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
-            uv = phase_to_sun(uv, ts0)
-        tr = time.time() - tr0
-
-        tw0 = time.time()
-        _writers = {
-            'uvfits': uv.write_uvfits,
-            'miriad': uv.write_miriad,
-            'mir':    uv.write_miriad,
-            'ms':     uv.write_ms,
-            'uvh5':   uv.write_uvh5,
-        }
-
-        writer = _writers[output_format]
-        logger.info(f"Creating {args.output_format} file: {fn_out}")
-        if os.path.exists(fn_out):
-            logger.warning(f"File exists, skipping: {fn_out}")
+        if args.n_int_per_file is not None:
+            N_cycles = len(vis.timestamps) // args.n_int_per_file
+            logger.info(f"Number of file reads: {N_cycles}")
         else:
-            writer(fn_out)
-        tw = time.time() - tw0
-        del uv
+            N_cycles = 1
+
+        tr0 = time.time()
+        for start_int in range(N_cycles):
+            uv = hdf5_to_pyuvdata(fn_in, array_config, conj=conj, max_int=args.n_int_per_file, start_int=start_int)
+
+            if args.phase_to_sun:
+                logger.info(f"Phasing to sun")
+                ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
+                uv = phase_to_sun(uv, ts0)
+            tr = time.time() - tr0
+
+            tw0 = time.time()
+            _writers = {
+                'uvfits': uv.write_uvfits,
+                'miriad': uv.write_miriad,
+                'mir':    uv.write_miriad,
+                'ms':     uv.write_ms,
+                'uvh5':   uv.write_uvh5,
+            }
+
+            writer = _writers[output_format]
+
+            if N_cycles > 1:
+                # Update filename if we are iterating over the file
+                new_fn_out = os.path.splitext(fn_out)[0] + f'.{start_int}' + EXT_LUT[output_format]
+            else:
+                new_fn_out = fn_out
+
+            logger.info(f"Creating {args.output_format} file: {new_fn_out}")
+            if os.path.exists(new_fn_out):
+                logger.warning(f"File exists, skipping: {new_fn_out}")
+            else:
+                writer(new_fn_out)
+            tw = time.time() - tw0
+            del uv
     
     elif output_format == 'sdp':
         tr0 = time.time()
@@ -188,7 +210,6 @@ def convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, co
         # Silence warnings from other packages (e.g. pyuvdata)
         warnings.simplefilter("ignore")
         reset_logger(use_tqdm=True, disable=True)
-
     convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 def run(args=None):
@@ -254,15 +275,7 @@ def run(args=None):
 
     # Setup filelist, globbing for files if in batch mode
     if args.batch or args.megabatch:
-        ext_lut = {
-            'ms': '.ms', 
-            'uvfits': '.uvfits',
-            'miriad': '.uv',
-            'mir': '.uv',
-            'sdp': '.sdph5',
-            'uvx': '.uvx5',
-            'uvh5': '.uvh5'
-        }
+
 
         if not os.path.exists(args.outfile):
             logger.info(f"Creating directory {args.outfile}")
@@ -276,7 +289,7 @@ def run(args=None):
         filelist_out = []
         for fn in filelist:
             bn = os.path.basename(fn)
-            bn_out = os.path.splitext(bn)[0] + ext_lut[output_format]
+            bn_out = os.path.splitext(bn)[0] + EXT_LUT[output_format]
             if args.megabatch:
                 subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn)))
                 filelist_out.append(os.path.join(subdir, bn_out))
