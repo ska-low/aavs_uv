@@ -104,13 +104,13 @@ def test_context():
         if os.path.exists("test.uvx5"):
             os.remove("test.uvx5")
 
-def test_dask():
+def test_parallel():
     try:
         # One worker
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
                "-i", "test-data/context.yml", 
                "-o", "sdp", 
-               "-N", "2",
+               "-w", "2",
                "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
                "test.sdp"]
         run(cmd)
@@ -118,7 +118,16 @@ def test_dask():
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
                "-i", "test-data/context.yml", 
                "-o", "sdp", 
-               "-N", "8",
+               "-w", "8",
+               "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
+               "test.sdp"]
+        run(cmd)
+        # Use dask instead
+        cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
+               "-i", "test-data/context.yml", 
+               "-o", "sdp", 
+               "-w", "8",
+               "-p", "dask",
                "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
                "test.sdp"]
         run(cmd)
@@ -126,7 +135,7 @@ def test_dask():
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
                "-i", "test-data/context.yml", 
                "-o", "sdp", 
-               "-N", "1",
+               "-w", "1",
                "-v",
                "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
                "test.sdp"]

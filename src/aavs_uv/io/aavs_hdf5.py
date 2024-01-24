@@ -67,7 +67,7 @@ def get_hdf5_metadata(filename: str) -> dict:
 
 def hdf5_to_uvx(fn_data: str, fn_config: str=None, 
                telescope_name: str=None, conj: bool=True, 
-               from_platform_yaml: bool=False, context: dict=None) -> UVX:
+               from_platform_yaml: bool=False, context: dict=None, provenance: dict=None) -> UVX:
     """ Create UV from HDF5 data and config file
     
     Args:
@@ -81,6 +81,8 @@ def hdf5_to_uvx(fn_data: str, fn_config: str=None,
         conj (bool): Conjugate visibility data (default True). 
         context (dict): Dictionary with observation context information 
                         should include 'intent', 'notes', 'observer' and 'date' as keys.
+        provenance (dict): Dictionary with additional provenance information to add to
+                           the provenance dictionary (which is auto-generated)
 
     Returns:
         uv (UV): A UV dataclass object with xarray datasets
@@ -145,14 +147,16 @@ def hdf5_to_uvx(fn_data: str, fn_config: str=None,
     
     if md['channel_width'] > md['channel_spacing']:
         data.frequency.attrs['oversampled'] = True
-    
-    provenance = create_empty_provenance_dict()
+
+    # Create empty provenance dictionary if not passed, then fill with creation info
+    provenance = create_empty_provenance_dict() if provenance is None else provenance
     provenance.update({'input_files': {
                         'data_filename': os.path.abspath(fn_data),
                         'config_filename': md['station_config_file'],
                         },
                   'aavs_uv_config': get_software_versions(),
                   'input_metadata': md})
+    
 
     # Compute zenith RA/DEC for phase center
     zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'), obstime=t[0], location=t.location)

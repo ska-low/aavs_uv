@@ -42,6 +42,8 @@ def test_phasing():
         sdp_ms.vis.values = vis_sdp_corr
 
         # Check that data are complex conjugate of each other
+        print(sdp_ms.vis.values[0])
+        print(sdp_sdp.vis.values[0])
         assert np.allclose(sdp_ms.vis.values, sdp_sdp.vis.values)
         assert np.allclose(sdp_ms.uvw, sdp_sdp.uvw, atol=0.5e-7)
     finally:

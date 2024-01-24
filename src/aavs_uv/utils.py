@@ -5,7 +5,7 @@ from loguru import logger
 import sys
 from tqdm import tqdm
 
-def reset_logger(use_tqdm: bool=False, disable: bool=False, level="INFO"):
+def reset_logger(use_tqdm: bool=False, disable: bool=False, level="INFO", *args, **kwargs):
     """ Reset loguru logger and setup output format """
     
     logger.remove()

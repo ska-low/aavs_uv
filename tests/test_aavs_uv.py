@@ -208,8 +208,24 @@ def test_aavs2_2x500():
     uv_phs, uv_uvf = _setup_test('Reading 2x500ms data', load_2x500=True)
     compare_uv_datasets(uv_phs, uv_uvf)
 
+def test_max_int_start_int():
+    """ Test the max_int and start_int keywords """
+    fn_in = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
+
+    uv = hdf5_to_pyuvdata(fn_in, telescope_name='aavs2', max_int=None)
+    uv0 = hdf5_to_pyuvdata(fn_in, telescope_name='aavs2', max_int=1, start_int=0)
+    uv1 = hdf5_to_pyuvdata(fn_in, telescope_name='aavs2', max_int=1, start_int=1)
+
+    assert uv.data_array.shape  == (32896*2, 1, 1, 4)
+    assert uv0.data_array.shape == (32896, 1, 1, 4)
+    assert uv1.data_array.shape == (32896, 1, 1, 4)
+
+    assert np.allclose(uv0.data_array[0], uv.data_array[0])
+    assert np.allclose(uv1.data_array[0], uv.data_array[32896])
+
 if __name__ == "__main__":
-    test0()
-    test_compare()
-    test_write()
-    test_aavs2_2x500()
+    #test0()
+    #test_compare()
+    #test_write()
+    #test_aavs2_2x500()
+    test_max_int_start_int()

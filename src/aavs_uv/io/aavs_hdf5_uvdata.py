@@ -52,7 +52,8 @@ def phase_to_sun(uv: UVData, t0: Time) -> UVData:
     return uv
 
 
-def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=None, phase_to_t0: bool=True, max_int: int=None, conj: bool=True) -> pyuvdata.UVData:
+def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=None, phase_to_t0: bool=True, 
+                     start_int: int=0, max_int: int=None, conj: bool=True) -> pyuvdata.UVData:
     """ Convert AAVS2/3 HDF5 correlator output to UVData object
 
     Args:
@@ -63,6 +64,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
                             the RA/DEC position of zenith at the first timestamp (t0).
                             This is needed if writing UVFITS files, but not if you
                             are doing snapshot imaging of each timestep. Default True.
+        start_int (int):    First integration index to read (allows skipping ahead through file)
         max_int (int):      Maximum number of intergrations to read. Default None (read all)
         conj (bool):        Conjugate visibility data (default True). 
 
@@ -78,7 +80,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
     uv = pyuvdata.UVData()
 
     if max_int is None:
-        max_int = md['n_integrations']
+        max_int = md['n_integrations'] - start_int
 
     if max_int < md['n_integrations']:
         md['n_integrations'] = max_int
@@ -212,7 +214,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
         # Data have shape (nint, nbaseline, nspw, npol)
         # Need to flatten to (nbaseline * nint (Nblts), nspw, nchan, npol)
         n_int = md['n_integrations']
-        data = datafile['correlation_matrix']['data'][:n_int]
+        data = datafile['correlation_matrix']['data'][start_int:(start_int + n_int)]
         #uv.data_array = np.transpose(data, (0, 2, 1, 3))
         uv.data_array = data.reshape((uv.Nblts, uv.Nspws, uv.Nfreqs, uv.Npols))
 
