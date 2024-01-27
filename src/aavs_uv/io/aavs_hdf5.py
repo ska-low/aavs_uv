@@ -62,6 +62,12 @@ def get_hdf5_metadata(filename: str) -> dict:
         metadata = {k: v for (k, v) in datafile.get('root').attrs.items()}
         metadata['n_integrations'] = metadata['n_blocks'] * metadata['n_samples']
         metadata['data_shape'] = datafile['correlation_matrix']['data'].shape
+
+        # Overwrite ts_start with value from sample_timestamps/data
+        # This is a WAR as h['root'].attrs['ts_start'] does not update 
+        # if a long observation spans multiple HDF5 files 
+        # (see https://github.com/ska-sci-ops/aavs_uv/issues/48)
+        metadata['ts_start'] = datafile['sample_timestamps/data'][0][0]
     return metadata
 
 
