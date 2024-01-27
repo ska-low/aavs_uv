@@ -223,9 +223,14 @@ def test_max_int_start_int():
     assert np.allclose(uv0.data_array[0], uv.data_array[0])
     assert np.allclose(uv1.data_array[0], uv.data_array[32896])
 
+    # Confirm time step updates
+    dt = Time(uv1.time_array[0], format='jd') - Time(uv0.time_array[0], format='jd')
+    print(dt.sec, uv0.integration_time)
+    assert np.allclose(dt.sec, uv0.integration_time, atol=5e-5)
+
 if __name__ == "__main__":
-    #test0()
-    #test_compare()
-    #test_write()
-    #test_aavs2_2x500()
+    test0()
+    test_compare()
+    test_write()
+    test_aavs2_2x500()
     test_max_int_start_int()

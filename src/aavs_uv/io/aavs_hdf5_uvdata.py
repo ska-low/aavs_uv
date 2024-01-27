@@ -151,6 +151,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
     # Compute JD from unix time and LST - we can do this as we set an EarthLocation on t0 Time
     _t = np.arange(md['n_integrations'], dtype='float64') * md['tsamp'] + md['ts_start']
     _t += md['tsamp'] / 2 # Time array is based on center of integration, so add tdelt / 2 
+    _t += start_int *  md['tsamp']  # Add time offset if not reading from t0
 
     t = Time(_t, format='unix', location=telescope_earthloc)
     t0 = t[0]
