@@ -81,6 +81,47 @@ def test_batch():
         if os.path.exists('test-batch-data'):
             os.system('rm -rf test-batch-data')
 
+def test_batch_zip():
+    try:
+        cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
+               "-b", 
+               "-z",
+               "-o", "ms", 
+               "../example-data/aavs2_2x500ms",
+               "test-batch-data"]
+        run(cmd)
+
+        cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
+               "-B", 
+               "-z", 
+               "-o", "miriad", 
+               "test-data/", # Note -B MEGABATCH test 
+               "test-batch-data2"]
+        run(cmd)
+
+    finally:
+        if os.path.exists('test-batch-data.zip'):
+            os.system('rm -rf test-batch-data.zip')
+        if os.path.exists('test-batch-data2'):
+            os.system('rm -rf test-batch-data2')
+        pass
+
+def test_batch_multi():
+    try:
+        cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
+               "-b", 
+               "-z",
+               "-o", "ms,miriad,uvx", 
+               "../example-data/aavs2_2x500ms",
+               "test-batch-data"]
+        run(cmd)
+
+    finally:
+        pass
+        #if os.path.exists('test-batch-data.zip'):
+        #    os.system('rm -rf test-batch-data.zip')
+
+
 def test_context():
     try:
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'), 
@@ -148,10 +189,11 @@ def test_parallel():
             os.remove("test.uvx5")
 
 if __name__ == "__main__":
-    test_batch()
-    test_context()
-    test_phase_to_sun()
-    test_custom_config()
-    test_errors()
-    test_converter()
-    
+    test_batch_multi()
+    #test_batch()
+    #test_context()
+    #test_phase_to_sun()
+    #test_custom_config()
+    #test_errors()
+    #test_converter()
+    #test_batch_zip()
