@@ -4,6 +4,7 @@ import aavs_uv
 from loguru import logger
 import sys
 from tqdm import tqdm
+import shutil
 
 def reset_logger(use_tqdm: bool=False, disable: bool=False, level="INFO", *args, **kwargs):
     """ Reset loguru logger and setup output format """
@@ -17,6 +18,7 @@ def reset_logger(use_tqdm: bool=False, disable: bool=False, level="INFO", *args,
             logger.add(lambda msg: tqdm.write(msg, end=""), format=logger_fmt, level=level, colorize=True)
     return logger
     
+
 def get_resource_path(relative_path: str) -> str:
     """ Get the path to an internal package resource (e.g. data file) 
     
@@ -73,6 +75,18 @@ def get_software_versions() -> dict:
         'erfa': erfa_version
     }
     return software
+
+
+def zipit(dirname: str, rm_dir: bool=False):
+    """ Zip up a directory 
+    
+    Args:
+        dirname (str): Name of directory to zip
+        rm_dir (bool): Delete directory after zipping (default False)
+    """
+    shutil.make_archive(dirname, format='zip', root_dir='.', base_dir=dirname)
+    if rm_dir:
+        shutil.rmtree(dirname)
 
 
 def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=None, conj=False):

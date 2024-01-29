@@ -9,7 +9,7 @@ from loguru import logger
 import pprint
 
 from .parallelize import task, run_in_parallel
-from .utils import reset_logger
+from .utils import reset_logger, zipit
 
 from astropy.time import Time, TimeDelta
 from aavs_uv import __version__
@@ -28,6 +28,8 @@ EXT_LUT = {
     'uvh5': '.uvh5'
 }
 
+PYUVDATA_FORMATS = ('uvfits', 'miriad', 'mir', 'ms', 'uvh5')
+
 def parse_args(args):
     """ Parse command-line arguments """
     p = argparse.ArgumentParser(description="AAVS UV file conversion utility")
@@ -35,7 +37,7 @@ def parse_args(args):
     p.add_argument("outfile", help="Output filename")
     p.add_argument("-o", 
                    "--output_format", 
-                   help="Output file format (uvx, uvfits, miriad, ms, uvh5, sdp)",
+                   help="Output file format (uvx, uvfits, miriad, ms, uvh5, sdp). Can be comma separated for multiple formats.",
                    required=True)
     p.add_argument("-c",
                    "--array_config",
@@ -106,7 +108,13 @@ def parse_args(args):
                    default=None,
                    type=int
                    )
-
+    p.add_argument("-z",
+                   "--zipit",
+                   help="Zip up a MS or Miriad file after conversion (flag ignored for other files)",
+                   required=False,
+                   action="store_true",
+                   default=False
+                   )
     args = p.parse_args(args)
     return args
 
@@ -135,8 +143,7 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
         logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
         logger.info(f"Polarization:   {vis.data.polarization.data}\n")
 
-
-    if output_format in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5'):
+    if output_format in PYUVDATA_FORMATS:
         if args.n_int_per_file is not None:
             N_cycles = len(vis.timestamps) // args.n_int_per_file
             logger.info(f"Number of file reads: {N_cycles}")
@@ -174,7 +181,11 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
             if os.path.exists(new_fn_out):
                 logger.warning(f"File exists, skipping: {new_fn_out}")
             else:
+                # Write the desired output format
                 writer(new_fn_out)
+                # and if MS or Miriad, check if it should be zipped
+                if args.zipit and output_format in ('ms', 'miriad'):
+                    zipit(new_fn_out, rm_dir=True)
             tw = time.time() - tw0
             del uv
     
@@ -237,7 +248,7 @@ def run(args=None):
             config_error_found = True
 
     conj = False if args.no_conj else True
-    output_format = args.output_format.lower()
+    output_formats = args.output_format.lower().split(',')
 
     # Check input file exists
     if not os.path.exists(args.infile):
@@ -255,9 +266,10 @@ def run(args=None):
             config_error_found = True
 
     # Check output format
-    if output_format not in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5', 'sdp', 'uvx'):
-        logger.error(f"Output format not valid: {output_format}")
-        config_error_found = True       
+    for output_format in output_formats:
+        if output_format not in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5', 'sdp', 'uvx'):
+            logger.error(f"Output format not valid: {output_format}")
+            config_error_found = True       
     
     # Raise error and quit if config issues exist
     if config_error_found:
@@ -267,58 +279,66 @@ def run(args=None):
     logger.info(f"Input path:       {args.infile}")
     logger.info(f"Array config:     {array_config}")
     logger.info(f"Output path:      {args.outfile}")
-    logger.info(f"Output format:    {output_format} \n")
+    logger.info(f"Output formats:   {output_formats} \n")
     logger.info(f"Conjugating data: {conj} \n")
+
+    # Check if we need to zip data
+    if args.zipit:
+        logger.info("Zip output:      Yes")
+        if output_format not in ('miriad', 'ms'):
+            logger.warning(f"Output format {output_format} is not MS or Miriad, so will not be zipped")
 
     # Check if context yaml was included
     context = load_yaml(args.context_yaml) if args.context_yaml is not None else None
 
-    # Setup filelist, globbing for files if in batch mode
-    if args.batch or args.megabatch:
-
-
-        if not os.path.exists(args.outfile):
-            logger.info(f"Creating directory {args.outfile}")
-            os.mkdir(args.outfile)
-
-        if args.batch:
-            filelist = sorted(glob.glob(os.path.join(args.infile, f'*.{args.file_ext}')))
-        else:
-            filelist = sorted(glob.glob(os.path.join(args.infile, f'*/*.{args.file_ext}'), recursive=True))
-            
-        filelist_out = []
-        for fn in filelist:
-            bn = os.path.basename(fn)
-            bn_out = os.path.splitext(bn)[0] + EXT_LUT[output_format]
-            if args.megabatch:
-                subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn)))
-                filelist_out.append(os.path.join(subdir, bn_out))
-            else:
-                filelist_out.append(os.path.join(args.outfile, bn_out))
-    else:
-        filelist     = [args.infile]
-        filelist_out = [args.outfile]
-
     ######
-    # Start main conversion loop
-    with warnings.catch_warnings() as wc:
-        if not args.verbose:
-            warnings.simplefilter("ignore")
-            logger.remove()
+    # Start outer main conversion loop -- (output formats)
+    for output_format in output_formats:
+        # Setup filelist, globbing for files if in batch mode
+        if args.batch or args.megabatch:
+            if not os.path.exists(args.outfile):
+                logger.info(f"Creating directory {args.outfile}")
+                os.mkdir(args.outfile)
 
-        logger.info(f"Starting conversion on {len(filelist)} files with {args.num_workers} workers")
+            if args.batch:
+                filelist = sorted(glob.glob(os.path.join(args.infile, f'*.{args.file_ext}')))
+            else:
+                filelist = sorted(glob.glob(os.path.join(args.infile, f'*/*.{args.file_ext}'), recursive=True))
+                
+            filelist_out = []
 
-        if args.num_workers > 1:
-            # Create a list of tasks to run
-            task_list = []
-            for fn_in, fn_out in zip(filelist, filelist_out):
-                task_list.append(convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, context, args.verbose))
-
-            # Run the task list
-            run_in_parallel(task_list, n_workers=args.num_workers, backend=args.parallel_backend, verbose=args.verbose)
+            for fn in filelist:
+                bn = os.path.basename(fn)
+                bn_out = os.path.splitext(bn)[0] + EXT_LUT[output_format]
+                if args.megabatch:
+                    subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn)))
+                    filelist_out.append(os.path.join(subdir, bn_out))
+                else:
+                    filelist_out.append(os.path.join(args.outfile, bn_out))
         else:
-            for fn_in, fn_out in zip(filelist, filelist_out):
-                convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
+            filelist     = [args.infile]
+            filelist_out = [args.outfile]
+
+        ######
+        # Start inner main conversion loop -- (run on each file)
+        with warnings.catch_warnings() as wc:
+            if not args.verbose:
+                warnings.simplefilter("ignore")
+                logger.remove()
+
+            logger.info(f"Starting conversion on {len(filelist)} files with {args.num_workers} workers")
+
+            if args.num_workers > 1:
+                # Create a list of tasks to run
+                task_list = []
+                for fn_in, fn_out in zip(filelist, filelist_out):
+                    task_list.append(convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, context, args.verbose))
+
+                # Run the task list
+                run_in_parallel(task_list, n_workers=args.num_workers, backend=args.parallel_backend, verbose=args.verbose)
+            else:
+                for fn_in, fn_out in zip(filelist, filelist_out):
+                    convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 if __name__ == "__main__": #pragma: no cover
     print(sys.argv[1:])
