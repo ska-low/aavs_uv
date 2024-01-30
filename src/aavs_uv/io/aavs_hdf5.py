@@ -164,10 +164,10 @@ def hdf5_to_uvx(fn_data: str, fn_config: str=None,
                   'input_metadata': md})
 
     # Include observation_info attributes, which includes firmware and software versions
-    if 'observation_config' in h5.keys():
+    if 'observation_info' in h5.keys():
         provenance['station_config'] = {}
         for key in ('description', 'firmware_version', 'software_version', 'station_config'):
-            provenance['station_config'][key] =  h5['observation_config'].attrs[key]
+            provenance['station_config'][key] =  h5['observation_info'].attrs[key]
         # For clarity, rename station_config to station_config_yaml
         provenance['station_config']['station_config_yaml'] = provenance['station_config'].pop('station_config')
         
