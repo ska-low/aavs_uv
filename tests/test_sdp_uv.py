@@ -24,6 +24,20 @@ def test_uvdata_to_sdp_vis():
     uv = hdf5_to_pyuvdata(fn_raw, yaml_raw)
     v = uvdata_to_sdp_vis(uv)
 
+    v2 = hdf5_to_sdp_vis(fn_raw, yaml_raw, apply_phasing=True)
+
+    # Check that data are complex conjugate of each other
+    print("---")
+    print(v.vis.values[0,1])
+    print("---")
+    print(v2.vis.values[0, 1])
+    print("---")
+
+    assert np.allclose(v.uvw, v2.uvw, atol=0.5e-4)
+    assert np.allclose(np.abs(v.vis.values), np.abs(v2.vis.values))
+    assert np.allclose(v.vis.values, v2.vis.values)
+    print("Hooray!")
+
 if __name__ == "__main__":
     test_sdp_vis()
     test_uvdata_to_sdp_vis()

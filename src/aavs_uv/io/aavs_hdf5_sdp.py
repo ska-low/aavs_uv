@@ -8,7 +8,7 @@ from astropy.time import Time
 
 from pyuvdata import UVData
 
-from ska_sdp_datamodels.visibility import Visibility, create_visibility
+from ska_sdp_datamodels.visibility import Visibility
 from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame, PolarisationFrame
 
@@ -115,7 +115,8 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, c
     return v
 
 
-def uvdata_to_sdp_vis(uv: UVData) -> Visibility:
+def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock_id: str="",
+                      conj: bool=False, flip_uvw=True) -> Visibility:
     """ Convert pyuvdata object to SDP Visibility 
     
     Args:
@@ -155,37 +156,69 @@ def uvdata_to_sdp_vis(uv: UVData) -> Visibility:
     f_c  = uv.freq_array[0]   # TODO: handle multiple spectral windows
     f_bw = np.ones_like(f_c) * uv.channel_width
 
+    if len(uv.freq_array) > 1:
+        raise NotImplementedError("Only length-1 frequency arrays supported at present.")
+
     # setup phase center
     pcd = uv.phase_center_catalog[1]
     pc_name = pcd['cat_name']
     pc_sc = SkyCoord(pcd['cat_lon'], pcd['cat_lat'], unit=('rad', 'rad'))
     pc_hourangle = t.sidereal_time('apparent').to('rad').value - pc_sc.icrs.ra.to('hourangle').to('rad').value
-    print(pc_hourangle)
 
     #integration_time (float, optional) – Only used in the specific case where times only has one element
     t_int = uv.integration_time[0] if uv.Ntimes == 1 else None
 
-    # Instantiate SDP Visibility object
-    v = create_visibility(
-        config=config,
-        times=t,
-        frequency=f_c,
-        phasecentre=pc_sc,
-        channel_bandwidth=f_bw,
-        weight=1.0,
-        polarisation_frame=pol_frame,
-        integration_time=t_int,  # Only used in specific case of
-        zerow=False,
-        elevation_limit=None,
-        source=pc_name,
-        scan_id=0,
-        scan_intent=None,
-        execblock_id=0,
-        meta={},
-        utc_time=None,
-        times_are_ha=False,
-    ) 
+    # Phase center
+    pc = SkyCoord(uv.phase_center_app_ra_degrees[0], uv.phase_center_app_dec_degrees[0], 
+                  unit=('degree', 'degree'))
 
-    # TODO: Add actual data
+    # Reshape UVW array -- note this assumes data are organized in same way as SDP
+    uvw = uv.uvw_array.reshape((uv.Ntimes, uv.Nbls, 3))
+    if flip_uvw:
+        uvw *= -1
+
+    # Reshape time array -- only need one entry per timestep
+    t = Time(uv.time_array.reshape((uv.Ntimes, uv.Nbls))[:, 0], format='jd', location=telescope_earthloc)
+    t_lst= t.sidereal_time('apparent').to('rad').value
+
+    # Reshape visibility array -- should be same layout so no worries here
+    vis_data = uv.data_array.reshape((uv.Ntimes, uv.Nbls, 1, 4))
+
+
+    # Remap XX.YY,XY,YX -> XX,XY,YX,YY
+    vis_data = vis_data[..., [0,2,3,1]]
+
+    if conj:
+        vis_data = np.conj(vis_data)
+
+    # Generate baseline IDs
+    baselines = pd.MultiIndex.from_arrays(
+        (uv.ant_1_array[:uv.Nbls], uv.ant_2_array[:uv.Nbls]), names=("antenna1", "antenna2")
+    )
+
+    # Get source name (kinda hidden in phase_center_catalog)
+    source_name = list(uv.phase_center_catalog.items())[0][1]['cat_name']
+
+    # Create SDP visibility
+    v = Visibility.constructor(
+            uvw=uvw,
+            time=t.mjd * 86400,
+            frequency=f_c,
+            vis=vis_data,
+            weight=np.ones(vis_data.shape),
+            baselines=baselines,
+            flags=np.zeros(vis_data.shape, dtype="int"),
+            integration_time=t_int,
+            channel_bandwidth=f_bw,
+            polarisation_frame=pol_frame,
+            source=source_name,
+            scan_id=scan_id,
+            scan_intent=scan_intent,
+            execblock_id=execblock_id,
+            meta={},
+            phasecentre=pc,
+            configuration=config,
+        )
+
     return v
 
