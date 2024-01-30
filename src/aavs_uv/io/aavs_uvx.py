@@ -129,6 +129,7 @@ def write_uvx(uv: UVX, filename: str):
         
         # add metadata about phasing (or lack of)
         h['phase_center'].attrs['phase_type']  = 'drift'  # pyuvdata defines 'drift' or 'phased'
+        h['phase_center'].attrs['source_name'] = 'zenith' 
         h['visibilities'].attrs['phase_center_tracking_applied'] = False
 
         # Add descriptions from uvx.yaml schema
