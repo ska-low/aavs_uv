@@ -221,15 +221,9 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
 
         # HDF5 data are written as XX, XY, YX, YY (AIPS codes -5, -7, -8, -6)
         if md['polarization_type'].lower() == 'linear_crossed':
-            # A little irritating, but we need to rearrange to get into AIPS standard 
-            # xx = np.copy(uv.data_array[..., 0])  # (Already in right spot)
-            xy = np.copy(uv.data_array[..., 1])
-            yx = np.copy(uv.data_array[..., 2])
-            yy = np.copy(uv.data_array[..., 3])
-            # uv.data_array[..., 0] = xx           # (Already in right spot)
-            uv.data_array[..., 1] = yy
-            uv.data_array[..., 2] = xy
-            uv.data_array[..., 3] = yx
+            # AIPS expects -5 -6 -7 -8, so we need to remap pols
+            pol_remap = [0, 3, 1, 2]
+            uv.data_array = uv.data_array[..., pol_remap]
             uv.polarization_array = _pol_types['linear']
 
         if conj:
