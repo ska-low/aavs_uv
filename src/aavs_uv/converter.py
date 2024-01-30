@@ -173,7 +173,7 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
 
             if N_cycles > 1:
                 # Update filename if we are iterating over the file
-                new_fn_out = os.path.splitext(fn_out)[0] + f'.{start_int}' + EXT_LUT[output_format]
+                new_fn_out = os.path.splitext(fn_out)[0] + f'.{start_int:05d}' + EXT_LUT[output_format]
             else:
                 new_fn_out = fn_out
 
