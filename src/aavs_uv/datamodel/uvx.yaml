@@ -149,3 +149,6 @@ uvx/provenance/input_files:
 uvx/provenance/input_metadata:
   description: Metadata from input files used in file generation.
   hdf5_type: group
+uvx/provenance/station_config:
+  description: Station data capture firmware/software setup and configuration information.
+  hdf5_type: group
