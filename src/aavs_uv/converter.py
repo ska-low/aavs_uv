@@ -182,7 +182,11 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
                 logger.warning(f"File exists, skipping: {new_fn_out}")
             else:
                 # Write the desired output format
-                writer(new_fn_out)
+                # Add special kwargs as needed -- currently just for UVFITS
+                kwargs = {}
+                if output_format == 'uvfits':
+                    kwargs['use_miriad_convention'] = True   
+                writer(new_fn_out, **kwargs)
                 # and if MS or Miriad, check if it should be zipped
                 if args.zipit and output_format in ('ms', 'miriad'):
                     zipit(new_fn_out, rm_dir=True)

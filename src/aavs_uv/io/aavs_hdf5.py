@@ -165,12 +165,17 @@ def hdf5_to_uvx(fn_data: str, fn_config: str=None,
 
     # Include observation_info attributes, which includes firmware and software versions
     if 'observation_info' in h5.keys():
-        provenance['station_config'] = {
-            'observation_description':       h5['observation_info'].attrs['description'],
-            'tpm_firmware_version':          h5['observation_info'].attrs['firmware_version'],
-            'daq_software_version':          h5['observation_info'].attrs['software_version'],
-            'station_config_yaml':           h5['observation_info'].attrs['station_config']
-        }
+        try:
+            provenance['station_config'] = {
+                'observation_description':       h5['observation_info'].attrs['description'],
+                'tpm_firmware_version':          h5['observation_info'].attrs['firmware_version'],
+                'daq_software_version':          h5['observation_info'].attrs['software_version'],
+                'station_config_yaml':           h5['observation_info'].attrs['station_config']
+            }
+        except:
+            logger.warning("Could not find expected keys in observation_info")
+            obs_info_keys = h5['observation_info'].keys()
+            logger.warning(f"{obs_info_keys}")
         
     # Compute zenith RA/DEC for phase center
     zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'), obstime=t[0], location=t.location)
