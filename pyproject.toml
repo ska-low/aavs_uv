@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "ska-ost-low-uv"
+version = "0.0.0"
+description = "SKA Ost Low UV provides utilities for handling UV data products for SKA Low."
+authors = ["Daniel Price <daniel.price@skao.int>"]
+license= "BSD-3-Clause"
+readme = "README.md"
+
+[[tool.poetry.source]]
+name = 'skao'
+url = 'https://artefact.skao.int/repository/pypi-internal/simple'
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+flake8 = "^6.0.0"
+isort = "^5.12.0"
+pylint = "^2.17.4"
+pylint-junit = "^0.3.2"
+pytest = "^7.3.1"
+pytest-cov = "^4.1.0"
+flake8-docstrings = "^1.7.0"
+flake8-rst-docstrings = "^0.3.0"
+flake8-pyproject = "^1.2.3"
+[tool.poetry.group.docs.dependencies]
+Sphinx = "^6.2.1"
+ska-ser-sphinx-theme = "^0.1.1"
+sphinx-autodoc-typehints = "^1.23.0"
+
+[tool.pytest.ini_options]
+addopts = "-v"
+
+[tool.flake8]
+docstring-style = "sphinx"
+rst-directives = "literalinclude"
+rst-roles = ["py:attr", "py:class", "py:const", "py:exc", "py:func", "py:meth", "py:mod"]
+enable = "DAR104"
+max-complexity = 10
+
+# E203 and W503 conflict with black
+ignore = ["E203", "W503"]
+
+[tool.pylint.messages_control]
+disable = [
+    "duplicate-code",
+    "fixme",
+]
+enable = ["useless-suppression"]
+
+[tool.pylint.similarities]
+min-similarity-lines = 7
+ignore-imports = "yes"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
