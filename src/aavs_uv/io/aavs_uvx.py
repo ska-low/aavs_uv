@@ -14,8 +14,8 @@ import aavs_uv
 
 
 def write_uvx(uv: UVX, filename: str):
-    """ Write a aavs UV object to a HDF5 file 
-    
+    """ Write a aavs UV object to a HDF5 file
+
     Args:
         uv (UVX): aavs_uv.datamodel.UV object
         filename (str): name of output file
@@ -30,25 +30,25 @@ def write_uvx(uv: UVX, filename: str):
             return darr.astype('bytes')
         else:
             return darr
-    
+
     def _set_attrs(dobj, dset):
         for k, v in dobj.attrs.items():
             try:
                 dset.attrs[k] = v
             except TypeError:
                 dset.attrs[k] = v.astype('bytes')
-    
+
     def _create_dset(group, name, dobj):
         data = _str2bytes(dobj.values)
         dset = group.create_dataset(name, data=data)
         _set_attrs(dobj, dset)
 
     with h5py.File(filename, mode='w') as h:
-        # Basic metadata 
+        # Basic metadata
         h.attrs['CLASS'] = 'AAVS_UV'
         h.attrs['VERSION'] = aavs_uv.__version__
         h.attrs['name'] = uv.name
-        
+
         ####################
         # VISIBILITY GROUP #
         ####################
@@ -73,24 +73,24 @@ def write_uvx(uv: UVX, filename: str):
 
         # Freq & polarization
         for coord in ('polarization', 'frequency'):
-            _create_dset(g_vis_c, coord, uv.data.coords[coord])       
+            _create_dset(g_vis_c, coord, uv.data.coords[coord])
 
         #################
         # ANTENNA GROUP #
-        ################# 
+        #################
         g_ant = h.create_group('antennas')
         g_ant_c = g_ant.create_group('coords')
         g_ant_a = g_ant.create_group('attrs')
-        
+
         for dset_name in ('enu', 'ecef'):
             _create_dset(g_ant, dset_name, uv.antennas[dset_name])
 
         for coord in ('antenna', 'spatial'):
             _create_dset(g_ant_c, coord, uv.antennas.coords[coord])
- 
+
         for attr in ('identifier', 'flags', 'array_origin_geocentric', 'array_origin_geodetic'):
             _create_dset(g_ant_a, attr, uv.antennas.attrs[attr])
-        
+
         ################
         # PHASE CENTER #
         ################
@@ -126,28 +126,31 @@ def write_uvx(uv: UVX, filename: str):
                     g_cont_a.attrs[sk] = sv
             else:
                 g_cont.attrs[k] = v
-        
+
         # add metadata about phasing (or lack of)
         h['phase_center'].attrs['phase_type']  = 'drift'  # pyuvdata defines 'drift' or 'phased'
-        h['phase_center'].attrs['source_name'] = 'zenith' 
+        h['phase_center'].attrs['source_name'] = 'zenith'
         h['visibilities'].attrs['phase_center_tracking_applied'] = False
 
         # Add descriptions from uvx.yaml schema
         for k, v in uvx_schema.items():
             k = k.replace('uvx/', '') # Strip uvx/ prefix to get hdf5 path
-            if 'description' in v.keys():
-                h[k].attrs['description'] = v['description']
-            if 'dims' in v.keys():
-                # Convert dims into a string
-                h[k].attrs['dims'] = str(tuple(v['dims']))
+            if k in h.keys():
+                if 'description' in v.keys():
+                    h[k].attrs['description'] = v['description']
+                if 'dims' in v.keys():
+                    # Convert dims into a string
+                    h[k].attrs['dims'] = str(tuple(v['dims']))
+            else:
+                logger.error(f"Could not find {k} in HDF5 file: {list(h.keys())}")
 
 
 def read_uvx(filename: str) -> UVX:
-    """ Load aavs_uv UVX object from uvx (HDF5) file 
-    
+    """ Load aavs_uv UVX object from uvx (HDF5) file
+
     Args:
         filename (str): path to uvx file
-    
+
     Returns:
         uv (aavs_uv.datamodel.UV): UV object
     """
@@ -155,7 +158,7 @@ def read_uvx(filename: str) -> UVX:
         return [x.strip("'").strip() for x in lstr.strip('()[]').split(', ')]
 
     with h5py.File(filename, mode='r') as h:
-        
+
         ################
         # ANTENNA DSET #
         ################
@@ -163,9 +166,9 @@ def read_uvx(filename: str) -> UVX:
             'antenna': h['antennas']['coords']['antenna'][:],
             'spatial': h['antennas']['coords']['spatial'][:].astype('str')
             }
-        
+
         data_vars = {
-        'enu': xp.DataArray(h['antennas']['enu'], 
+        'enu': xp.DataArray(h['antennas']['enu'],
                dims=_to_list(h['antennas']['enu'].attrs['dims']),
                attrs=dict(h['antennas']['enu'].attrs.items()),
                coords=coords
@@ -176,28 +179,28 @@ def read_uvx(filename: str) -> UVX:
                coords=coords
                )
         }
-    
+
         attrs = {
-            'identifier': xp.DataArray(h['antennas/attrs/identifier'][:].astype('str'), 
-                                    dims=('antenna'), 
+            'identifier': xp.DataArray(h['antennas/attrs/identifier'][:].astype('str'),
+                                    dims=('antenna'),
                                     attrs=dict(h['antennas/attrs/identifier'].attrs.items())
                                     ),
-            'flags': xp.DataArray(h['antennas/attrs/flags'][:], 
-                                dims=('antenna'), 
+            'flags': xp.DataArray(h['antennas/attrs/flags'][:],
+                                dims=('antenna'),
                                 attrs=dict(h['antennas/attrs/flags'].attrs.items())
                                 ),
-            'array_origin_geocentric': xp.DataArray(h['antennas/attrs/array_origin_geocentric'][:], 
-                                dims=('spatial'), 
+            'array_origin_geocentric': xp.DataArray(h['antennas/attrs/array_origin_geocentric'][:],
+                                dims=('spatial'),
                                 attrs=dict(h['antennas/attrs/array_origin_geocentric'].attrs.items())
                                 ),
-            'array_origin_geodetic': xp.DataArray(h['antennas/attrs/array_origin_geodetic'][:], 
-                                dims=('spatial'), 
+            'array_origin_geodetic': xp.DataArray(h['antennas/attrs/array_origin_geodetic'][:],
+                                dims=('spatial'),
                                 attrs=dict(h['antennas/attrs/array_origin_geodetic'].attrs.items())
                                 )
         }
-    
+
         antennas = xp.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
-        
+
         # Small bytes -> string fixup
         antennas.attrs['array_origin_geodetic'].attrs['unit'] = antennas.attrs['array_origin_geodetic'].attrs['unit'].astype('str')
 
@@ -207,23 +210,23 @@ def read_uvx(filename: str) -> UVX:
 
         # Coordinate - time
         mjd  = h['visibilities/coords/time/mjd'][:]
-        lst  = h['visibilities/coords/time/lst'][:] 
-        unix = h['visibilities/coords/time/unix'][:] 
+        lst  = h['visibilities/coords/time/lst'][:]
+        unix = h['visibilities/coords/time/unix'][:]
         t_coord = pd.MultiIndex.from_arrays((mjd, lst, unix), names=('mjd', 'lst', 'unix'))
-        
+
         # Coordinate - baseline
         bl_coord = pd.MultiIndex.from_arrays(
-            (h['visibilities/coords/baseline/ant1'][:], h['visibilities/coords/baseline/ant2'][:]), 
+            (h['visibilities/coords/baseline/ant1'][:], h['visibilities/coords/baseline/ant2'][:]),
             names=('ant1', 'ant2'))
-        
+
         # Coordinate - polarization
         pol_coord = h['visibilities/coords/polarization'][:].astype('str')
-        
+
         # Coordinate - frequency
         f_center  = h['visibilities/coords/frequency'][:]
-        f_coord   = xp.DataArray(f_center, dims=('frequency',), 
+        f_coord   = xp.DataArray(f_center, dims=('frequency',),
                                 attrs=dict(h['visibilities/coords/frequency'].attrs.items()))
-        
+
         coords={
             'time': t_coord,
             'polarization': pol_coord,
@@ -231,12 +234,12 @@ def read_uvx(filename: str) -> UVX:
             'frequency': f_coord
         }
 
-        vis = xp.DataArray(h['visibilities']['data'], 
-                        coords=coords, 
+        vis = xp.DataArray(h['visibilities']['data'],
+                        coords=coords,
                         dims=_to_list(h['visibilities']['data'].attrs['dims']),
                         attrs=attrs
                         )
-        
+
         # Copy over attributes
         for c in coords.keys():
             for k, v in h[f'visibilities/coords/{c}'].attrs.items():
@@ -246,9 +249,9 @@ def read_uvx(filename: str) -> UVX:
         ################
         # PHASE CENTER #
         ################
-        phase_center = SkyCoord(h['phase_center']['ra'][:], 
-                                h['phase_center']['dec'][:], 
-                                unit=(h['phase_center']['ra'].attrs['unit'], 
+        phase_center = SkyCoord(h['phase_center']['ra'][:],
+                                h['phase_center']['dec'][:],
+                                unit=(h['phase_center']['ra'].attrs['unit'],
                                       h['phase_center']['dec'].attrs['unit']))
 
         ########################
@@ -263,17 +266,17 @@ def read_uvx(filename: str) -> UVX:
             context[k] = dict(v.attrs.items())
 
         # Add time and earth location
-        eloc = EarthLocation.from_geocentric(*h['antennas']['attrs']['array_origin_geocentric'][:], 
-                                        unit=h['antennas']['attrs']['array_origin_geocentric'].attrs['unit'])    
+        eloc = EarthLocation.from_geocentric(*h['antennas']['attrs']['array_origin_geocentric'][:],
+                                        unit=h['antennas']['attrs']['array_origin_geocentric'].attrs['unit'])
         t = Time(unix, format='unix', location=eloc)
 
 
-        uv = UVX(name=h.attrs['name'], 
-            antennas=antennas, 
+        uv = UVX(name=h.attrs['name'],
+            antennas=antennas,
             context=context,
-            data=vis, 
-            timestamps=t, 
-            origin=eloc, 
+            data=vis,
+            timestamps=t,
+            origin=eloc,
             phase_center=phase_center,
             provenance=provenance)
 

@@ -38,12 +38,12 @@ def test_converter():
     try:
         cmd = [
         "-o", "uvfits", "-n", "aavs3", "-j",
-        "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
+        "./test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
         "test_noconj.uvfits"]
         run(cmd)
         cmd = [
         "-o", "uvfits", "-n", "aavs3",
-        "../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
+        "./test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
         "test.uvfits"]
         run(cmd)
 
