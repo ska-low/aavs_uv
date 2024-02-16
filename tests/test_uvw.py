@@ -4,7 +4,7 @@ import numpy as np
 from pyuvdata import utils as uvutils
 
 def test_uvw():
-    fn = '../example-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
+    fn = './test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
     uv = hdf5_to_uvx(fn, telescope_name='aavs2')
 
     uvd = hdf5_to_pyuvdata(fn, telescope_name='aavs2')
@@ -13,10 +13,10 @@ def test_uvw():
     # Checks comparing internal calls within calc_uvw
     n_bl = len(uv.data.baseline)
     n_ts = len(uv.timestamps)
-    
+
     # Get LST in radians
     lst_rad = (uv.data.time.lst / 12 * np.pi).values
-    
+
     # Compute apparent RA and DECs
     app_ras, app_decs = uvutils.transform_icrs_to_app(
         uv.timestamps,
@@ -30,15 +30,15 @@ def test_uvw():
         dist=None,
         astrometry_library=None,
     )
-    
-    # Now compute position angle 
-    frame_pos_angle = uvutils.calc_frame_pos_angle(uv.timestamps.jd, 
-                                 app_ra=app_ras, 
+
+    # Now compute position angle
+    frame_pos_angle = uvutils.calc_frame_pos_angle(uv.timestamps.jd,
+                                 app_ra=app_ras,
                                  app_dec=app_decs,
                                  ref_frame='icrs',
                                  telescope_loc=uv.origin)
-    
-    # And now we can compute UVWs 
+
+    # And now we can compute UVWs
     uvw = uvutils.calc_uvw(
         app_ra=np.repeat(app_ras, n_bl),
         app_dec=np.repeat(app_decs, n_bl),

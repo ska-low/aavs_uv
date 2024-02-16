@@ -1,4 +1,3 @@
-import numpy as np
 import os
 import aavs_uv
 from loguru import logger
@@ -6,9 +5,29 @@ import sys
 from tqdm import tqdm
 import shutil
 
-def reset_logger(use_tqdm: bool=False, disable: bool=False, level="INFO", *args, **kwargs):
-    """ Reset loguru logger and setup output format """
-    
+def reset_logger(use_tqdm: bool=False, disable: bool=False, level: str="INFO", *args, **kwargs) -> logger:
+    """ Reset loguru logger and setup output format
+
+    Helps loguru (logger), tqdm (progress bar) and joblib/dask (parallel) work together.
+
+    Args:
+        use_tqdm (bool): Set to true if using tqdm progress bar
+        disable (bool): Disable the logger (set to ERROR only output)
+        level (str): One of DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+    Notes:
+        If using the `@task` decorator, it's a good idea to add reset_logger
+        to your function to keep the task quiet so progress bar shows, eg:
+            ```
+            @task
+            def convert_file_task(args, ...):
+            if not verbose:
+                reset_logger(use_tqdm=True, disable=True)
+            ```
+    Returns:
+        logger (logger): loguru logger object
+    """
+
     logger.remove()
     logger_fmt = "<g>{time:HH:mm:ss.S}</g> | <w><b>{level}</b></w> | {message}"
     if not disable:
@@ -16,22 +35,24 @@ def reset_logger(use_tqdm: bool=False, disable: bool=False, level="INFO", *args,
             logger.add(sys.stdout, format=logger_fmt, level=level, colorize=True)
         else:
             logger.add(lambda msg: tqdm.write(msg, end=""), format=logger_fmt, level=level, colorize=True)
+    else:
+        logger.add(lambda msg: tqdm.write(msg, end=""), format=logger_fmt, level="ERROR", colorize=True)
     return logger
-    
+
 
 def get_resource_path(relative_path: str) -> str:
-    """ Get the path to an internal package resource (e.g. data file) 
-    
+    """ Get the path to an internal package resource (e.g. data file)
+
     Args:
         relative_path (str): Relative path to data file, e.g. 'config/aavs3/uv_config.yaml'
-    
+
     Returns:
         abs_path (str): Absolute path to the data file
     """
 
     path_root = os.path.abspath(aavs_uv.__path__[0])
     abs_path = os.path.join(path_root, relative_path)
-    
+
     if not os.path.exists(abs_path):
         logger.warning(f"File not found: {abs_path}")
 
@@ -39,11 +60,11 @@ def get_resource_path(relative_path: str) -> str:
 
 
 def get_config_path(name: str) -> str:
-    """ Get path to internal array configuration by telescope name 
-    
+    """ Get path to internal array configuration by telescope name
+
     Args:
         name (str): Name of telescope to load array config, e.g. 'aavs2'
-    
+
     Returns:
         abs_path (str): Absolute path to config file.
     """
@@ -78,8 +99,8 @@ def get_software_versions() -> dict:
 
 
 def zipit(dirname: str, rm_dir: bool=False):
-    """ Zip up a directory 
-    
+    """ Zip up a directory
+
     Args:
         dirname (str): Name of directory to zip
         rm_dir (bool): Delete directory after zipping (default False)
@@ -87,42 +108,3 @@ def zipit(dirname: str, rm_dir: bool=False):
     shutil.make_archive(dirname, format='zip', root_dir='.', base_dir=dirname)
     if rm_dir:
         shutil.rmtree(dirname)
-
-
-def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=None, conj=False):
-    """ Convert 1D visibility array (lower/upper) triangular to correlation matrix 
-    
-    Args:
-        d (np.ndarray): 1D Numpy array with len N_ant * (N_ant + 1) / 2
-        n_ant (int): Number of antennas in array
-        tri (str): Either 'upper' or 'lower' triangular, to match data
-        V (np.ndarray): Either None (create new array) or an (N_ant x N_ant) Numpy array
-    
-    Returns:
-        V (np.ndarray): (N_ant x N_ant) correlation matrix
-    """
-    n_bl = n_ant * (n_ant + 1) // 2
-    if d.shape[0] != n_bl:
-        raise RuntimeError(f"N_ant: {n_ant} -> N_bl: {n_bl}, but d.shape = {d.shape[0]}")
-    if tri == 'upper':
-        ix, iy = np.triu_indices(n_ant)
-    elif tri == 'lower':
-        ix, iy = np.tril_indices(n_ant)
-    else:
-        raise RuntimeError('Must be upper or lower triangular')
-    
-    if V is None:
-        V = np.zeros((n_ant, n_ant), dtype='complex64')
-    else:
-        try:
-            assert V.shape == (n_ant, n_ant)
-        except AssertionError:
-            raise RuntimeError("Correlation matrix shape mismatch")
-        
-    V[ix, iy] = d[:]
-    V[iy, ix] = np.conj(d[:])
-
-    if conj:
-        V = np.conj(V)
-    
-    return V
