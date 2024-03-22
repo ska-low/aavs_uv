@@ -1,4 +1,4 @@
-uvx: 
+uvx:
   CLASS: AAVS_UV
   VERSION: X.Y.Z
   hdf5_type: root
@@ -30,12 +30,12 @@ uvx/antennas/attrs/flags:
   description: Data quality issue flag, per antenna.
   dims:
     - antenna
-  hdf5_type: dataset  
+  hdf5_type: dataset
 uvx/antennas/attrs/identifier:
   description: Antenna name/identifier
   dims:
     - antenna
-  hdf5_type: dataset  
+  hdf5_type: dataset
 uvx/antennas/coords:
   description: Data coordinates for antenna data
   hdf5_type: group
@@ -51,16 +51,18 @@ uvx/antennas/coords/spatial:
   hdf5_type: dataset
 uvx/antennas/ecef:
   description: Antenna WGS84 locations in Earth-centered, Earth-fixed (ECEF) coordinate system.  Note array center (origin) position (X0, Y0, Z0) has been subtracted.
-  dims: 
+  dims:
     - antenna
     - spatial
-  hdf5_type: dataset  
+  units: m
+  hdf5_type: dataset
 uvx/antennas/enu:
   description: Antenna locations in local East-North-Up coordinates
-  dims: 
+  dims:
     - antenna
     - spatial
-  hdf5_type: dataset  
+  units: m
+  hdf5_type: dataset
 
 ####################
 # Visibilities group
@@ -106,17 +108,17 @@ uvx/visibilities/coords/time/lst:
     - time
 uvx/visibilities/coords/time/mjd:
   description: Modified Julian Date
-  hdf5_type: dataset  
+  hdf5_type: dataset
   dims:
     - time
 uvx/visibilities/coords/time/unix:
   description: "Unix timestamp (seconds since 1970-01-01 00:00:00 UTC)"
-  hdf5_type: dataset 
+  hdf5_type: dataset
   dims:
-    - time 
+    - time
 uvx/visibilities/data:
   description: Visibility dataset / correlation tensor
-  dims: 
+  dims:
     - time
     - frequency
     - baseline

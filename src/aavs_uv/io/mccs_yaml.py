@@ -1,12 +1,12 @@
 from operator import itemgetter
 
-from aavs_uv.io.yaml import load_yaml
+from aavs_uv.utils import load_yaml
 import pandas as pd
 import numpy as np
 from astropy.coordinates import EarthLocation
 
 def station_location_from_platform_yaml(fn_yaml: str) -> (EarthLocation, pd.DataFrame):
-    """ Load station location from AAVS3 MCCS yaml config 
+    """ Load station location from AAVS3 MCCS yaml config
 
     Args:
         fn_yaml (str): Filename path to yaml config
@@ -46,4 +46,3 @@ def read_flags_from_platform_yaml(fn_yaml: str) -> np.array:
     """
     earth_loc, ant_enu = station_location_from_platform_yaml(fn_yaml)
     return ant_enu['flagged'].values
-    
