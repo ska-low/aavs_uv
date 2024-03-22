@@ -23,7 +23,6 @@ class UVX:
     origin: EarthLocation   # Astropy EarthLocation for array origin
     phase_center: SkyCoord  # Astropy SkyCoord corresponding to phase center
     provenance: dict        # Provenance/history information and other metadata
-    file: h5py.File         # File handler
 
 
 def create_empty_context_dict():

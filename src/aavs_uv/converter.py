@@ -140,7 +140,7 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
         logger.info(f"UTC start:      {vis.timestamps[0].iso}")
         logger.info(f"MJD start:      {vis.timestamps[0].mjd}")
         logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
-        logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
+        logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.units}")
         logger.info(f"Polarization:   {vis.data.polarization.data}\n")
 
     if output_format in PYUVDATA_FORMATS:

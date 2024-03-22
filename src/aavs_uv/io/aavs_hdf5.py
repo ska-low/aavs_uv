@@ -191,8 +191,7 @@ def hdf5_to_uvx(fn_data: str, fn_config: str=None,
                 timestamps=t,
                 origin=eloc,
                 phase_center=zen_sc,
-                provenance=provenance,
-                file=h5
+                provenance=provenance
                 )
 
         return uv

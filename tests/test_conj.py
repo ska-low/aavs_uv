@@ -61,5 +61,5 @@ def test_converter():
             os.remove("test_noconj.uvfits")   
 
 if __name__ == "__main__":
-    #test_converter()
+    test_converter()
     test_conj()

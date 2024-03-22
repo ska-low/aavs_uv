@@ -189,9 +189,9 @@ def test_parallel():
             os.remove("test.uvx5")
 
 if __name__ == "__main__":
+    test_context()
     test_batch_multi()
     test_batch()
-    test_context()
     test_phase_to_sun()
     test_custom_config()
     test_errors()

@@ -200,7 +200,7 @@ def read_uvx(filename: str) -> UVX:
         antennas = xp.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
         # Small bytes -> string fixup
-        antennas.attrs['array_origin_geodetic'].attrs['unit'] = antennas.attrs['array_origin_geodetic'].attrs['unit'].astype('str')
+        antennas.attrs['array_origin_geodetic'].attrs['units'] = antennas.attrs['array_origin_geodetic'].attrs['units'].astype('str')
 
         ################
         # VISIBILITIES #
@@ -265,7 +265,7 @@ def read_uvx(filename: str) -> UVX:
 
         # Add time and earth location
         eloc = EarthLocation.from_geocentric(*h['antennas']['attrs']['array_origin_geocentric'][:],
-                                        unit=h['antennas']['attrs']['array_origin_geocentric'].attrs['unit'])
+                                        unit=h['antennas']['attrs']['array_origin_geocentric'].attrs['units'])
         t = Time(unix, format='unix', location=eloc)
 
 
