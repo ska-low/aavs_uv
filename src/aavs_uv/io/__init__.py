@@ -5,5 +5,4 @@
 from .aavs_hdf5 import  load_observation_metadata, hdf5_to_uvx, get_hdf5_metadata
 from .aavs_hdf5_sdp import hdf5_to_sdp_vis, uvdata_to_sdp_vis
 from .aavs_hdf5_uvdata import hdf5_to_pyuvdata, phase_to_sun
-from .yaml import load_config
 from .aavs_uvx import read_uvx, write_uvx

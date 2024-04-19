@@ -4,6 +4,7 @@ from loguru import logger
 import sys
 from tqdm import tqdm
 import shutil
+import yaml
 
 def reset_logger(use_tqdm: bool=False, disable: bool=False, level: str="INFO", *args, **kwargs) -> logger:
     """ Reset loguru logger and setup output format
@@ -38,6 +39,19 @@ def reset_logger(use_tqdm: bool=False, disable: bool=False, level: str="INFO", *
     else:
         logger.add(lambda msg: tqdm.write(msg, end=""), format=logger_fmt, level="ERROR", colorize=True)
     return logger
+
+
+def load_yaml(filename: str) -> dict:
+    """ Read YAML file into a Python dict """
+    d = yaml.load(open(filename, 'r'), yaml.Loader)
+    return d
+
+
+def load_config(telescope_name: str) -> dict:
+    """ Load internal array configuration by telescope name """
+    yaml_path = get_config_path(telescope_name)
+    d = load_yaml(yaml_path)
+    return d
 
 
 def get_resource_path(relative_path: str) -> str:

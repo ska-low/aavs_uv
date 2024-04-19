@@ -15,11 +15,11 @@ from astropy.time import Time, TimeDelta
 from aavs_uv import __version__
 from aavs_uv.utils import get_config_path
 from aavs_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uvx, phase_to_sun, write_uvx
-from aavs_uv.io.yaml import load_yaml
+from aavs_uv.utils import load_yaml
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
 EXT_LUT = {
-    'ms': '.ms', 
+    'ms': '.ms',
     'uvfits': '.uvfits',
     'miriad': '.uv',
     'mir': '.uv',
@@ -35,8 +35,8 @@ def parse_args(args):
     p = argparse.ArgumentParser(description="AAVS UV file conversion utility")
     p.add_argument("infile", help="Input filename")
     p.add_argument("outfile", help="Output filename")
-    p.add_argument("-o", 
-                   "--output_format", 
+    p.add_argument("-o",
+                   "--output_format",
                    help="Output file format (uvx, uvfits, miriad, ms, uvh5, sdp). Can be comma separated for multiple formats.",
                    required=True)
     p.add_argument("-c",
@@ -47,13 +47,13 @@ def parse_args(args):
                    "--telescope_name",
                    help="Telescope name, e.g. 'aavs3'. If supplied, will attempt to use aavs_uv internal array config.",
                    required=False)
-    p.add_argument("-s", 
+    p.add_argument("-s",
                    "--phase-to-sun",
                    help="Re-phase to point toward Sun (the sun must be visible!). If flag not set, data will be phased toward zenith.",
                    required=False,
                    action="store_true",
                    default=False)
-    p.add_argument("-j", 
+    p.add_argument("-j",
                    "--no_conj",
                    help="Do not conjugate visibility data (note AAVS2 and AAVS3 require conjugation)",
                    required=False,
@@ -78,7 +78,7 @@ def parse_args(args):
                    help="File extension to search for in batch mode ",
                    required=False,
                    default="hdf5")
-    p.add_argument("-i", 
+    p.add_argument("-i",
                    "--context_yaml",
                    help="Path to observation context YAML (for SDP / UVX formats)",
                    required=False,
@@ -140,7 +140,7 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
         logger.info(f"UTC start:      {vis.timestamps[0].iso}")
         logger.info(f"MJD start:      {vis.timestamps[0].mjd}")
         logger.info(f"LST start:      {vis.data.time.data[0][1]:.5f}")
-        logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.attrs['unit']}")
+        logger.info(f"Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.units}")
         logger.info(f"Polarization:   {vis.data.polarization.data}\n")
 
     if output_format in PYUVDATA_FORMATS:
@@ -185,14 +185,14 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
                 # Add special kwargs as needed -- currently just for UVFITS
                 kwargs = {}
                 if output_format == 'uvfits':
-                    kwargs['use_miriad_convention'] = True   
+                    kwargs['use_miriad_convention'] = True
                 writer(new_fn_out, **kwargs)
                 # and if MS or Miriad, check if it should be zipped
                 if args.zipit and output_format in ('ms', 'miriad'):
                     zipit(new_fn_out, rm_dir=True)
             tw = time.time() - tw0
             del uv
-    
+
     elif output_format == 'sdp':
         tr0 = time.time()
         if context is not None:
@@ -206,7 +206,7 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
         export_visibility_to_hdf5(vis, fn_out)
         tw = time.time() - tw0
         del vis
-    
+
     elif output_format == 'uvx':
         tr0 = time.time()
         vis = hdf5_to_uvx(fn_in, array_config, conj=conj, context=context)
@@ -214,7 +214,7 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
         tw0 = time.time()
         logger.info(f"Creating {args.output_format} file: {fn_out}")
         write_uvx(vis, fn_out)
-        tw = time.time() - tw0    
+        tw = time.time() - tw0
         del vis
 
     return (fn_in, tr, tw)
@@ -235,14 +235,14 @@ def run(args=None):
     # Reset logger
     reset_logger()
     logger.info(f"aavs_uv {__version__}")
-    
+
     # Load array configuration
     array_config = args.array_config
 
     if args.telescope_name:
         logger.info(f"Telescope name: {args.telescope_name}")
         array_config = get_config_path(args.telescope_name)
-   
+
     if array_config is None:
         logger.error(f"No telescope name or array config file passed. Please re-run with -n or -c flag set")
         config_error_found = True
@@ -258,7 +258,7 @@ def run(args=None):
     if not os.path.exists(args.infile):
         logger.error(f"Cannot find input file: {args.infile}")
         config_error_found = True
-    
+
     # Check path points to a directory for batch mode, or a file for regular mode
     if args.batch or args.megabatch:
         if not os.path.isdir(args.infile):
@@ -273,13 +273,13 @@ def run(args=None):
     for output_format in output_formats:
         if output_format not in ('uvfits', 'miriad', 'mir', 'ms', 'uvh5', 'sdp', 'uvx'):
             logger.error(f"Output format not valid: {output_format}")
-            config_error_found = True       
-    
+            config_error_found = True
+
     # Raise error and quit if config issues exist
     if config_error_found:
         logger.error("Errors found. Please check arguments.")
         return
-    
+
     logger.info(f"Input path:       {args.infile}")
     logger.info(f"Array config:     {array_config}")
     logger.info(f"Output path:      {args.outfile}")
@@ -308,7 +308,7 @@ def run(args=None):
                 filelist = sorted(glob.glob(os.path.join(args.infile, f'*.{args.file_ext}')))
             else:
                 filelist = sorted(glob.glob(os.path.join(args.infile, f'*/*.{args.file_ext}'), recursive=True))
-                
+
             filelist_out = []
 
             for fn in filelist:
@@ -348,5 +348,3 @@ if __name__ == "__main__": #pragma: no cover
     print(sys.argv[1:])
     args = parse_args(sys.argv[1:])
     run(args)
-    
-

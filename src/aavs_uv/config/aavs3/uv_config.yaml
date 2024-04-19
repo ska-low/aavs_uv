@@ -5,10 +5,10 @@ history: Created from aavs_uv config/aavs3/uv_config.yaml
 instrument: aavs3
 telescope_name: aavs3
 # Array ECEF location, from
-# https://gitlab.com/ska-telescope/ska-low-aavs3/-/blob/main/helmfile.d/values/aavs3.yaml
+# https://gitlab.com/ska-telescope/ska-low-aavs3/-/blob/main/tmdata/instrument/mccs-configuration/aavs3.yaml
 # platform:
 #  metadata:
-#    version: 0.0.7
+#    version: 0.1.0
 # name: aavs3
 # reference:
 #  datum: WGS84

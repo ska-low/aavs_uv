@@ -8,8 +8,7 @@ from astropy.time import Time
 from astropy.coordinates import SkyCoord, EarthLocation
 
 from aavs_uv.datamodel.uvx import UVX
-from aavs_uv.io.yaml import load_yaml
-from aavs_uv.utils import get_resource_path
+from aavs_uv.utils import get_resource_path, load_yaml
 import aavs_uv
 
 
@@ -20,7 +19,6 @@ def write_uvx(uv: UVX, filename: str):
         uv (UVX): aavs_uv.datamodel.UV object
         filename (str): name of output file
     """
-
     # Load UVX schema from YAML. We can use this to load descriptions
     # And other metadata from the schema (e.g. dimensions)
     uvx_schema = load_yaml(get_resource_path('datamodel/uvx.yaml'))
@@ -142,7 +140,7 @@ def write_uvx(uv: UVX, filename: str):
                     # Convert dims into a string
                     h[k].attrs['dims'] = str(tuple(v['dims']))
             else:
-                logger.error(f"Could not find {k} in HDF5 file: {list(h.keys())}")
+                logger.warning(f"Could not find {k} in HDF5 file: {list(h.keys())}")
 
 
 def read_uvx(filename: str) -> UVX:
@@ -202,7 +200,7 @@ def read_uvx(filename: str) -> UVX:
         antennas = xp.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
         # Small bytes -> string fixup
-        antennas.attrs['array_origin_geodetic'].attrs['unit'] = antennas.attrs['array_origin_geodetic'].attrs['unit'].astype('str')
+        antennas.attrs['array_origin_geodetic'].attrs['units'] = antennas.attrs['array_origin_geodetic'].attrs['units'].astype('str')
 
         ################
         # VISIBILITIES #
@@ -267,7 +265,7 @@ def read_uvx(filename: str) -> UVX:
 
         # Add time and earth location
         eloc = EarthLocation.from_geocentric(*h['antennas']['attrs']['array_origin_geocentric'][:],
-                                        unit=h['antennas']['attrs']['array_origin_geocentric'].attrs['unit'])
+                                        unit=h['antennas']['attrs']['array_origin_geocentric'].attrs['units'])
         t = Time(unix, format='unix', location=eloc)
 
 
