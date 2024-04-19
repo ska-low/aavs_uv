@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from astropy.coordinates import EarthLocation
 
-def station_location_from_platform_yaml(fn_yaml: str) -> (EarthLocation, pd.DataFrame):
+def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> (EarthLocation, pd.DataFrame):
     """ Load station location from AAVS3 MCCS yaml config
 
     Args:
@@ -15,15 +15,15 @@ def station_location_from_platform_yaml(fn_yaml: str) -> (EarthLocation, pd.Data
         (earth_loc, ant_enu): astropy EarthLocation and antenna ENU locations in m
     """
     d = load_yaml(fn_yaml)
-    d_station = d['platform']['array']['station_clusters']['a1']['stations']['1']
+    d_station = d['platform']['array']['stations'][station_name]
 
     # Generate pandas dataframe of antenna positions
     d_ant = d_station['antennas']
 
     location_getter = itemgetter("east", "north", "up")
     ant_enu = [
-        [f"SB{a['smartbox']}-{a['smartbox_port']}", *location_getter(a["location_offset"]), a.get("masked", False)]
-        for a in sorted(d_ant.values(), key=lambda x: (int(x["tpm"]), x["tpm_y_channel"] // 2))
+        [f"{a['smartbox']}-{a['smartbox_port']}", *location_getter(a["location_offset"]), a.get("masked", False)]
+        for a in sorted(d_ant.values(), key=lambda x: (int(x["tpm"].strip("tpm")), x["tpm_y_channel"] // 2))
     ]
 
     ant_enu = pd.DataFrame(ant_enu, columns=('name', 'E', 'N', 'U', 'flagged'))
