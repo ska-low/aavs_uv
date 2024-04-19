@@ -4,6 +4,7 @@ import numpy as np
 import xarray as xp
 import pandas as pd
 from dataclasses import dataclass
+from loguru import logger
 
 from astropy.coordinates import EarthLocation, SkyCoord, AltAz, Angle
 from astropy.time import Time
@@ -191,6 +192,7 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
     }
 
     if conj:
+        logger.info('Conjugating data')
         data = np.conj(data)
 
     vis = xp.DataArray(data,
