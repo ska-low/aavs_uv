@@ -3,6 +3,8 @@ notebooks/
 external-repos/
 tests/profiles/
 tests/*.html
+tests/htmlcov/
+tests/output-tmp/
 
  Byte-compiled / optimized / DLL files
 __pycache__/
