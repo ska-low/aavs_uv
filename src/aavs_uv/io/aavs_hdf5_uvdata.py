@@ -286,7 +286,8 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
     uv.Nspws           = md['Nspws']
     uv.Nphase          = md['Nphase']
     uv.Ntimes          = md['n_integrations']
-    uv.channel_width   = md['channel_width']
+    uv.channel_width   = md['channel_spacing']  # NOTE: channel_spacing is used for frequency delta
+                                                # 'channel_width' exists in metadata, but not used here
     uv.flex_spw        = md['flex_spw']
     uv.future_array_shapes = md['future_array_shapes']
 
@@ -362,10 +363,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
 
     # Reference date RDATE and corresponding Greenwich sidereal time at midnight GST0
     # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1305C13-L1305C85
-    # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1318C20-L1318C21
-    # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1323C40-L1323C45
-    # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1338C13-L1338C47
-    rdate_obj = Time(np.floor(uv.time_array[0]), format="jd", scale="utc")
+    rdate_obj = Time(uv.time_array[0], format="jd", scale="utc", location=t0.location)
     uv.rdate = rdate_obj.strftime("%Y-%m-%d")
     uv.gst0  = float(rdate_obj.sidereal_time("apparent", "tio").deg)
     uv.dut1  = float(rdate_obj.delta_ut1_utc)
