@@ -1,5 +1,8 @@
 # project specific ignores
 notebooks/
+external-repos/
+tests/profiles/
+tests/*.html
 
  Byte-compiled / optimized / DLL files
 __pycache__/
