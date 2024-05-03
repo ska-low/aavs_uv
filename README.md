@@ -8,7 +8,7 @@ These codes use the `UVData` class from [pyuvdata](https://pyuvdata.readthedocs.
 
 Additionally, data can be loaded into the `Visibility` data model from [ska-sdp-datamodels](https://developer.skao.int/projects/ska-sdp-datamodels/en/latest/), which is based on [xarray](https://docs.xarray.dev/en/stable/).
 
-![aavsuv-overview](https://github.com/ska-sci-ops/aavs_uv/raw/master/docs/images/uv_flow.png)
+![aavsuv-overview](https://github.com/ska-sci-ops/aavs_uv/blob/2024.05-dev/docs/images/uv_flow.png?raw=true)
 
 Some simple calibration and imaging utilities are currently in development (intended primarily for QA).
 
