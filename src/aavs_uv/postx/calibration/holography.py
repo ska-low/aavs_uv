@@ -1,9 +1,9 @@
 from __future__ import annotations
 import typing
 if typing.TYPE_CHECKING:
-    from postx.aperture_array import ApertureArray
+    from ..aperture_array import ApertureArray
 
-from postx.coord_utils import gaincal_vec_to_matrix
+from ..coord_utils import gaincal_vec_to_matrix
 import numpy as np
 
 from astropy.constants import c

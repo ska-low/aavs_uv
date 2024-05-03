@@ -3,7 +3,7 @@ import numpy as np
 from astropy.constants import c
 from astropy.coordinates import get_sun
 from aavs_uv.vis_utils import  vis_arr_to_matrix
-from postx.sky_model import RadioSource
+from ..sky_model import RadioSource
 
 LIGHT_SPEED = c.to('m/s').value
 cos, sin = np.cos, np.sin

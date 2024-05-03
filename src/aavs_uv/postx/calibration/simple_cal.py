@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import numpy as np
 from .simple_sim import simulate_visibilities
 from .stefcal import stefcal
-from postx.ant_array import RadioArray
 from aavs_uv.vis_utils import vis_arr_to_matrix
 
 def create_baseline_matrix(xyz: np.array) -> np.ndarray:
@@ -20,7 +21,7 @@ def create_baseline_matrix(xyz: np.array) -> np.ndarray:
     return bls
 
 
-def simple_stefcal(aa: RadioArray, model: dict, t_idx: int=0, f_idx: int=0, pol_idx: int=0) -> (RadioArray, np.array):
+def simple_stefcal(aa: ApertureArray, model: dict, t_idx: int=0, f_idx: int=0, pol_idx: int=0) -> tuple[ApertureArray, np.ndarray]:
     """ Apply stefcal to calibrate UV data
 
     Args:

@@ -7,8 +7,7 @@ import xarray as xr
 from astropy.constants import c
 from astropy.coordinates import get_sun
 from aavs_uv.vis_utils import  vis_arr_to_matrix
-from postx.coord_utils import hpix2sky, sky2hpix
-from postx.sky_model import RadioSource
+from ..coord_utils import hpix2sky, sky2hpix
 from pyuvsim.analyticbeam import AnalyticBeam
 from matvis import simulate_vis
 

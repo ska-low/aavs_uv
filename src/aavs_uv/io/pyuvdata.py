@@ -71,8 +71,10 @@ def pyuvdata_to_uvx(uv: UVData, check: bool=False) -> UVX:
     # Create Antenna dataset
     antpos_ENU = uvutils.ENU_from_ECEF(uv.antenna_positions + uv.telescope_location,
                                        *uv.telescope_location_lat_lon_alt)
-    df = np.column_stack((uv.antenna_names, antpos_ENU, np.zeros_like(uv.antenna_names, dtype='bool')))
-    df = pd.DataFrame(df, columns=['name', 'E', 'N', 'U', 'flagged'])
+    df = pd.DataFrame(antpos_ENU, columns=('E', 'N', 'U'))
+    df['flagged'] = False
+    df['name']    = uv.antenna_names
+    df = df[['name', 'E', 'N', 'U', 'flagged']]
     antennas = create_antenna_data_array(df, eloc)
 
     # Create frequency, time, and data
