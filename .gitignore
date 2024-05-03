@@ -5,6 +5,7 @@ tests/profiles/
 tests/*.html
 tests/htmlcov/
 tests/output-tmp/
+tests/test-batch-data/
 reference-docs/
 
  Byte-compiled / optimized / DLL files
