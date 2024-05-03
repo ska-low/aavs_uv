@@ -7,6 +7,7 @@ tests/htmlcov/
 tests/output-tmp/
 tests/test-batch-data/
 reference-docs/
+test.h5
 
  Byte-compiled / optimized / DLL files
 __pycache__/
