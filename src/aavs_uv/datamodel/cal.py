@@ -22,6 +22,23 @@ class UVXAntennaCal:
     flags: xp.DataArray      # Flag xarray dataset (frequency, antenna, pol)
     provenance: dict         # Provenance/history information and other metadata
 
+    def to_matrix(self, f_idx: int=0) -> np.ndarray:
+        """ Convert to visibility matrix
+
+        Args:
+            f_idx (int): Frequency index to load
+
+        Returns:
+            cal_mat (np.ndarray): Calibration matrix, (N_ant, N_ant, N_stokes)
+        """
+        gc = self.cal
+        cal_mat = np.zeros((gc.shape[1], gc.shape[1], 4), dtype='complex64')
+        cal_mat[..., 0] = np.outer(gc[f_idx, ..., 0], gc[f_idx, ..., 0])
+        cal_mat[..., 1] = np.outer(gc[f_idx, ..., 0], gc[f_idx, ..., 1])
+        cal_mat[..., 2] = np.outer(gc[f_idx, ..., 1], gc[f_idx, ..., 0])
+        cal_mat[..., 3] = np.outer(gc[f_idx, ..., 1], gc[f_idx, ..., 1])
+
+        return cal_mat
 
 def create_provenance_dict():
     provenance = {
@@ -36,7 +53,7 @@ def _create_antenna_cal_coords(f: Quantity, a: np.ndarray, p: np.ndarray, cal_ty
     Args:
         f (Quantity): Astropy Quantity array corresponding to frequency axis (specified at channel center)
         a_or_bl (np.ndarray): List of antenna IDs
-        p (np.ndarray): Polarization labels, e.g ('XX','XY','YX','YY')
+        p (np.ndarray): Polarization labels, e.g ('X', 'Y')
 
     Returns:
         coords (dict): coords for xarray DataArray kwarg

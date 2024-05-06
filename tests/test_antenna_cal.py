@@ -21,5 +21,8 @@ def test_antenna_cal():
 
     cal = create_uvx_antenna_cal('AAVS3', 'manual', cal, flags, f, a, p, {'history':  'yo'})
 
+    cal_mat = cal.to_matrix(f_idx=0)
+    assert cal_mat.shape == (256, 256, 4)
+
 if __name__ == "__main__":
     test_antenna_cal()

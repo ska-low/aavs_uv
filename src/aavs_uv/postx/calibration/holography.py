@@ -4,6 +4,8 @@ if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 
 from ..coord_utils import gaincal_vec_to_matrix
+from aavs_uv.datamodel.cal import UVXAntennaCal, create_uvx_antenna_cal
+
 import numpy as np
 
 from astropy.constants import c
@@ -13,6 +15,7 @@ LIGHT_SPEED = c.value
 import matplotlib as mpl
 import pylab as plt
 
+from loguru import logger
 
 ##################
 # HELPER FUNCTIONS
@@ -231,7 +234,7 @@ def jishnu_selfholo(aa: ApertureArray, cal_src: SkyCoord,
 
 
 def jishnu_phasecal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=None,
-                    n_iter_max: int=50, target_phs_std: float=1.0):
+                    n_iter_max: int=50, target_phs_std: float=1.0) -> UVXAntennaCal:
     """ Iteratively apply Jishnu Cal phase calibration
 
     Args:
@@ -284,21 +287,36 @@ def jishnu_phasecal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=No
             else:
                 cc_iter_mat = gaincal_vec_to_matrix(cc_iter)
                 cc_mat *= cc_iter_mat
+                cc *= cc_iter
 
                 # Update phs_std comparator
                 phs_std = phs_std_iter
+
         # Log phase stdev iteration to
         phs_iter_list[ii] = phs_std
+
+    # TODO: Check this. I think cc_iter needs to be iteratively applied?
     cc_dict = {
-        'phs_cal': cc_iter * cc,
+        'phs_cal': cc,
         'n_iter': ii,
         'phs_std': phs_iter_list[:ii]
     }
-    return cc_dict
+
+    cal_arr  = np.expand_dims(cc_dict['phs_cal'].data, axis=0)
+    flag_arr = np.expand_dims(cc_dict['phs_cal'].mask, axis=0)
+
+    cal = create_uvx_antenna_cal(telescope=aa.name, method='jishnu_phasecal',
+                                 antenna_cal_arr=cal_arr,
+                                 antenna_flags_arr=flag_arr,
+                                 f=aa.f, a=aa.ant_names, p=np.array(('X', 'Y')),
+                                 provenance={'jishnu_phasecal': cc_dict}
+                                 )
+
+    return cal
 
 
 def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
-                    n_iter_max: int=50, target_phs_std: float=1.0, target_mag: float=1.0):
+                    n_iter_max: int=50, target_phs_std: float=1.0, target_mag: float=1.0) -> UVXAntennaCal:
     """ Iteratively apply Jishnu Cal phase calibration, then compute magnitude calibraiton
 
     Args:
@@ -308,6 +326,7 @@ def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
         min_baseline_len (float): Minimum baseline length to use in visibilty array
         target_phs_std (float): Target phase STDEV (in deg) at which to stop iterating.
         target_mag (float): Target magnitude. Default 1.0 (unity)
+        apply (bool): If True, will apply calibration to aa object
 
     Returns:
         cc_dict (dict): Phase calibration solution and runtime info, in dictionary with keys:
@@ -344,7 +363,9 @@ def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
     cc_dict['target_mag'] = target_mag
 
     # And also apply mag+phs cal to aa object
-    aa.set_cal(mp_cal)
+    if apply:
+        logger.info(f"Applying calibration to {aa.name}")
+        aa.set_cal(mp_cal)
 
     return cc_dict
 
