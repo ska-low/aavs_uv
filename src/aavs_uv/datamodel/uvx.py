@@ -132,7 +132,8 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
     return dant
 
 
-def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthLocation, conj: bool=True) -> xp.DataArray:
+def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthLocation,
+                            conj: bool=True, N_ant: int=256) -> xp.DataArray:
     """ Create visibility array out of data array + metadata
 
     Takes a data array, frequency and time axes, and an EarthLocation.
@@ -143,6 +144,7 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
         md (dict): Dictionary of metadata, as found in raw HDF5 file.
         eloc (EarthLocation): Astropy EarthLocation for array center
         conj (bool): Conjugate visibility data (default True).
+        N_ant (int): Number of antennas in array.
 
 
     Returns:
@@ -168,13 +170,15 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
         DataArray does not). Conversion to/from datetime64 takes significantly longer than
         generation from an array of MJD values.
     """
+    uvx_schema = load_yaml(get_resource_path('datamodel/uvx.yaml'))
+
     # Coordinate - time
     t.location = eloc
     lst = t.sidereal_time('apparent').to('hourangle')
     t_coord = pd.MultiIndex.from_arrays((t.mjd, lst.value, t.unix), names=('mjd', 'lst', 'unix'))
 
     # Coordinate - baseline
-    ix, iy = np.triu_indices(256)
+    ix, iy = np.triu_indices(N_ant)
     bl_coord = pd.MultiIndex.from_arrays((ix, iy), names=('ant1', 'ant2'))
 
     # Coordinate - polarization
@@ -182,7 +186,11 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
 
     # Coordinate - frequency
     f_center  = f.to('Hz').value
-    f_coord = xp.DataArray(f_center, dims=('frequency',), attrs={'units': 'Hz', 'description': 'Frequency at channel center'})
+    f_coord = xp.DataArray(f_center, dims=('frequency',),
+                           attrs={
+                               'units': uvx_schema['uvx/visibilities/coords/frequency']['units'],
+                               'description': uvx_schema['uvx/visibilities/coords/frequency']['description']
+                               })
 
     coords={
         'time': t_coord,
