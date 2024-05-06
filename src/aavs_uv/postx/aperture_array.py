@@ -12,7 +12,8 @@ from astropy.coordinates import SkyCoord, AltAz, Angle, get_sun
 import healpy as hp
 
 from aavs_uv.vis_utils import  vis_arr_to_matrix_4pol
-from aavs_uv.datamodel import UVX
+from aavs_uv.datamodel import UVX, UVXAntennaCal
+from .aa_plotting import AaPlotter
 from .coord_utils import phase_vector, skycoord_to_lmn, generate_lmn_grid, sky2hpix, hpix2sky, gaincal_vec_to_matrix
 
 from .allsky_viewer import AllSkyViewer
@@ -86,6 +87,9 @@ class ApertureArray(object):
 
         # Add model visibilities
         self.model = None
+
+        # Add plotting utils
+        self.plotting = AaPlotter(self)
 
     def set_gsm(self, gsm_str: str='gsm08'):
         """ Set the Global Sky Model to use """
@@ -233,19 +237,13 @@ class ApertureArray(object):
 
         return pv_grid, lmn
 
-    def set_cal(self, cal: np.array):
+    def set_cal(self, cal: UVXAntennaCal):
         """ Set gaincal solution (used when generating vis matrix)
 
         Args:
-            cal (np.array): Complex array with shape (N_ant, 2)
+            cal (UVXAntennaCal): Calibration to apply
         """
-        if isinstance(cal, np.ma.core.MaskedArray):
-            cal[cal.mask] = 0
-            cal.fill_value = 0
-            self.uvx.antennas.attrs['flags'] = np.logical_or(*cal.mask.T)
-
-        cal_mat = gaincal_vec_to_matrix(cal)
-        self.workspace['cal'] = {'gaincal': cal, 'gaincal_matrix': cal_mat}
+        self.workspace['cal'] = cal
 
     def generate_vis_matrix(self, vis: str='data', t_idx=None, f_idx=None) -> np.array:
         """ Generate visibility matrix from underlying array data
@@ -254,7 +252,7 @@ class ApertureArray(object):
         Model data should have axes (time, frequency, antenna1, antenna2) and be an xr.DataArray
 
         Args:
-            vis (str): Select visibilities to be either real data or model visibilities ('data' or 'model')
+            vis (str): Select visibilities to be either raw 'data', calibrated 'corrected', or 'model'
             t_idx (int): Time index for data
             f_idx (int): Frequency index for data
 
@@ -265,12 +263,14 @@ class ApertureArray(object):
         t_idx = self.idx['t'] if t_idx is None else t_idx
         f_idx = self.idx['f'] if f_idx is None else f_idx
         match vis:
-            case 'data':
+            case 'corrected':
                 vis_sel = self.uvx.data[t_idx, f_idx].values
                 vis_mat = vis_arr_to_matrix_4pol(vis_sel, self.n_ant)
                 if self._in_workspace('cal'):
-                    vis_mat *= self.workspace['cal']['gaincal_matrix']
-
+                    vis_mat *= self.workspace['cal'].to_matrix()
+            case 'data':
+                vis_sel = self.uvx.data[t_idx, f_idx].values
+                vis_mat = vis_arr_to_matrix_4pol(vis_sel, self.n_ant)
             case 'model':
                 vis_mat = self.model.visibilities[t_idx, f_idx].values
 
