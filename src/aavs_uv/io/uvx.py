@@ -147,7 +147,7 @@ def read_uvx(filename: str) -> UVX:
     """ Load aavs_uv UVX object from uvx (HDF5) file
 
     Args:
-        filename (str): path to uvx file
+        filename (str): path to uvx file, or h5py.File
 
     Returns:
         uv (aavs_uv.datamodel.UV): UV object
@@ -155,7 +155,12 @@ def read_uvx(filename: str) -> UVX:
     def _to_list(lstr):
         return [x.strip("'").strip() for x in lstr.strip('()[]').split(', ')]
 
-    with h5py.File(filename, mode='r') as h:
+    if isinstance(filename, h5py.File):
+        fh = filename
+    else:
+        fh = h5py.File(filename, mode='r')
+
+    with fh as h:
 
         ################
         # ANTENNA DSET #
