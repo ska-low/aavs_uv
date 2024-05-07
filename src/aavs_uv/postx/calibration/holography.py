@@ -614,32 +614,57 @@ class Holographer(object):
         self.plot_farfield_beam_pattern.__func__.__doc__ = plot_farfield_beam_pattern.__doc__
         self.plot_phasecal_iterations.__func__.__doc__ = plot_jishnu_phasecal_iterations.__doc__
 
+    def __check_cal_src_set(self):
+        if self.cal_src is None:
+            e = "Calibration source not set! Run set_cal_src() first."
+            logger.error(e)
+            raise RuntimeError(e)
+
+    def __check_holo_dict_set(self):
+        if self.holo_dict is None:
+            e = "Self-holography not run yet! Run run_selfholo() first."
+            logger.error(e)
+            raise RuntimeError(e)
+
+    def __check_phs_dict_set(self):
+        if self.phs_dict is None:
+            e = "Phase calibration not run yet! Run run_phasecal() first."
+            logger.error(e)
+            raise RuntimeError(e)
+
     def run_phasecal(self, *args, **kwargs):
         # Docstring inherited from jishnu_phasecal function
+        self.__check_cal_src_set()
         self.phs_dict = jishnu_phasecal(self.aa, self.cal_src, *args, **kwargs)
         return self.phs_dict
 
     def run_selfholo(self, *args, **kwargs):
         # Docstring inherited from jishnu_selfholo function
+        self.__check_cal_src_set()
         self.holo_dict = jishnu_selfholo(self.aa, self.cal_src, *args, **kwargs)
         return self.holo_dict
 
     def report_flagged_antennas(self, *args, **kwargs):
         # Docstring inherited from report_flagged_antennas
+        self.__check_phs_dict_set()
         return report_flagged_antennas(self.aa, self.phs_dict)
+
+    def plot_phasecal_iterations(self, *args, **kwargs):
+        # Docstring inherited from plot_jishnu_phasecal_iterations function
+        self.__check_phs_dict_set()
+        plot_jishnu_phasecal_iterations(self.phs_dict)
 
     def plot_aperture(self, *args, **kwargs):
         # Docstring inherited from plot_aperture function
+        self.__check_holo_dict_set()
         plot_aperture(self.aa, self.holo_dict, *args, **kwargs)
 
     def plot_aperture_xy(self, *args, **kwargs):
         # Docstring inherited from plot_aperture_xy function
+        self.__check_holo_dict_set()
         plot_aperture_xy(self.aa, self.holo_dict, *args, **kwargs)
-
-    def plot_phasecal_iterations(self, *args, **kwargs):
-        # Docstring inherited from plot_jishnu_phasecal_iterations function
-        plot_jishnu_phasecal_iterations(self.phs_dict)
 
     def plot_farfield_beam_pattern(self, *args, **kwargs):
         # Docstring inherited from plot_farfield_beam_pattern
+        self.__check_holo_dict_set()
         plot_farfield_beam_pattern(self.holo_dict)
