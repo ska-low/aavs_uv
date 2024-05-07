@@ -22,6 +22,7 @@ import pyuvdata.utils as uvutils
 
 from aavs_uv.io.to_uvx import load_observation_metadata
 from aavs_uv.datamodel import UVX
+from aavs_uv.utils import get_resource_path, load_yaml
 from aavs_uv import __version__
 
 def phase_to_sun(uv: UVData, t0: Time) -> UVData:
@@ -266,6 +267,9 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
 
     # Load metadata
     md = load_observation_metadata(filename, yaml_config, load_config=telescope_name)
+
+    pyuv_md = load_yaml(get_resource_path('config/pyuvdata_config.yaml'))
+    md.update(pyuv_md)
 
     # Create empty UVData object
     uv = pyuvdata.UVData()
