@@ -90,6 +90,7 @@ class ApertureArray(object):
 
         # Add plotting utils
         self.plotting = AaPlotter(self)
+        self.viewer   = AllSkyViewer(self)
 
     def set_gsm(self, gsm_str: str='gsm08'):
         """ Set the Global Sky Model to use """

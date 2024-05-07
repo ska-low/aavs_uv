@@ -1,3 +1,8 @@
+from __future__ import annotations
+import typing
+if typing.TYPE_CHECKING:
+    from .aperture_array import ApertureArray
+
 import numpy as np
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -6,7 +11,6 @@ from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
 import healpy as hp
 
-from .ant_array import RadioArray
 from .sky_model import generate_skycat_solarsys, generate_skycat
 from .coord_utils import sky2hpix
 
@@ -17,7 +21,7 @@ class AllSkyViewer(object):
         update() - updates WCS information
         get_pixel() - get pixel information
     """
-    def __init__(self, observer: RadioArray=None, skycat: dict=None, ts: Time=None, f_mhz: float=None, n_pix: int=128):
+    def __init__(self, observer: ApertureArray=None, skycat: dict=None, ts: Time=None, f_mhz: float=None, n_pix: int=128):
         self.observer = observer
         self.skycat = skycat if skycat is not None else generate_skycat(observer)
         self.name = observer.name if hasattr(observer, 'name') else 'allsky'
