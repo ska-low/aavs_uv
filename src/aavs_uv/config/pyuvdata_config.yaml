@@ -1,0 +1,5 @@
+# PyUVData specific keywords
+future_array_shapes: False
+flex_spw: False
+Nspws: 1
+Nphase: 1
