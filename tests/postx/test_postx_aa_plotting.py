@@ -3,7 +3,7 @@ from aavs_uv.io import hdf5_to_uvx
 import pylab as plt
 
 def test_aa_plotter():
-    uvx = hdf5_to_uvx('../test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5', telescope_name='aavs2')
+    uvx = hdf5_to_uvx('./test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5', telescope_name='aavs2')
     aa = ApertureArray(uvx)
 
     plt.figure("ANT")

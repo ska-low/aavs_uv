@@ -3,7 +3,7 @@ import pylab as plt
 from aavs_uv.io import hdf5_to_uvx
 from aavs_uv.postx import ApertureArray
 
-FN_RAW   = '../test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
+FN_RAW   = './test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
 
 def test_holography_errs():
     uvx = hdf5_to_uvx(FN_RAW, telescope_name='aavs2')

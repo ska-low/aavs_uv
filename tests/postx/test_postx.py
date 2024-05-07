@@ -2,8 +2,8 @@ import numpy as np
 import pylab as plt
 from astropy.coordinates import SkyCoord
 
-from postx import RadioArray, AllSkyViewer, generate_skycat
-from postx.sky_model import sun_model
+from aavs_uv.postx import ApertureArray, AllSkyViewer, generate_skycat
+from aavs_uv.postx.sky_model import sun_model
 
 from aavs_uv.io import hdf5_to_uvx
 
@@ -14,22 +14,12 @@ def setup_test():
     v = hdf5_to_uvx(fn_data, fn_yaml)
 
     # RadioArray basics
-    aa = RadioArray(v)
+    aa = ApertureArray(v)
     return aa
 
 def test_postx():
     aa = setup_test()
     print(aa.get_zenith())
-    print(aa.zenith)
-
-    # RadioArray - various aa.update() calls
-    aa.verbose = True
-    aa.update()
-    aa.verbose = False
-    aa.update(t_idx=0)
-    aa.conjugate_data = True
-    aa.update(f_idx=0)
-    aa.update(update_gsm=True)
 
     # RadioArray - images
     img  = aa.make_image()
@@ -46,21 +36,12 @@ def test_postx():
     asv.load_skycat(skycat)
     asv.update()
 
-    print(asv.get_pixel(aa.zenith))
+    print(asv.get_pixel(aa.get_zenith()))
     sc_north = SkyCoord('12:00', '80:00:00', unit=('hourangle', 'deg'))
     assert asv.get_pixel(sc_north) == (0, 0)
 
 def test_postx_plotting():
     aa = setup_test()
-
-    # RadioArray - plotting
-    aa.plot_corr_matrix()
-    aa.plot_corr_matrix_4pol()
-    plt.show()
-    aa.plot_antennas(overlay_names=True)
-    plt.show()
-    aa.plot_antennas('E', 'U')
-    plt.show()
 
     # Sky catalog
     skycat = generate_skycat(aa)

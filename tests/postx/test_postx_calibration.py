@@ -3,8 +3,8 @@ import numpy as np
 from astropy.coordinates import get_sun
 
 from aavs_uv.io import hdf5_to_uvx
-from postx import RadioArray, AllSkyViewer, generate_skycat
-from postx.calibration import simulate_visibilities, simple_stefcal
+from aavs_uv.postx import ApertureArray, AllSkyViewer, generate_skycat
+from aavs_uv.postx.calibration import simulate_visibilities, simple_stefcal
 
 FN_RAW   = 'test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
 YAML_RAW = '../example-config/aavs2/uv_config.yaml'
@@ -12,7 +12,7 @@ YAML_RAW = '../example-config/aavs2/uv_config.yaml'
 def test_calibration():
     vis = hdf5_to_uvx(FN_RAW, YAML_RAW)
 
-    aa = RadioArray(vis, conjugate_data=False)
+    aa = ApertureArray(vis, conjugate_data=False)
     asv = AllSkyViewer(aa)
     sc = generate_skycat(aa)
     asv.load_skycat(sc)

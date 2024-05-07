@@ -25,24 +25,22 @@ def simple_stefcal(aa: ApertureArray, model: dict, t_idx: int=0, f_idx: int=0, p
     """ Apply stefcal to calibrate UV data
 
     Args:
-        aa (RadioArray): A RadioArray with UV data to calibrate
+        aa (ApertureArray): A RadioArray with UV data to calibrate
         model (dict): sky model to use (dictionary of SkyCoords)
         t_idx (int): time index of UV data array
         f_idx (int): frequency index of UV data array
         pol_idx (int): polarization index of UV data array
 
     Returns:
-        aa (RadioArray): RadioArray with calibration applied
-        g (np.array): 1D gains vector, complex data
+        aa (ApertureArray): RadioArray with calibration applied
+        g (np.ndarray): 1D gains vector, complex data
     """
-    aa.update(t_idx, f_idx, pol_idx, update_gsm=False)
 
-    d = aa.vis.data[t_idx, f_idx, :,  pol_idx]
-    v = vis_arr_to_matrix(d, aa.n_ant, 'upper', conj=True)
 
+    v = aa.generate_vis_matrix(f_idx=f_idx, t_idx=t_idx)[..., pol_idx]
     v_model = simulate_visibilities(aa, sky_model=model)
 
-    flags = aa.vis.antennas.flags
+    flags = aa.uvx.antennas.flags
     g, nit, z = stefcal(v, v_model)
 
     cal = np.outer(np.conj(g), g)
