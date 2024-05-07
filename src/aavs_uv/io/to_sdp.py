@@ -13,7 +13,7 @@ from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame, PolarisationFrame
 
 from aavs_uv.io.to_uvx import hdf5_to_uvx
-from aavs_uv.uvw import calc_uvw, calc_zenith_tracking_phase_corr
+from aavs_uv.uvw import calc_uvw, calc_zenith_tracking_phase_corr, calc_zenith_apparent_coords
 
 def hdf5_to_sdp_vis(fn_raw: str, yaml_raw: str=None, telescope_name: str=None, conj: bool=True,
                     scan_id: int=0, scan_intent: str="", execblock_id: str="", flip_uvw=True,
@@ -160,7 +160,8 @@ def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock
         raise NotImplementedError("Only length-1 frequency arrays supported at present.")
 
     # setup phase center
-    pcd = uv.phase_center_catalog[1]
+    pc_id = sorted(uv.phase_center_catalog.keys())[0]
+    pcd = uv.phase_center_catalog[pc_id]
     pc_name = pcd['cat_name']
     pc_sc = SkyCoord(pcd['cat_lon'], pcd['cat_lat'], unit=('rad', 'rad'))
     pc_hourangle = t.sidereal_time('apparent').to('rad').value - pc_sc.icrs.ra.to('hourangle').to('rad').value
