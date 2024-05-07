@@ -5,6 +5,7 @@ from astropy.constants import c
 from astropy.coordinates import SkyCoord, EarthLocation
 
 import pyuvdata.utils as uvutils
+import warnings
 
 #SHORTHAND
 sin, cos = np.sin, np.cos
@@ -124,8 +125,10 @@ def generate_lmn_grid(n_pix: int, abs_max: int=1, nan_below_horizon: bool=True):
     lmn[:, :, 0] = lg
     lmn[:, :, 1] = mg
     if nan_below_horizon:
-        ng     = np.sqrt(1 - lg**2 - mg**2)
-        lmn[:, :, 2] = ng
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', 'invalid value encountered in sqrt')
+            ng     = np.sqrt(1 - lg**2 - mg**2)
+            lmn[:, :, 2] = ng
     else:
         lmn[:, :, 2] = 0
     return lmn

@@ -16,6 +16,8 @@ import matplotlib as mpl
 import pylab as plt
 
 from loguru import logger
+import warnings
+
 
 ##################
 # HELPER FUNCTIONS
@@ -89,16 +91,18 @@ def meas_corr_to_magcal(mc: np.array, target_mag: float=1.0, sigma_thr: float=10
     mc_xy = mc[..., [0, 3]]
 
     # Magnitude Calibration
-    gc = target_mag / np.abs(mc_xy) * mc_xy.shape[0]
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', 'divide by zero encountered in divide')
+        gc = target_mag / np.abs(mc_xy) * mc_xy.shape[0]
 
-    # Simple normalization: mask values > 10x median
-    # Then do (data - avg) / std
-    gcm = (np.ma.array(gc, mask=gc  > np.median(gc) * 10)).compressed()
-    gcm = gcm[gcm > 0]
-    gc_norm = (gc - np.median(gcm)) / np.std(gcm)
-    gc = np.ma.array(gc, mask=gc_norm > sigma_thr)
-    gc[gc.mask] = 0
-    gc.mask = gc <= 0
+        # Simple normalization: mask values > 10x median
+        # Then do (data - avg) / std
+        gcm = (np.ma.array(gc, mask=gc  > np.median(gc) * 10)).compressed()
+        gcm = gcm[gcm > 0]
+        gc_norm = (gc - np.median(gcm)) / np.std(gcm)
+        gc = np.ma.array(gc, mask=gc_norm > sigma_thr)
+        gc[gc.mask] = 0
+        gc.mask = gc <= 0
 
     return gc
 
@@ -115,18 +119,21 @@ def meas_corr_to_phasecal(mc: np.array) -> np.array:
         pc (np.array): Phase calibration solutions.
                        Shape (N_ant, N_pol=2), dtype complex
     """
-    mc_xy = mc[..., [0, 3]]
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', "Warning: 'partition' will ignore the 'mask' of the MaskedArray.")
 
-    # Run magcal first, so we can look for and flag bad antennas
-    # Note we only use gc.mask, and ignore magnitude cal coeffs
-    gc = meas_corr_to_magcal(mc, target_mag=1.0)
+        mc_xy = mc[..., [0, 3]]
 
-    # Phase calibration
-    phs_ang = np.ma.array(np.angle(np.conj(mc_xy)), mask=gc.mask)
-    phs_ang -= np.median(phs_ang)
-    pc = np.exp(1j * phs_ang)
-    pc[gc.mask] = 0
-    pc.mask = gc.mask
+        # Run magcal first, so we can look for and flag bad antennas
+        # Note we only use gc.mask, and ignore magnitude cal coeffs
+        gc = meas_corr_to_magcal(mc, target_mag=1.0)
+
+        # Phase calibration
+        phs_ang = np.ma.array(np.angle(np.conj(mc_xy)), mask=gc.mask)
+        phs_ang -= np.median(phs_ang)
+        pc = np.exp(1j * phs_ang)
+        pc[gc.mask] = 0
+        pc.mask = gc.mask
 
     return pc
 
@@ -267,22 +274,22 @@ def jishnu_phasecal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=No
     for ii in range(n_iter_max):
         if ii == 0:
             meas_corr_src = np.einsum('i,ilp,l->ip', pv_src[0], V,
-                                  np.conj(pv_src[0]), optimize='optimal')
+                                np.conj(pv_src[0]), optimize='optimal')
             cc    = meas_corr_to_phasecal(meas_corr_src)
 
             cc_mat = gaincal_vec_to_matrix(cc)
             phs_std = np.std(np.angle(cc))
         else:
             meas_corr_iter = np.einsum('i,ilp,l->ip', pv_src[0], V * cc_mat,
-                                       np.conj(pv_src[0]), optimize='optimal')
+                                    np.conj(pv_src[0]), optimize='optimal')
             cc_iter     = meas_corr_to_phasecal(meas_corr_iter)
 
             phs_std_iter = np.std(np.angle(cc_iter))
             if phs_std_iter >= phs_std:
-                print(f"Iter {ii-1}: Iteration phase std minima reached, breaking")
+                logger.info(f"Iter {ii-1}: Iteration phase std minima reached, breaking")
                 break
             elif target_phs_std > np.rad2deg(phs_std_iter):
-                print(f"Iter {ii-1}: Target phase std reached, breaking")
+                logger.info(f"Iter {ii-1}: Target phase std reached, breaking")
                 break
             else:
                 cc_iter_mat = gaincal_vec_to_matrix(cc_iter)
@@ -306,11 +313,11 @@ def jishnu_phasecal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=No
     flag_arr = np.expand_dims(cc_dict['phs_cal'].mask, axis=0)
 
     cal = create_uvx_antenna_cal(telescope=aa.name, method='jishnu_phasecal',
-                                 antenna_cal_arr=cal_arr,
-                                 antenna_flags_arr=flag_arr,
-                                 f=aa.f, a=aa.ant_names, p=np.array(('X', 'Y')),
-                                 provenance={'jishnu_phasecal': cc_dict}
-                                 )
+                                antenna_cal_arr=cal_arr,
+                                antenna_flags_arr=flag_arr,
+                                f=aa.f, a=aa.ant_names, p=np.array(('X', 'Y')),
+                                provenance={'jishnu_phasecal': cc_dict}
+                                )
 
     return cal
 
