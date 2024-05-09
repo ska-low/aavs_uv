@@ -40,5 +40,5 @@ def test_uvdata_to_sdp_vis():
 
 if __name__ == "__main__":
     test_sdp_vis()
-    test_uvdata_to_sdp_vis()
     test_sdp_vis_conj()
+    test_uvdata_to_sdp_vis()

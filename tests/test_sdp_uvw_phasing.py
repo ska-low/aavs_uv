@@ -15,8 +15,8 @@ def test_phasing():
     except:
         pass
 
-    try:   
-        # Read in test data, converting into a pyuvdata.UVData and sdp Visibility 
+    try:
+        # Read in test data, converting into a pyuvdata.UVData and sdp Visibility
         test_data_fn = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
         uvdp = hdf5_to_pyuvdata(test_data_fn, telescope_name='aavs2', phase_to_t0=True)
         sdp = hdf5_to_sdp_vis(test_data_fn, telescope_name='aavs2')
@@ -31,16 +31,17 @@ def test_phasing():
         sdp_ms = create_visibility_from_ms('test.ms')[0]
 
         # Check that data are complex conjugate of each other
-        print("---")
+        print("--- SDP ---")
         print(sdp.vis.values[0,1])
-        print("---")
+        print("--- MS -> SDP ---")
         print(sdp_ms.vis.values[0, 1])
-        print("---")
-        print(sdp_sdp.vis.values[0,1])
+        #print("---")
+        #print(sdp_sdp.vis.values[0,1])
 
         assert np.allclose(sdp_ms.uvw, sdp_sdp.uvw, atol=0.5e-7)
+        assert np.allclose(sdp.vis.values, sdp_sdp.vis.values)
         assert np.allclose(sdp_ms.vis.values, sdp_sdp.vis.values)
-        
+
     finally:
         if os.path.exists('test.ms'):
             os.system('rm -rf test.ms')

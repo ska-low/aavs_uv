@@ -20,8 +20,9 @@ import pyuvdata
 from pyuvdata import UVData
 import pyuvdata.utils as uvutils
 
-from aavs_uv.io.aavs_hdf5 import load_observation_metadata
+from aavs_uv.io.to_uvx import load_observation_metadata
 from aavs_uv.datamodel import UVX
+from aavs_uv.utils import get_resource_path, load_yaml
 from aavs_uv import __version__
 
 def phase_to_sun(uv: UVData, t0: Time) -> UVData:
@@ -232,7 +233,7 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
     uv.uvw_array = np.zeros((uv.Nblts, 3), dtype='float64')
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        uv.set_uvws_from_antenna_positions(update_vis=True)
+        uv.set_uvws_from_antenna_positions(update_vis=False)
 
     # We have phased to Zenith, but pyuvdata's UVFITS writer needs data to be phased
     # to the zenith of the first timestamp. So, we do this by default
@@ -267,6 +268,9 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
     # Load metadata
     md = load_observation_metadata(filename, yaml_config, load_config=telescope_name)
 
+    pyuv_md = load_yaml(get_resource_path('config/pyuvdata_config.yaml'))
+    md.update(pyuv_md)
+
     # Create empty UVData object
     uv = pyuvdata.UVData()
 
@@ -286,7 +290,8 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
     uv.Nspws           = md['Nspws']
     uv.Nphase          = md['Nphase']
     uv.Ntimes          = md['n_integrations']
-    uv.channel_width   = md['channel_width']
+    uv.channel_width   = md['channel_spacing']  # NOTE: channel_spacing is used for frequency delta
+                                                # 'channel_width' exists in metadata, but not used here
     uv.flex_spw        = md['flex_spw']
     uv.future_array_shapes = md['future_array_shapes']
 
@@ -362,10 +367,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
 
     # Reference date RDATE and corresponding Greenwich sidereal time at midnight GST0
     # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1305C13-L1305C85
-    # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1318C20-L1318C21
-    # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1323C40-L1323C45
-    # See https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/uvfits.py#L1338C13-L1338C47
-    rdate_obj = Time(np.floor(uv.time_array[0]), format="jd", scale="utc")
+    rdate_obj = Time(uv.time_array[0], format="jd", scale="utc", location=t0.location)
     uv.rdate = rdate_obj.strftime("%Y-%m-%d")
     uv.gst0  = float(rdate_obj.sidereal_time("apparent", "tio").deg)
     uv.dut1  = float(rdate_obj.delta_ut1_utc)
@@ -423,12 +425,12 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
     uv.uvw_array = np.zeros((uv.Nblts, 3), dtype='float64')
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        uv.set_uvws_from_antenna_positions(update_vis=True)
+        uv.set_uvws_from_antenna_positions(update_vis=False)
 
         # We have phased to Zenith, but pyuvdata's UVFITS writer needs data to be phased
         # to the zenith of the first timestamp. So, we do this by default
         if phase_to_t0:
             phase_time = Time(uv.time_array[0], format="jd")
-            uv.phase_to_time(phase_time)
+            uv.phase_to_time(phase_time, use_ant_pos=True)
 
     return uv

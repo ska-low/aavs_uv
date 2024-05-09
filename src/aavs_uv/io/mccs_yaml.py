@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from astropy.coordinates import EarthLocation
 
-def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> (EarthLocation, pd.DataFrame):
+def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tuple[EarthLocation, pd.DataFrame]:
     """ Load station location from AAVS3 MCCS yaml config
 
     Args:

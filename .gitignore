@@ -1,3 +1,14 @@
+# project specific ignores
+notebooks/
+external-repos/
+tests/profiles/
+tests/*.html
+tests/htmlcov/
+tests/output-tmp/
+tests/test-batch-data/
+reference-docs/
+test.h5
+
  Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

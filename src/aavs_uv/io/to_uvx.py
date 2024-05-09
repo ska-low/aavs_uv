@@ -45,7 +45,6 @@ def load_observation_metadata(filename: str, yaml_config: str=None, load_config:
     md['station_config_file']  = os.path.abspath(yaml_config)
     return md
 
-
 def get_hdf5_metadata(filename: str) -> dict:
     """ Extract metadata from HDF5 and perform checks """
     with h5py.File(filename, mode='r') as datafile:

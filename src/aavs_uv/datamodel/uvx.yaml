@@ -93,6 +93,7 @@ uvx/visibilities/coords/frequency:
   hdf5_type: dataset
   dims:
     - frequency
+  units: Hz
 uvx/visibilities/coords/polarization:
   description: Polarization products coordinate
   hdf5_type: dataset
@@ -106,16 +107,19 @@ uvx/visibilities/coords/time/lst:
   hdf5_type: dataset
   dims:
     - time
+  units: hr
 uvx/visibilities/coords/time/mjd:
   description: Modified Julian Date
   hdf5_type: dataset
   dims:
     - time
+  format: mjd
 uvx/visibilities/coords/time/unix:
   description: "Unix timestamp (seconds since 1970-01-01 00:00:00 UTC)"
   hdf5_type: dataset
   dims:
     - time
+  format: unix
 uvx/visibilities/data:
   description: Visibility dataset / correlation tensor
   dims:
