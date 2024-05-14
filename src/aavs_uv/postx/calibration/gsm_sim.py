@@ -1,12 +1,12 @@
 
 from __future__ import annotations
+import typing
+if typing.TYPE_CHECKING:
+    from ..aperture_array import ApertureArray
 import numpy as np
 import healpy as hp
 import xarray as xr
 
-from astropy.constants import c
-from astropy.coordinates import get_sun
-from aavs_uv.vis_utils import  vis_arr_to_matrix
 from ..coord_utils import hpix2sky, sky2hpix
 from pyuvsim.analyticbeam import AnalyticBeam
 from matvis import simulate_vis

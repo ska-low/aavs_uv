@@ -18,6 +18,8 @@ from .coord_utils import phase_vector, skycoord_to_lmn, generate_lmn_grid, sky2h
 
 from .allsky_viewer import AllSkyViewer
 from .calibration.holography import Holographer
+from .calibration.aa_sim import AaSimulator
+from .calibration.aa_model import Model
 
 from astropy.constants import c
 SPEED_OF_LIGHT = c.value
@@ -86,11 +88,13 @@ class ApertureArray(object):
         self.holography = Holographer(self)
 
         # Add model visibilities
-        self.model = None
+        self.model = Model()
+        self.model.gsm = gsm
 
-        # Add plotting utils
+        # Add-on modules
         self.plotting = AaPlotter(self)
         self.viewer   = AllSkyViewer(self)
+        self.simulation = AaSimulator(self)
 
     def set_gsm(self, gsm_str: str='gsm08'):
         """ Set the Global Sky Model to use """
@@ -273,7 +277,7 @@ class ApertureArray(object):
                 vis_sel = self.uvx.data[t_idx, f_idx].values
                 vis_mat = vis_arr_to_matrix_4pol(vis_sel, self.n_ant)
             case 'model':
-                vis_mat = self.model.visibilities[t_idx, f_idx].values
+                vis_mat = self.simulation.model.visibilities[t_idx, f_idx].values
 
         return vis_mat
 

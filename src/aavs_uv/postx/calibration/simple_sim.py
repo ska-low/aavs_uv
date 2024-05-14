@@ -1,14 +1,15 @@
 from __future__ import annotations
+import typing
+if typing.TYPE_CHECKING:
+    from ..aperture_array import ApertureArray
 import numpy as np
 from astropy.constants import c
-from astropy.coordinates import get_sun
-from aavs_uv.vis_utils import  vis_arr_to_matrix
-from ..sky_model import RadioSource
+import xarray as xr
 
 LIGHT_SPEED = c.to('m/s').value
 cos, sin = np.cos, np.sin
 
-def simulate_visibilities(ant_arr: ApertureArray, sky_model: dict):
+def simulate_visibilities_pointsrc(ant_arr: ApertureArray, sky_model: dict):
     """ Simulate model visibilities for an antenna array
 
     Args:
@@ -22,10 +23,23 @@ def simulate_visibilities(ant_arr: ApertureArray, sky_model: dict):
     for srcname, src in sky_model.items():
         phs = ant_arr.generate_phase_vector(src, conj=True).squeeze()
         if hasattr(src, "mag"):
-            phs *= np.sqrt(src.mag)
+            phs *= src.mag / np.sqrt(2)
 
         if phsmat is None:
             phsmat = np.outer(phs, np.conj(phs))
         else:
             phsmat += np.outer(phs, np.conj(phs))
-    return phsmat
+
+    # Convert to 4-pol
+    v0 = np.zeros_like(phsmat)
+    V_shape = list(v0.shape)
+    V_shape.append(4)
+    V = np.zeros_like(phsmat, shape=V_shape)
+    V[..., 0] = phsmat
+    V[..., 1] = v0
+    V[..., 2] = v0
+    V[..., 3] = phsmat
+    V = np.expand_dims(V, axis=(0, 1))
+    V = xr.DataArray(V, dims=('time', 'frequency', 'ant1', 'ant2', 'polarization'))
+
+    return V

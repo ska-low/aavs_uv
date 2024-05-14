@@ -4,7 +4,7 @@ Simple sky model class for ephemeris using pyephem
 from __future__ import annotations
 import typing
 if typing.TYPE_CHECKING:
-    from postx.aperture_array import ApertureArray
+    from .aperture_array import ApertureArray
 import ephem
 import numpy as np
 
@@ -45,13 +45,16 @@ def generate_skycat(observer: ApertureArray):
     skycat.update(generate_skycat_solarsys(observer))
     return skycat
 
-def generate_skycat_solarsys(observer: RadioArray):
+def generate_skycat_solarsys(observer: ApertureArray):
     """ Generate Sun + Moon for observer """
     sun_gcrs  = get_body('sun', observer._ws('t'))
     moon_gcrs = get_body('moon', observer._ws('t'))
+    jupiter_gcrs = get_body('jupiter', observer._ws('t'))
+
     skycat = {
         'Sun': RadioSource(sun_gcrs.ra, sun_gcrs.dec, mag=1.0),
         'Moon': RadioSource(moon_gcrs.ra, moon_gcrs.dec, mag=1.0),
+        'Jupiter': RadioSource(jupiter_gcrs.ra, jupiter_gcrs.dec, mag=1.0),
     }
     return skycat
 

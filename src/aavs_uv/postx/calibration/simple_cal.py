@@ -1,7 +1,10 @@
 from __future__ import annotations
+import typing
+if typing.TYPE_CHECKING:
+    from ..aperture_array import ApertureArray
 
 import numpy as np
-from .simple_sim import simulate_visibilities
+from .simple_sim import simulate_visibilities_pointsrc
 from .stefcal import stefcal
 from aavs_uv.vis_utils import vis_arr_to_matrix
 
@@ -38,7 +41,7 @@ def simple_stefcal(aa: ApertureArray, model: dict, t_idx: int=0, f_idx: int=0, p
 
 
     v = aa.generate_vis_matrix(f_idx=f_idx, t_idx=t_idx)[..., pol_idx]
-    v_model = simulate_visibilities(aa, sky_model=model)
+    v_model = simulate_visibilities_pointsrc(aa, sky_model=model)
 
     flags = aa.uvx.antennas.flags
     g, nit, z = stefcal(v, v_model)

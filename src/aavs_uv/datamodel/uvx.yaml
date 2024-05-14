@@ -1,5 +1,5 @@
 uvx:
-  CLASS: AAVS_UV
+  CLASS: AA_UV
   VERSION: X.Y.Z
   hdf5_type: root
 

@@ -94,6 +94,7 @@ class AaPlotter(object):
             aa (ApertureArray): Aperture array 'parent' object to use
         """
         self.aa = aa
+        self.__setup_docstrings()
 
     def __setup_docstrings(self):
         # Inherit docstrings
