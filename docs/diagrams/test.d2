@@ -1,0 +1,128 @@
+#D2_THEME=100 d2 --sketch -w test.d2 out.svg
+#rsvg-convert -o out.png out.svg
+
+ApertureArray: {
+  shape: class
+  earth_location
+  antenna_xyz
+  phase_center
+}
+
+DataSource {
+  shape: class
+  frequency
+  timestamps
+  polarization
+  set_idx(): TODO
+  gen_vis_mat(): np.array
+}
+
+Data {
+  shape: cylinder
+}
+
+Calibration {
+  shape: class
+  load_cal(): TODO
+  set_cal(): TODO
+}
+
+Holography {
+  shape: class
+  set_ref_src(): RENAME
+  run_phasecal()
+  run_selfholo()
+  report_flagged_antennas()
+  plot_phasecal_iterations()
+  plot_aperture()
+  plot_aperture_xy()
+  plot_farfield_beam_pattern()
+}
+
+Stefcal {
+  shape: class
+  set_model(): TODO
+  run_stefcal(): TODO
+}
+
+Imager {
+  shape: class
+  make_image(): np.array
+  make_healpix(): np.array
+  deconvolve(): TODO
+  peel(): TODO
+}
+
+#ImagerUtils {
+#  shape: class
+#  generate_weight_grid()
+#  generate_phase_vector()
+# }
+
+Viewer {
+  shape: class
+  load_labels(): TODO
+  get_pixel(): tuple
+  orthview(): RENAME
+  mollview()
+}
+
+Simulation {
+  shape: class
+  sim_diffuse_sky_vis(): RENAME
+  sim_pointsrc_sky_vis(): RENAME
+  orthview_gsm(): RENAME
+  mollview_gsm(): RENAME
+}
+
+Models {
+  shape: class
+  beam
+  diffuse_sky: GlobalSkyModel
+  point_source_sky: Dict
+}
+
+
+Coords {
+  shape: class
+  get_sun(): SkyCoord
+  get_zenith(): SkyCoord
+  get_alt_az(): SkyCoord
+  get_ra_dec(): TODO
+}
+
+Modules {
+  shape: class
+}
+
+Workspace {
+  shape: stored_data
+  data
+  model
+  cal
+}
+
+Plotting {
+  shape: class
+  plot_antennas()
+  plot_corr_matrix()
+  plot_corr_matrix_4pol()
+}
+
+ApertureArray -> Workspace
+ApertureArray -> DataSource 
+ApertureArray -> Modules
+
+DataSource -> Plotting
+DataSource -> Data
+
+Modules -> Imager
+Modules -> Calibration 
+Modules -> Simulation -> Models
+Modules -> Coords
+
+Calibration -> Holography
+Calibration -> Stefcal
+
+#Imager -> ImagerUtils
+Imager -> Viewer
