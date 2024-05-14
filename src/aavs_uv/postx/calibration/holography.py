@@ -233,7 +233,7 @@ def jishnu_selfholo(aa: ApertureArray, cal_src: SkyCoord,
         'meas_corr': meas_corr_src,
         'lmn_grid': lmn,
         'vis_matrix': V,
-        'aperture_size': (λ / (lmn[0,0,0] - lmn[0,1,0]))[0] * oversample_factor,
+        'aperture_size': (λ / (lmn[0,0,0] - lmn[0,1,0]))[0],
         'n_pix': n_pix,
         'oversample_factor': oversample_factor
     }
@@ -495,7 +495,7 @@ def plot_aperture(aa: ApertureArray, cal: dict, pol_idx: int=0, plot_type: str='
     plt.ylim(-ap_ex/2/osamp, ap_ex/2/osamp)
 
     if annotate:
-        ix, iy = aa.xyz_enu[:, 0] * osamp, -aa.xyz_enu[:, 1] * osamp
+        ix, iy = aa.xyz_enu[:, 0], -aa.xyz_enu[:, 1]
         ixy = np.column_stack((ix, iy))
         for ii in range(aa.n_ant):
             text_color = 'red' if ant_flags[ii] else 'white'
