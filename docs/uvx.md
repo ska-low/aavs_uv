@@ -9,13 +9,11 @@ and polarization:
 
 ![xarray-example](images/xarray_example.png)
 
-Each axis has a corresponding dimension coordinate array, which maps array indexes to a corresponding time/frequency/baseline/polarization coordinate. This is the natural output structure for correlation
-codes.
+Each axis has a corresponding dimension coordinate array, which maps array indexes to a corresponding time/frequency/baseline/polarization coordinate. This is the natural output structure for correlation codes.
 
 In contrast, traditional UV formats (e.g. UVFITS, CASA MeasurementSet), store data as tables. In table-based formats, each row contains the data for one antenna pair, and corresponding time, antenna IDs, baseline UVW coordinates, weights, flags, integration length, etc. While this approach is flexible -- each row can be treated fully independently -- it essentially rips apart the correlator's natural array output. While necessary in some use cases (e.g. missing baselines, baseline-dependent averaging), the conversion is only applied so existing software can read the data.
 
 There are several advantages to keeping visibility data in a multi-dimensional array. Many algorithms require that the correlation matrix is constructed, which is trivial from an array, but difficult (and inefficient) from a table. The corresponding data volume is also much smaller for arrays than for tables.
-
 
 ### The `UVX` Python dataclass
 
@@ -49,6 +47,47 @@ For these to be useful, one also needs to know the
    2) `phase_center`: where the array is pointed, stored in an astropy `SkyCoord()`.
 
 Metadata about why the observation was done is stored in  `context`, and other information about how the file came to be is stored in `provenance`. Note that there is also a `timestamps` attribute; time information is available in the `data` array, but the astropy `Time()` class provides incredibly useful functionality.
+
+#### Visibility data
+
+Visibility data are stored in a `DataArray` with the following attributes:
+
+```
+<xarray.DataArray (time: N_time, frequency: N_freq, baseline: N_bl, polarization: N_pol)>
+    Coordinates:
+    * time          (time) object MultiIndex
+    * mjd           (time) time in MJD
+    * lst           (time) time in LST
+    * polarization  (polarization) <U2 'XX' 'XY' 'YX' 'YY'
+    * baseline      (baseline) object MultiIndex
+    * ant1          (baseline) int64 0 0 0 0 0 0 0 ... N_ant
+    * ant2          (baseline) int64 0 1 2 3 4 5 6 ... N_ant
+    * frequency     (frequency) float64 channel frequency values, in Hz
+```
+
+ The [SDP `Visibility`](https://developer.skao.int/projects/ska-sdp-datamodels/en/latest/xarray.html) datamodel shares similarities with `UVX` Visibility data, but notably stores UVW coordinates and weights, which `UVX` does not.
+
+#### Antenna data
+
+Antenna locations are stored as an xarray `Dataset`, relative to the `UVX.origin` (which is an astropy `EarthLocation`).
+
+```
+<xarray.Dataset>
+    Dimensions:  (antenna: N_ant, spatial: 3)
+    Coordinates:
+    * antenna  (antenna) int64 0 1 2 3 4 5 6 7 ... N_ant
+    * spatial  (spatial) <U1 'x' 'y' 'z'
+
+    Data variables:
+        enu      (antenna, spatial) float64 East-North-Up coordinates relative to eloc
+        ecef     (antenna, spatial) float64 ECEF XYZ coordinates (XYZ - eloc.XYZ0)
+
+    Attributes:
+        identifier:               Antenna names / identifiers
+        flags:                    Flags if antenna is bad
+        array_origin_geocentric:  Array origin (ECEF)
+        array_origin_geodetic:    Array origin (lat/lon/height)
+```
 
 ### HDF5 specification
 

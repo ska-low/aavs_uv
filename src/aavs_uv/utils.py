@@ -18,13 +18,13 @@ def reset_logger(use_tqdm: bool=False, disable: bool=False, level: str="INFO", *
 
     Notes:
         If using the `@task` decorator, it's a good idea to add reset_logger
-        to your function to keep the task quiet so progress bar shows, eg:
-            ```
+        to your function to keep the task quiet so progress bar shows, eg::
+
             @task
             def convert_file_task(args, ...):
             if not verbose:
                 reset_logger(use_tqdm=True, disable=True)
-            ```
+
     Returns:
         logger (logger): loguru logger object
     """

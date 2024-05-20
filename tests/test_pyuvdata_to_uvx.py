@@ -1,5 +1,5 @@
 from pyuvdata import UVData
-from aavs_uv.io.pyuvdata import pyuvdata_to_uvx, convert_data_to_uvx_convention
+from aavs_uv.io.from_pyuvdata import pyuvdata_to_uvx, convert_data_to_uvx_convention
 
 def test_pyuvdata_to_uvx():
     fn='./test-data/aavs3/aavs3_chan204_20231115.uvfits'

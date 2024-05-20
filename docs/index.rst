@@ -6,31 +6,34 @@
 aa_uv: Aperture Array UV Utilities
 ==================================
 
-`aa_uv` provides utilities for handling UV data products for low-frequency aperture array telescopes.
-
-.. image:: images/uv_flow.png
-   :width: 90 %
-   :alt: UV conversion flow
+.. image:: images/allsky_triptych.png
+   :width: 100 %
+   :alt: EDA2, AAVS2, AAVS3
    :align: center
 
+Utilities for handling UV data products for low-frequency aperture array telescopes.
+
 .. toctree::
    :maxdepth: 2
-   :caption: Data conversion
+   :caption: Overview
 
    conversion
+   uvx
 
 .. toctree::
    :maxdepth: 2
-   :caption: File utilities
+   :caption: AA UV code listing
 
-   uvx
-
+   io
+   utils
 
 .. toctree::
    :maxdepth: 2
    :caption: QA + Imaging
 
    postx
+
+
 
 Indices and tables
 ==================

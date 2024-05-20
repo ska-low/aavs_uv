@@ -55,6 +55,7 @@ def pyuvdata_to_uvx(uv: UVData, check: bool=False) -> UVX:
     Notes:
         This is experimental, and will only work under certain
         circumstances:
+
             * Nspws = 1
             * Data are in lower-triangular order, no missing data.
             * Data not phase-tracking (if multiple timesteps)

@@ -51,26 +51,30 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
 
     Args:
         antpos (pd.Dataframe): Pandas dataframe with antenna positions. Should have
-                               columns: id | name | E | N | U | flagged
+                               columns: ``id | name | E | N | U | flagged``
         eloc (EarthLocation): Astropy EarthLocation corresponding to array center
 
     Returns:
         dant (xp.Dataset): xarray Dataset with antenna locations
 
     Notes:
-        <xarray.Dataset>
-            Dimensions:  (antenna: N_ant, spatial: 3)
-            Coordinates:
-            * antenna  (antenna) int64 0 1 2 3 4 5 6 7 ... N_ant
-            * spatial  (spatial) <U1 'x' 'y' 'z'
-            Data variables:
-                enu      (antenna, spatial) float64 East-North-Up coordinates relative to eloc
-                ecef     (antenna, spatial) float64 ECEF XYZ coordinates (XYZ - eloc.XYZ0)
-            Attributes:
-                identifier:               Antenna names / identifiers
-                flags:                    Flags if antenna is bad
-                array_origin_geocentric:  Array origin (ECEF)
-                array_origin_geodetic:    Array origin (lat/lon/height)
+        ::
+
+            <xarray.Dataset>
+                Dimensions:  (antenna: N_ant, spatial: 3)
+                Coordinates:
+                * antenna  (antenna) int64 0 1 2 3 4 5 6 7 ... N_ant
+                * spatial  (spatial) <U1 'x' 'y' 'z'
+
+                Data variables:
+                    enu      (antenna, spatial) float64 East-North-Up coordinates relative to eloc
+                    ecef     (antenna, spatial) float64 ECEF XYZ coordinates (XYZ - eloc.XYZ0)
+
+                Attributes:
+                    identifier:               Antenna names / identifiers
+                    flags:                    Flags if antenna is bad
+                    array_origin_geocentric:  Array origin (ECEF)
+                    array_origin_geodetic:    Array origin (lat/lon/height)
     """
     uvx_schema = load_yaml(get_resource_path('datamodel/uvx.yaml'))
 
@@ -153,21 +157,23 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
         vis (xp.DataArray): xarray DataArray object, see notes below
 
     Notes:
-        <xarray.DataArray (time: N_time, frequency: N_freq, baseline: N_bl, polarization: N_pol)>
-            Coordinates:
-            * time          (time) object MultiIndex
-              * mjd           (time) time in MJD
-              * lst           (time) time in LST
-            * polarization  (polarization) <U2 'XX' 'XY' 'YX' 'YY'
-            * baseline      (baseline) object MultiIndex
-              * ant1          (baseline) int64 0 0 0 0 0 0 0 ... N_ant
-              * ant2          (baseline) int64 0 1 2 3 4 5 6 ... N_ant
-            * frequency     (frequency) float64 channel frequency values, in Hz
+        ::
+
+            <xarray.DataArray (time: N_time, frequency: N_freq, baseline: N_bl, polarization: N_pol)>
+                Coordinates:
+                * time          (time) object MultiIndex
+                * mjd           (time) time in MJD
+                * lst           (time) time in LST
+                * polarization  (polarization) <U2 'XX' 'XY' 'YX' 'YY'
+                * baseline      (baseline) object MultiIndex
+                * ant1          (baseline) int64 0 0 0 0 0 0 0 ... N_ant
+                * ant2          (baseline) int64 0 1 2 3 4 5 6 ... N_ant
+                * frequency     (frequency) float64 channel frequency values, in Hz
 
     Speed notes:
         this code generates MJD and LST timestamps attached as coordinates, as well as an
-        astropy Time() array (which provides useful conversion between time formats that
-        DataArray does not). Conversion to/from datetime64 takes significantly longer than
+        astropy `Time()` array (which provides useful conversion between time formats that
+        `DataArray` does not). Conversion to/from `datetime64` takes significantly longer than
         generation from an array of MJD values.
     """
     uvx_schema = load_yaml(get_resource_path('datamodel/uvx.yaml'))

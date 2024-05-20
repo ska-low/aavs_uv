@@ -1,5 +1,7 @@
 # `aa_uv` command-line utility
 
+![](images/uv_flow.png)
+
 The `aa_uv` command-line utility converts the HDF5 output from AAVS/AA0.5 stations into a file format
 of your choosing. Currently supported:
 

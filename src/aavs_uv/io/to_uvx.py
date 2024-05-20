@@ -92,19 +92,21 @@ def hdf5_to_uvx(fn_data: str, fn_config: str=None,
         uv (UV): A UV dataclass object with xarray datasets
 
     Notes:
-        The dataclass is defined as:
-        class UV:
-            name: str
-            context: dict
-            antennas: xp.Dataset - dimensions ('antenna', 'spatial')
-            data: xp.DataArray   - dimensions ('time', 'frequency', 'baseline', 'polarization')
-            timestamps: Time
-            origin: EarthLocation
-            phase_center: SkyCoord
-            provenance: dict
+        The dataclass is defined as::
+
+            class UV:
+                name: str
+                context: dict
+                antennas: xp.Dataset - dimensions ('antenna', 'spatial')
+                data: xp.DataArray   - dimensions ('time', 'frequency', 'baseline', 'polarization')
+                timestamps: Time
+                origin: EarthLocation
+                phase_center: SkyCoord
+                provenance: dict
 
     Metadata notes:
-        The following dict items are required to generate coordinate arrays:
+        The following dict items are required to generate coordinate arrays::
+
             n_integrations
             tsamp
             ts_start
