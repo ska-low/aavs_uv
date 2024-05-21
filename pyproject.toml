@@ -13,7 +13,6 @@ include = [
 
 [tool.poetry.dependencies]
 python = ">=3.10"
-astroplan = ">=0.9"
 astropy = ">=5.3"
 h5py = ">=3.9"
 joblib = ">=1.3.0"
@@ -23,7 +22,7 @@ xarray = ">=2023.7"
 loguru = ">=0.5"
 pyyaml = ">=5.0"
 pygdsm   = ">=1.3"
-pyuvdata =  { git = "https://github.com/telegraphic/pygdsm"}
+pyuvdata =  { git = "https://github.com/ska-sci-ops/pyuvdata"}
 ska-sdp-func-python = { git = "https://gitlab.com/ska-telescope/sdp/ska-sdp-func-python"}
 ska-sdp-datamodels = {git = "https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels"}
 

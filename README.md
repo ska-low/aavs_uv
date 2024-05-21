@@ -121,3 +121,13 @@ pip install git+https://github.com/ska-sci-ops/aa_uv/edit/main/README.md
 ```
 
 Alternatively, download this repository and install using `pip install .`. A list of required packages can be found in the [pyproject.toml](https://github.com/ska-sci-ops/aa_uv/blob/main/pyproject.toml#L13).
+
+#### Astronomy packages
+
+[![astropy](http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat)](http://www.astropy.org/)
+
+`aa_uv` is built upon the following astronomy packages:
+* [astropy](http://www.astropy.org/) for coordinate calculations.
+* [pyuvdata](https://github.com/RadioAstronomySoftwareGroup/pyuvdata) for interferometric data format conversion.
+* [matvis](https://github.com/HERA-Team/matvis) for visibility simulation.
+* [pygdsm](https://github.com/telegraphic/pygdsm) for diffuse sky model generation.

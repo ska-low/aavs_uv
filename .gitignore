@@ -170,3 +170,4 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 .DS_Store
+tests/correlation_burst_204_20240104_53513_0.uvx5
