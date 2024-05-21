@@ -1,8 +1,8 @@
 import numpy as np
 import pylab as plt
 
-from aavs_uv.acacia import AcaciaStorage
-from aavs_uv.postx import ApertureArray
+from aa_uv.acacia import AcaciaStorage
+from aa_uv.postx import ApertureArray
 
 def test_acacia():
     acacia = AcaciaStorage()
@@ -13,9 +13,9 @@ def test_acacia():
     uvx = acacia.read_uvx(bucket, fpath)
     aa = ApertureArray(uvx)
 
-    aa.holography.set_cal_src(aa.get_sun())
-    holo_dict = aa.holography.run_selfholo()
-    aa.holography.plot_aperture(plot_type='phs')
+    aa.calibration.holography.set_cal_src(aa.coords.get_sun())
+    holo_dict = aa.calibration.holography.run_selfholo()
+    aa.calibration.holography.plot_aperture(plot_type='phs')
     plt.show()
 
 if __name__ == "__main__":

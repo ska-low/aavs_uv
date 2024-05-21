@@ -242,7 +242,7 @@ uvx/phase_center/dec:
 uvx/provenance:
   description: History and data provenance information.
   hdf5_type: group
-uvx/provenance/aavs_uv_config:
+uvx/provenance/aa_uv_config:
   description: Software versions used in file generation.
   hdf5_type: group
 uvx/provenance/input_files:

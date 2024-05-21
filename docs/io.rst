@@ -4,13 +4,13 @@ Data Models
 UVX
 ===
 
-.. automodule:: aavs_uv.datamodel.uvx
+.. automodule:: aa_uv.datamodel.uvx
     :members:
 
 Cal
 ===
 
-.. automodule:: aavs_uv.datamodel.cal
+.. automodule:: aa_uv.datamodel.cal
     :members:
 
 File I/O
@@ -19,31 +19,31 @@ File I/O
 pyuvdata
 ========
 
-.. automodule:: aavs_uv.io.from_pyuvdata
+.. automodule:: aa_uv.io.from_pyuvdata
     :members:
 
-.. automodule:: aavs_uv.io.to_pyuvdata
+.. automodule:: aa_uv.io.to_pyuvdata
     :members:
 
 uvx
 ===
 
-.. automodule:: aavs_uv.io.uvx
+.. automodule:: aa_uv.io.uvx
     :members:
 
-.. automodule:: aavs_uv.io.to_uvx
+.. automodule:: aa_uv.io.to_uvx
     :members:
 
 
 sdp
 ===
 
-.. automodule:: aavs_uv.io.to_sdp
+.. automodule:: aa_uv.io.to_sdp
     :members:
 
 
 yaml
 ====
 
-.. automodule:: aavs_uv.io.mccs_yaml
+.. automodule:: aa_uv.io.mccs_yaml
     :members:

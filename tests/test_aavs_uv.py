@@ -1,7 +1,7 @@
 from pyuvdata import UVData
 from pyuvdata.parameter import UVParameter
-from aavs_uv.io import hdf5_to_pyuvdata, phase_to_sun
-from aavs_uv.utils import load_config
+from aa_uv.io import hdf5_to_pyuvdata, phase_to_sun
+from aa_uv.utils import load_config
 import numpy as np
 from astropy.time import Time
 import glob, os
@@ -130,9 +130,9 @@ def get_aavs2_correlator_filelist(filepath: str) -> list:
 def test0():
     """ Test basic data loading using get_aavs2_correlator_filelist """
     filepath    = 'test-data/aavs2_1x1000ms/'
-    yaml_config = '../example-config/aavs2/uv_config.yaml'
+    yaml_config = '../src/aa_uv/config/aavs2/uv_config.yaml'
     filelist = get_aavs2_correlator_filelist(filepath)
-    uv = hdf5_to_pyuvdata(filelist[0], yaml_config)
+    uv = hdf5_to_pyuvdata(filelist[0], yaml_config=yaml_config)
 
 def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=False) -> UVData:
     """ Load datasets to use in tests
@@ -153,7 +153,7 @@ def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=Fal
         uv_uvf: Loaded from a UVFITS file - chan_204_20230823T055556.uvfits
         uv_mir: Loaded from a MIRIAD file - chan_204_20230823T055556.uv
     """
-    yaml_raw = '../example-config/aavs2/uv_config.yaml'
+    yaml_raw = '../src/aa_uv/config/aavs2/uv_config.yaml'
     fn_raw = 'test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
     fn_uvf = 'test-data/aavs2_1x1000ms/chan_204_20230823T055556.uvfits'
     fn_mir = 'test-data/aavs2_1x1000ms/chan_204_20230823T055556.uv'
@@ -162,7 +162,7 @@ def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=Fal
     fn_2x500_uvf = 'test-data/aavs2_2x500ms/chan_204_20230927T094734.uvfits'
 
     def _load_and_phase_hdf5():
-        uv_raw = hdf5_to_pyuvdata(fn_raw, yaml_raw)
+        uv_raw = hdf5_to_pyuvdata(fn_raw, yaml_config=yaml_raw)
         t0 = Time(uv_raw.time_array[0], format='jd')
         uv_phs = phase_to_sun(uv_raw, t0)
         uv_phs.check()
@@ -178,14 +178,14 @@ def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=Fal
         uv_mir = UVData.from_file(fn_mir, file_type='miriad')
         return uv_phs, uv_uvf, uv_mir
     elif load_2x500:
-        uv_phs = hdf5_to_pyuvdata(fn_2x500_raw, yaml_raw)
+        uv_phs = hdf5_to_pyuvdata(fn_2x500_raw, yaml_config=yaml_raw)
         uv_uvf = UVData.from_file(fn_2x500_uvf, file_type='uvfits', run_check=False)
         return uv_phs, uv_phs
     else:
         return uv_phs
 
 def test_compare():
-    """ Compare aavs_uv conversion to MIRIAD dataset """
+    """ Compare aa_uv conversion to MIRIAD dataset """
     uv_phs, uv_uvf, uv_mir = _setup_test('Compare to MIRIAD', load_comp=True)
     compare_uv_datasets(uv_phs, uv_mir)
 

@@ -19,6 +19,10 @@
         color: var(--jet);
     }
 
+    .wy-nav-side .toctree-l1 a:hover, .wy-nav-side .toctree-l2 a:hover {
+        background: var(--blueshift-darknavy);
+    }
+
     .pre {
         color: var(--reductant);
     }

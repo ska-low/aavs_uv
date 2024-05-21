@@ -1,7 +1,7 @@
 import numpy as np
 import healpy as hp
 
-from aavs_uv.postx.coord_utils import hpix2sky, sky2hpix
+from aa_uv.postx.coords.coord_utils import hpix2sky, sky2hpix
 
 def test_pix2sky():
     """ Small test routine for converting healpix pixel_id to and from SkyCoords """

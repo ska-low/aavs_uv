@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "aavs-uv"
+name = "aa-uv"
 version = "2.0.0"
 description = "SKA-low Aperture Array Verification Systems (AAVS) Interferometry UV utilities."
 authors = ["Danny C. Price"]
@@ -34,7 +34,7 @@ optional = true
 python-casacore = {version = ">=3.5"}
 
 [tool.poetry.scripts]
-aavs_uv = "aavs_uv.converter:run"
+aa_uv = "aa_uv.converter:run"
 
 [tool.poetry.extras]
 python-casacore = ["python-casacore"]

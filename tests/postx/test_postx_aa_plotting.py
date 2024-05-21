@@ -1,5 +1,5 @@
-from aavs_uv.postx import ApertureArray
-from aavs_uv.io import hdf5_to_uvx
+from aa_uv.postx import ApertureArray
+from aa_uv.io import hdf5_to_uvx
 import pylab as plt
 
 def test_aa_plotter():

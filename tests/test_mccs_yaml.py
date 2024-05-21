@@ -1,5 +1,5 @@
-from aavs_uv.io.mccs_yaml import station_location_from_platform_yaml
-from aavs_uv.utils import get_resource_path
+from aa_uv.io.mccs_yaml import station_location_from_platform_yaml
+from aa_uv.utils import get_resource_path
 
 def test_mccs_yaml():
     fn = get_resource_path('config/aavs3/mccs_aavs3_0.1.0.yaml')

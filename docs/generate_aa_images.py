@@ -1,7 +1,7 @@
 import numpy as np
 import pylab as plt
-from aavs_uv.io import hdf5_to_uvx
-from aavs_uv.postx import ApertureArray
+from aa_uv.io import hdf5_to_uvx
+from aa_uv.postx import ApertureArray
 
 test_data =  {
     'aavs2': ('test-data/aavs2/correlation_burst_100_20211113_14447_0.hdf5',

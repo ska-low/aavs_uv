@@ -4,23 +4,23 @@ Utilities
 uvw_utils.py
 ============
 
-.. automodule:: aavs_uv.uvw_utils
+.. automodule:: aa_uv.uvw_utils
     :members:
 
 vis_utils.py
 ============
 
-.. automodule:: aavs_uv.vis_utils
+.. automodule:: aa_uv.vis_utils
     :members:
 
 utils.py
 =========
 
-.. automodule:: aavs_uv.utils
+.. automodule:: aa_uv.utils
     :members:
 
 parallelize.py
 ==============
 
-.. automodule:: aavs_uv.parallelize
+.. automodule:: aa_uv.parallelize
     :members:

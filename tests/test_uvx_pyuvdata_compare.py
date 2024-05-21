@@ -1,5 +1,5 @@
-from aavs_uv.io import read_uvx, hdf5_to_uvx
-from aavs_uv.io.to_pyuvdata import hdf5_to_pyuvdata, uvx_to_pyuvdata
+from aa_uv.io import read_uvx, hdf5_to_uvx
+from aa_uv.io.to_pyuvdata import hdf5_to_pyuvdata, uvx_to_pyuvdata
 import numpy as np
 
 def test_compare_uv_paths():

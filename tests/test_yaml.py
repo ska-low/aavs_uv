@@ -1,4 +1,4 @@
-from aavs_uv.utils import load_config, load_yaml
+from aa_uv.utils import load_config, load_yaml
 
 def test_yaml():
     print(load_config('aavs2'))

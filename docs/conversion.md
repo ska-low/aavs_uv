@@ -13,8 +13,8 @@ of your choosing. Currently supported:
 
 
 ```
-$ aavs_uv -h
-usage: aavs_uv [-h] -o OUTPUT_FORMAT [-c ARRAY_CONFIG] [-n TELESCOPE_NAME] [-s] [-j] [-b] [-B] [-x FILE_EXT]
+$ aa_uv -h
+usage: aa_uv [-h] -o OUTPUT_FORMAT [-c ARRAY_CONFIG] [-n TELESCOPE_NAME] [-s] [-j] [-b] [-B] [-x FILE_EXT]
                [-i CONTEXT_YAML] [-w NUM_WORKERS] [-v] [-p PARALLEL_BACKEND] [-N N_INT_PER_FILE] [-z]
                infile outfile
 
@@ -30,9 +30,9 @@ options:
                         Output file format (uvx, uvfits, miriad, ms, uvh5, sdp). Can be comma separated for multiple
                         formats.
   -c ARRAY_CONFIG, --array_config ARRAY_CONFIG
-                        Array configuration YAML file. If supplied, will override aavs_uv internal array configs.
+                        Array configuration YAML file. If supplied, will override aa_uv internal array configs.
   -n TELESCOPE_NAME, --telescope_name TELESCOPE_NAME
-                        Telescope name, e.g. 'aavs3'. If supplied, will attempt to use aavs_uv internal array config.
+                        Telescope name, e.g. 'aavs3'. If supplied, will attempt to use aa_uv internal array config.
   -s, --phase-to-sun    Re-phase to point toward Sun (the sun must be visible!). If flag not set, data will be phased
                         toward zenith.
   -j, --no_conj         Do not conjugate visibility data (note AAVS2 and AAVS3 require conjugation)
