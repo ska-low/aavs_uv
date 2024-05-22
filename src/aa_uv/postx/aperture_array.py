@@ -55,8 +55,6 @@ class ApertureArray(object):
         # Phase center
         self.phase_center = uvx.phase_center
 
-        self.calibration_mat = None
-
         # Setup current index dict and workspace
         self.idx = {'t': 0, 'f': 0, 'p': 0}
         self.workspace = {}
@@ -78,6 +76,10 @@ class ApertureArray(object):
         # Setup Global Sky Model
         self.set_gsm(gsm)
 
+    def __repr__(self):
+        eloc = self.earthloc.to_geodetic()
+        s = f"<ApertureArray: {self.name} (lat {eloc.lat.value:.2f}, lon {eloc.lon.value:.2f})>"
+        return s
 
     def set_gsm(self, gsm_str: str='gsm08'):
         """ Set the Global Sky Model to use """
@@ -158,6 +160,10 @@ class ApertureArray(object):
             case 'data':
                 vis_sel = self.uvx.data[t_idx, f_idx].values
                 vis_mat = vis_arr_to_matrix_4pol(vis_sel, self.n_ant)
+            case 'cal':
+                vis_sel = self.uvx.data[t_idx, f_idx].values
+                vis_mat = vis_arr_to_matrix_4pol(vis_sel, self.n_ant)
+                vis_mat *= self.workspace['cal'].to_matrix()
             case 'model':
                 vis_mat = self.simulation.model.visibilities[t_idx, f_idx].values
 

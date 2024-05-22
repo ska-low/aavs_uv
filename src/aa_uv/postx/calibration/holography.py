@@ -143,7 +143,8 @@ def meas_corr_to_phasecal(mc: np.array) -> np.array:
 
 def jishnu_selfholo(aa: ApertureArray, cal_src: SkyCoord,
                abs_max: int=4, aperture_padding: float=3, NFFT: int=2049,
-               min_baseline_len: float=None, oversample_factor: int=3) -> dict:
+               min_baseline_len: float=None, oversample_factor: int=3,
+               vis: str='data') -> dict:
     """ Calibrate aperture array data using self-holography
 
     Implentation based on J. Thekkeppattu et al. (2024)
@@ -178,6 +179,8 @@ def jishnu_selfholo(aa: ApertureArray, cal_src: SkyCoord,
         oversample_factor (int): Amount to oversample lmn direction cosine plane. This increases
                                  resolution for the beam_corr (far-field E-pattern), at the
                                  expense of increasing the aperture illumination image size.
+        vis (str): Visibility type to use - one of 'data', 'cal', 'corrected', or 'model'.
+                   Passed to generate_vis_matrix() to select visibility data.
 
     Returns:
         cal = {
@@ -206,7 +209,8 @@ def jishnu_selfholo(aa: ApertureArray, cal_src: SkyCoord,
     n_pix *= oversample_factor
 
     # Generate visibility matrix (N_ant, N_ant, N_pol=4)
-    V = aa.generate_vis_matrix()
+    logger.info(f"Generating vis matrix: {vis}")
+    V = aa.generate_vis_matrix(vis)
 
     if min_baseline_len:
         short_bls = aa.bl_matrix < min_baseline_len
@@ -326,7 +330,8 @@ def jishnu_phasecal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=No
 
 
 def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
-                    n_iter_max: int=50, target_phs_std: float=1.0, target_mag: float=1.0) -> UVXAntennaCal:
+                    n_iter_max: int=50, target_phs_std: float=1.0, target_mag: float=1.0,
+                    apply: bool=False) -> UVXAntennaCal:
     """ Iteratively apply Jishnu Cal phase calibration, then compute magnitude calibraiton
 
     Args:
