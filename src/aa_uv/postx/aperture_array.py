@@ -8,6 +8,7 @@ import pylab as plt
 from astropy.constants import c
 from astropy.units import Quantity
 import healpy as hp
+from loguru import logger
 
 from aa_uv.vis_utils import  vis_arr_to_matrix_4pol
 from aa_uv.datamodel import UVX, UVXAntennaCal
@@ -163,7 +164,10 @@ class ApertureArray(object):
             case 'cal':
                 vis_sel = self.uvx.data[t_idx, f_idx].values
                 vis_mat = vis_arr_to_matrix_4pol(vis_sel, self.n_ant)
-                vis_mat *= self.workspace['cal'].to_matrix()
+                if 'cal' in self.workspace.keys():
+                    vis_mat *= self.workspace['cal'].to_matrix()
+                else:
+                    logger.warning("Calibration not set, returning raw visibilities.")
             case 'model':
                 vis_mat = self.simulation.model.visibilities[t_idx, f_idx].values
 
