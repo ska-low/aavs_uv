@@ -76,6 +76,33 @@ def plot_antennas(aa: ApertureArray, x: str='E', y: str='N', overlay_names: bool
     plt.title(title)
 
 
+def plot_uvdist_amp(aa: ApertureArray, vis: str='data', pol_idx: int=0, **kwargs):
+    """ Plot amplitude as function of UV distance
+
+    Args:
+        vis (str): One of 'data', 'corrected', or 'model'
+        pol_idx (int): Polarization index
+    """
+    bls = aa.bl_matrix
+    amp = np.abs(aa.generate_vis_matrix(vis)[..., pol_idx])
+
+    title = f"{aa.name} | UV Amplitude"
+
+    if 'marker' not in kwargs.keys():
+        kwargs['marker'] = '.'
+
+    if 's' not in kwargs.keys():
+        kwargs['s'] = 8
+
+    if 'alpha' not in kwargs.keys():
+        kwargs['alpha'] = 0.2
+
+    plt.scatter(bls.ravel(), amp.ravel(),  **kwargs)
+    plt.xlabel("UV Distance [m]")
+    plt.ylabel("Amplitude")
+    plt.title(title)
+
+
 ####################
 ## AA_PLOTTER CLASS
 ####################
@@ -104,6 +131,7 @@ class AaPlotter(AaBaseModule):
         self.plot_corr_matrix.__func__.__doc__  = plot_corr_matrix.__doc__
         self.plot_corr_matrix_4pol.__func__.__doc__  = plot_corr_matrix_4pol.__doc__
         self.plot_antennas.__func__.__doc__  = plot_antennas.__doc__
+        self.plot_uvdist_amp.__func__.__doc__  = plot_uvdist_amp.__doc__
 
     def plot_corr_matrix(self, *args, **kwargs):
         # Docstring inherited
@@ -116,3 +144,7 @@ class AaPlotter(AaBaseModule):
     def plot_antennas(self, *args, **kwargs):
         # Docstring inherited
         plot_antennas(self.aa, *args, **kwargs)
+
+    def plot_uvdist_amp(self, *args, **kwargs):
+        # Docstring inherited
+        plot_uvdist_amp(self.aa, *args, **kwargs)
