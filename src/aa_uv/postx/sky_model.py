@@ -12,7 +12,7 @@ from astropy.coordinates import SkyCoord, get_body, get_sun
 
 class RadioSource(SkyCoord):
     """ A SkyCoordinate with a magnitude """
-    def __init__(self, *args, mag=1.0, unit=None, **kwargs):
+    def __init__(self, *args, mag: float=1.0, unit: str=None, **kwargs):
         if unit is None:
             unit=('hourangle', 'degree')
         super().__init__(*args, unit=unit, **kwargs)
@@ -38,6 +38,8 @@ def generate_skycat(observer: ApertureArray):
         'Fornax_A':    RadioSource('03h 22m 41.7',   '−37:12:30',    ),
         'Vela':        RadioSource('08h 35m 20.66',  '-45:10:35.2',  ),
         'Taurus_A':    RadioSource('05h 34m 30.9',   '+22:00:53',    ),
+        'Puppis_A':    RadioSource('08h 24m 07s',    '-42:59:48'     ),
+        '3C_444':      RadioSource('22h 14m 25.752', '-17:01:36.29'  ),
         'GC':          RadioSource('17h 45m 40.04',  '-29:00:28.1',  ),
         'LMC':         RadioSource('05h 23m 34.6s',  '-69:45:22',    ),
         'SMC':         RadioSource('00h 52m 38.0s',  '-72:48:01',    ),
