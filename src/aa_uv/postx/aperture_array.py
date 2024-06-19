@@ -91,6 +91,25 @@ class ApertureArray(object):
         self.simulation.model.gsm.date  = self.t[0].datetime
         self.gsm = self.simulation.model.gsm
 
+    def set_idx(self, f: int=None, t: int=None, p: int=None):
+        """ Set index of UVX data array
+
+        Args:
+            f (int): Frequency index
+            t (int): Time index
+            p (int): Polarization index
+
+        Notes:
+            Updates the self.idx dictionary (keys are f,t,p).
+            This controls which data are selected by generate_vis_matrix()
+        """
+        if f is not None:
+            self.idx['f'] = f
+        if t is not None:
+            self.idx['t'] = t
+        if p is not None:
+            self.idx['p'] = p
+
     def _ws(self, key: str):
         """ Return value of current index for freq / pol / time or workspace entry
 
@@ -122,7 +141,7 @@ class ApertureArray(object):
 
         # Helper fn to compute length for one row
         def bl_len(xyz, idx):
-            return np.sum(np.sqrt((xyz - xyz[idx])**2), axis=-1)
+            return np.sqrt(np.sum((xyz - xyz[idx])**2, axis=-1))
 
         bls = np.zeros((self.n_ant, self.n_ant), dtype='float32')
         # Loop over rows
