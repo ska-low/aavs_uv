@@ -1,5 +1,5 @@
-from aavs_uv.io import hdf5_to_uvx, hdf5_to_pyuvdata
-from aavs_uv.uvw import calc_uvw
+from aa_uv.io import hdf5_to_uvx, hdf5_to_pyuvdata
+from aa_uv.uvw_utils import calc_uvw
 import numpy as np
 from pyuvdata import utils as uvutils
 

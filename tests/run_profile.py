@@ -4,7 +4,7 @@ import numpy as np
 from astropy.io import fits as pf
 from astropy.time import Time
 import pylab as plt
-from aavs_uv.io import hdf5_to_pyuvdata
+from aa_uv.io import hdf5_to_pyuvdata
 import os
 
 # use eith er pyinstrument or cprofile
@@ -13,7 +13,7 @@ USE_CPROFILE     = True
 
 
 fn_h5 = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
-fn_conf = '../example-config/aavs3/uv_config.yaml'
+fn_conf = '../src/aa_uv/config/aavs3/uv_config.yaml'
 
 
 if __name__ == "__main__":
@@ -25,7 +25,7 @@ if __name__ == "__main__":
             USE_CPROFILE = True
             USE_PYINSTRUMENT = False
 
-    uv2 = hdf5_to_pyuvdata(fn_h5, fn_conf, max_int=30)
+    uv2 = hdf5_to_pyuvdata(fn_h5, yaml_config=fn_conf, max_int=30)
 
     try:
         if USE_PYINSTRUMENT:
@@ -34,7 +34,7 @@ if __name__ == "__main__":
             from pyinstrument import Profiler
             profiler = Profiler()
             profiler.start()
-            uv2 = hdf5_to_pyuvdata(fn_h5, fn_conf, max_int=30)
+            uv2 = hdf5_to_pyuvdata(fn_h5, yaml_config=fn_conf, max_int=30)
 
             profiler.stop()
             profiler.print(show_all=False)
@@ -54,7 +54,7 @@ if __name__ == "__main__":
             import pstats
             print("--- HDF5 to UVDATA ---\n")
             with cProfile.Profile() as profile:
-                uv2 = hdf5_to_pyuvdata(fn_h5, fn_conf, max_int=30)
+                uv2 = hdf5_to_pyuvdata(fn_h5, yaml_config=fn_conf, max_int=30)
                 stats = pstats.Stats(profile).sort_stats('tottime')
                 stats.print_stats(100)
 

@@ -1,6 +1,6 @@
 import numpy as np
 from astropy.units import Quantity
-from aavs_uv.datamodel.cal import (
+from aa_uv.datamodel.cal import (
     create_antenna_cal, create_antenna_flags, create_uvx_antenna_cal
 )
 

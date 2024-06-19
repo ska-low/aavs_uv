@@ -1,5 +1,5 @@
-from aavs_uv.utils import zipit
-from aavs_uv.vis_utils import vis_arr_to_matrix, vis_arr_to_matrix_4pol
+from aa_uv.utils import zipit
+from aa_uv.vis_utils import vis_arr_to_matrix, vis_arr_to_matrix_4pol
 import numpy as np
 import pytest
 

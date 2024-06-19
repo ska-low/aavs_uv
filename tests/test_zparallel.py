@@ -1,4 +1,4 @@
-from aavs_uv.parallelize import run_in_parallel, task
+from aa_uv.parallelize import run_in_parallel, task
 import time
 
 @task

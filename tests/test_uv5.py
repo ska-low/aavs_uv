@@ -1,4 +1,4 @@
-from aavs_uv.io import hdf5_to_uvx, read_uvx, write_uvx
+from aa_uv.io import hdf5_to_uvx, read_uvx, write_uvx
 
 def test_roundtrip():
 
@@ -31,7 +31,7 @@ def test_roundtrip():
     for k, v in uv.provenance.items():
         assert k in uv2.provenance.keys()
         assert isinstance(uv2.provenance[k], type(v))
-    
+
     for k, v in uv.antennas.attrs.items():
         assert k in uv2.antennas.attrs.keys()
         assert isinstance(uv2.antennas.attrs[k], type(v))

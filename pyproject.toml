@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "aavs-uv"
+name = "aa-uv"
 version = "2.0.0"
 description = "SKA-low Aperture Array Verification Systems (AAVS) Interferometry UV utilities."
 authors = ["Danny C. Price"]
@@ -13,7 +13,6 @@ include = [
 
 [tool.poetry.dependencies]
 python = ">=3.10"
-astroplan = ">=0.9"
 astropy = ">=5.3"
 h5py = ">=3.9"
 joblib = ">=1.3.0"
@@ -23,7 +22,7 @@ xarray = ">=2023.7"
 loguru = ">=0.5"
 pyyaml = ">=5.0"
 pygdsm   = ">=1.3"
-pyuvdata =  { git = "https://github.com/telegraphic/pygdsm"}
+pyuvdata = ">=2.4.4"
 ska-sdp-func-python = { git = "https://gitlab.com/ska-telescope/sdp/ska-sdp-func-python"}
 ska-sdp-datamodels = {git = "https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels"}
 
@@ -34,7 +33,7 @@ optional = true
 python-casacore = {version = ">=3.5"}
 
 [tool.poetry.scripts]
-aavs_uv = "aavs_uv.converter:run"
+aa_uv = "aa_uv.converter:run"
 
 [tool.poetry.extras]
 python-casacore = ["python-casacore"]
@@ -50,6 +49,7 @@ colored = ">=2.2"
 [tool.poetry.group.docs.dependencies]
 sphinx = ">=7.2"
 sphinx-rtd-theme = ">=1.3"
+myst-parser = ">3.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.2.0"]

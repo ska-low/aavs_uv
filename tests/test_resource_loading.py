@@ -1,4 +1,4 @@
-from aavs_uv.utils import get_resource_path, get_config_path
+from aa_uv.utils import get_resource_path, get_config_path
 
 def test_resource_loading():
     print(get_resource_path('catch/me/if/you/can'))

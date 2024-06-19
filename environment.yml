@@ -6,7 +6,7 @@ dependencies:
   # Base
   - python
   - mamba
-  - pip 
+  - pip
   - poetry
   - pytz
   - tzdata
@@ -21,7 +21,6 @@ dependencies:
   - dask
   # astro
   - astropy
-  - astroplan
   - pyerfa
   - casacore
   - python-casacore
@@ -33,7 +32,7 @@ dependencies:
   # test + logging
   - loguru
   - pytest
-  - pytest-cov 
+  - pytest-cov
   # Docs
   - sphinx
   - sphinx-rtd-theme

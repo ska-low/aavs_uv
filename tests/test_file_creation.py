@@ -3,12 +3,12 @@ from astropy.time import Time
 
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
-from aavs_uv.io import hdf5_to_pyuvdata, phase_to_sun, hdf5_to_sdp_vis
+from aa_uv.io import hdf5_to_pyuvdata, phase_to_sun, hdf5_to_sdp_vis
 
 def test_file_creation():
     try:
         # Files to open
-        yaml_raw = '../example-config/aavs2/uv_config.yaml'
+        yaml_raw = '../src/aa_uv/config/aavs2/uv_config.yaml'
         fn_raw   = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
 
         # Load raw data and phase to sun
@@ -23,7 +23,7 @@ def test_file_creation():
         uv.write_uvh5('test.uvh5')
 
         # Write out SDP data format too
-        vis = hdf5_to_sdp_vis(fn_raw, yaml_raw)
+        vis = hdf5_to_sdp_vis(fn_raw, yaml_config=yaml_raw)
         export_visibility_to_hdf5(vis, 'test.sdpuv5')
     finally:
         os.system('rm -rf test.ms')

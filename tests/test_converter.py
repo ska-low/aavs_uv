@@ -1,6 +1,6 @@
-from aavs_uv.converter import parse_args, run
-from aavs_uv.utils import get_resource_path
-from aavs_uv.io import read_uvx
+from aa_uv.converter import parse_args, run
+from aa_uv.utils import get_resource_path
+from aa_uv.io import read_uvx
 import os
 
 def test_converter():
@@ -138,7 +138,7 @@ def test_context():
         run(cmd)
         uv = read_uvx("test.uvx5")
         print(uv.context)
-        assert(uv.context['intent'] == "Test routine for AAVS_UV package")
+        assert(uv.context['intent'] == "Test routine for aa_uv package")
     finally:
         if os.path.exists("test.sdp"):
             os.remove("test.sdp")
