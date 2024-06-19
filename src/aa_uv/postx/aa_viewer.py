@@ -76,11 +76,14 @@ class AllSkyViewer(AaBaseModule):
         self._update_wcs()
         self._update_skycat()
 
-    def get_pixel(self, src: SkyCoord) -> tuple:
+    def get_pixel(self, src: SkyCoord) -> tuple[int]:
         """ Return the pixel index for a given SkyCoord
 
         Args:
             src (SkyCoord): sky coordinate of interest
+
+        Returns:
+            idx (tuple): pixel index corresponding to source location
         """
 
         self._update_wcs()
@@ -94,6 +97,17 @@ class AllSkyViewer(AaBaseModule):
             return (j, i)    # flip so you can use as numpy index
         else:
             return (0, 0)
+
+    def get_pixel_healpix(self, n_side: int, src: SkyCoord) -> int:
+        """ Return the healpix pixel index for a given SkyCoord
+
+        Args:
+            src (SkyCoord): sky coordinate of interest
+
+        Returns:
+            idx (tuple): pixel index corresponding to source location
+        """
+        return sky2hpix(n_side, src)
 
     def load_labels(self, label_dict: dict):
         """ Load a sky catalog
@@ -187,7 +201,6 @@ class AllSkyViewer(AaBaseModule):
             title = f'GSM from {self.name}:  {ts.iso}  \n LST: {lst_str}  |  freq: {f.to("MHz").value:.2f} MHz'
             kwargs['title'] = title
         self.orthview(data=data, *args, **kwargs)
-
 
     def mollview(self,
                  hmap: np.array=None,
