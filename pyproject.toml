@@ -22,7 +22,7 @@ xarray = ">=2023.7"
 loguru = ">=0.5"
 pyyaml = ">=5.0"
 pygdsm   = ">=1.3"
-pyuvdata =  { git = "https://github.com/ska-sci-ops/pyuvdata"}
+pyuvdata = ">=2.4.4"
 ska-sdp-func-python = { git = "https://gitlab.com/ska-telescope/sdp/ska-sdp-func-python"}
 ska-sdp-datamodels = {git = "https://gitlab.com/ska-telescope/sdp/ska-sdp-datamodels"}
 
