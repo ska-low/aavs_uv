@@ -15,5 +15,8 @@ def test_aa_plotter():
     #plt.figure("CORR 4x")
     aa.plotting.plot_corr_matrix_4pol()
 
+    plt.figure("UV DIST")
+    aa.plotting.plot_uvdist_amp()
+
 if __name__ == "__main__":
     test_aa_plotter()

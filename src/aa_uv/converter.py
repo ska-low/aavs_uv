@@ -9,14 +9,20 @@ from loguru import logger
 import pprint
 
 from .parallelize import task, run_in_parallel
-from .utils import reset_logger, zipit
+from .utils import reset_logger, zipit, import_optional_dependency
 
 from astropy.time import Time, TimeDelta
 from aa_uv import __version__
 from aa_uv.utils import get_config_path
-from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uvx, phase_to_sun, write_uvx
+from aa_uv.io import hdf5_to_pyuvdata,  hdf5_to_uvx, phase_to_sun, write_uvx
 from aa_uv.utils import load_yaml
-from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
+
+try:
+    import_optional_dependency('ska_sdp_datamodels')
+    from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
+    from aa_uv.io import hdf5_to_sdp_vis
+except ImportError:
+    pass
 
 EXT_LUT = {
     'ms': '.ms',
