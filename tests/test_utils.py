@@ -1,8 +1,8 @@
-from aa_uv.utils import zipit
-from aa_uv.vis_utils import vis_arr_to_matrix
+from aa_uv.utils import zipit, import_optional_dependency
 import numpy as np
 import pytest
 import os, shutil
+
 
 def test_zipit():
      def create_dummy_dir():
@@ -22,6 +22,16 @@ def test_zipit():
 
      os.remove('test-zip.zip')
 
+
+def test_import_optional_dependency():
+     import_optional_dependency('numpy')
+     import_optional_dependency('numpy.linalg')
+     with pytest.raises(ImportError):
+          import_optional_dependency('whatimlookingfor')
+     import_optional_dependency('whatimlookingfor', 'warn')
+     import_optional_dependency('whatimlookingfor', 'ignore')
+
+
 if __name__ == "__main__":
-    test_vis_arr_to_matrix()
     test_zipit()
+    test_import_optional_dependency()

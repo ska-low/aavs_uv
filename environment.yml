@@ -1,4 +1,4 @@
-name: aavs
+name: aa_uv
 channels:
   - conda-forge
   - nodefaults
@@ -13,18 +13,25 @@ dependencies:
   - python-dateutil
   - urllib3
   - tqdm
+  - joblib
+  - colored
+  - setuptools_scm
   # Scientific
   - numpy
   - scipy
   - xarray
   - ducc0
   - dask
+  - matplotlib
+  - ipython
+  - pandas
   # astro
   - astropy
   - pyerfa
   - casacore
   - python-casacore
   - healpy
+  - ephem
   # I/O
   - h5py
   - pyyaml
@@ -36,7 +43,5 @@ dependencies:
   # Docs
   - sphinx
   - sphinx-rtd-theme
-  # C/C++ compilation (use conda gcc instead of system, which can be ancient)
-  - gcc
-  - gxx
-  - openmp
+  - myst-parser
+  - docstring_parser

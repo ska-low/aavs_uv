@@ -5,6 +5,8 @@ import sys
 from tqdm import tqdm
 import shutil
 import yaml
+import types, typing
+import importlib
 
 def reset_logger(use_tqdm: bool=False, disable: bool=False, level: str="INFO", *args, **kwargs) -> logger:
     """ Reset loguru logger and setup output format
@@ -122,3 +124,26 @@ def zipit(dirname: str, rm_dir: bool=False):
     shutil.make_archive(dirname, format='zip', root_dir='.', base_dir=dirname)
     if rm_dir:
         shutil.rmtree(dirname)
+
+
+def import_optional_dependency(name: str,
+                               errors: typing.Literal["raise", "warn", "ignore"] = "raise",
+                               ) -> types.ModuleType | None:
+    """ Import an optional dependency by name.
+
+    Notes:
+        Adapted from pandas/pandas/compat/_optional.py (BSD-3)
+    """
+    msg = (
+        f"Missing optional dependency '{name}'. "
+        f"Use pip or conda to install {name}."
+    )
+    try:
+        module = importlib.import_module(name)
+    except ImportError as err:
+        if errors == "raise":
+            raise ImportError(msg) from err
+        elif errors == "warn":
+            logger.warning(msg)
+        return None
+    return module

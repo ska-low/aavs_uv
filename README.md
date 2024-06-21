@@ -8,9 +8,35 @@ These codes use the `UVData` class from [pyuvdata](https://pyuvdata.readthedocs.
 
 Additionally, data can be loaded into the `Visibility` data model from [ska-sdp-datamodels](https://developer.skao.int/projects/ska-sdp-datamodels/en/latest/), which is based on [xarray](https://docs.xarray.dev/en/stable/).
 
-![aavsuv-overview](https://github.com/ska-sci-ops/aa_uv/blob/2024.05-dev/docs/images/uv_flow.png?raw=true)
+![aavsuv-overview](https://github.com/ska-sci-ops/aa_uv/blob/main/docs/images/uv_flow.png?raw=true)
 
-Some simple calibration and imaging utilities are currently in development (intended primarily for QA).
+Some simple calibration and imaging utilities are provided in the `postx` submodule. This is an optional extra,
+that requires the `matvis` package for simulations.
+
+### Installation
+
+Download this repository, then install via `pip install .`. To install optional extras:
+
+```
+pip install .[postx]  # Post-correlation imaging and QA tools
+pip install .[sdp]    # Support for SDP Visibility
+pip install .[casa]   # Installs python-casacore for MS support
+```
+
+Or run `pip install .[all]` to install all optional extras.
+
+#### Fresh conda install
+
+To install from scratch using `conda`, download this repository, cd into the directory, and run
+
+```
+conda env create -f environment.yml
+conda activate aa_uv
+```
+
+You can then use `conda activate aa_uv` to start up the environment, and `conda deactivate` to leave it.
+
+Then run `pip install .` and any extras (e.g. `pip install .[postx]`).
 
 ### File conversion: command-line script
 
