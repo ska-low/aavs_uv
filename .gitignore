@@ -171,3 +171,4 @@ cython_debug/
 #.idea/
 .DS_Store
 tests/correlation_burst_204_20240104_53513_0.uvx5
+scripts/ska-low-deployment
