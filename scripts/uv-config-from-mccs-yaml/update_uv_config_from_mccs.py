@@ -1,3 +1,9 @@
+""" Update UV config from MCCS YAML
+
+* Retrieves the lasest ska-low-deployment git repository (where station YAML files are located)
+* Generates aa_uv's internally-used UV Configuration for a station
+* Copies these over to aa_uv/src/aa_uv/config
+"""
 import os
 from datetime import datetime
 from astropy.coordinates import EarthLocation
@@ -11,6 +17,8 @@ MCCS_CONFIG_PATH = 'ska-low-deployment/tmdata/instrument/mccs-configuration'
 def generate_uv_config(name):
     """ Generate UV configs, create directories """
     now = Time(datetime.now())
+
+    # Read the YAML file and return an EarthLocation and pandas Dataframe of antenna positions
     eloc, antennas = station_location_from_platform_yaml(f'{MCCS_CONFIG_PATH}/{name}.yaml', name)
 
     # Create Directory

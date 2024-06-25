@@ -1,4 +1,4 @@
-
+# This script pulls any changes from MCCS station YAML
 GITDIR=ska-low-deployment
 
 if [ -f $GITDIR ]; then
