@@ -29,7 +29,9 @@ class AllSkyViewer(AaBaseModule):
         mollview() - Plot all-sky image using healpy Mollview
         load_labels() - Load dictionary of sky coordinates as labels
         get_pixel() - get pixel ID for a given skycoord
-        plot_gsm() - plot observed Global diffuse sky model using pygdsm
+        write_fits() - write to FITS file
+        orthview_gsm() - orthview plot observed Global diffuse sky model using pygdsm
+        mollview_gsm() - mollview plot observed Global diffuse sky model using pygdsm
     """
     def __init__(self, observer: ApertureArray=None, skycat: dict=None, ts: Time=None, f_mhz: float=None, n_pix: int=128):
         self.observer = observer
@@ -191,16 +193,13 @@ class AllSkyViewer(AaBaseModule):
         if return_data:
             return data
 
-    def plot_gsm(self, *args, **kwargs):
-        data = self.observer.generate_gsm()
-        # Create title
-        if 'title' not in kwargs.keys():
-            ts = self.observer._ws('t')
-            f  = self.observer._ws('f')
-            lst_str = str(ts.sidereal_time('apparent'))
-            title = f'GSM from {self.name}:  {ts.iso}  \n LST: {lst_str}  |  freq: {f.to("MHz").value:.2f} MHz'
-            kwargs['title'] = title
-        self.orthview(data=data, *args, **kwargs)
+    def orthview_gsm(self, *args, **kwargs):
+        """ View diffuse sky model (Orthographic) """
+        return self.observer.simulation.orthview_gsm(*args, **kwargs)
+
+    def mollview_gsm(self, *args, **kwargs):
+        """ View diffuse sky model (Mollweide) """
+        return self.observer.simulation.mollview_gsm(*args, **kwargs)
 
     def mollview(self,
                  hmap: np.array=None,
