@@ -16,7 +16,7 @@ uv = hdf5_to_pyuvdata('input_data.hdf5', yaml_config='my_config/uv_config.yaml')
 
 ## Source of truth
 
-* AA1/AA0.5: https://confluence.skatelescope.org/display/SST/Antenna+positions+in+SKA+Low+AA1+stations
+* AA0.5: https://gitlab.com/ska-telescope/ska-low-deployment/-/tree/main/tmdata/instrument/mccs-configuration
 * AAVS2/AAVS3: https://confluence.skatelescope.org/display/SE/MCCS-1826%3A+Provide+AAVS3+data+for+telmodel+export
 * AAVS3: https://confluence.skatelescope.org/display/SST/SKA1+LOW+AAVS3+Station+Centre
 * AAVS3: https://gitlab.com/ska-telescope/ska-low-aavs3/-/blob/main/tmdata/instrument/mccs-configuration/aavs3.yaml

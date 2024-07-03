@@ -76,12 +76,13 @@ def plot_antennas(aa: ApertureArray, x: str='E', y: str='N', overlay_names: bool
     plt.title(title)
 
 
-def plot_uvdist_amp(aa: ApertureArray, vis: str='data', pol_idx: int=0, **kwargs):
+def plot_uvdist_amp(aa: ApertureArray, vis: str='data', pol_idx: int=0, sfunc: np.ufunc=None, **kwargs):
     """ Plot amplitude as function of UV distance
 
     Args:
         vis (str): One of 'data', 'corrected', or 'model'
         pol_idx (int): Polarization index
+        sfunc (np.unfunc): Scaling function to apply, e.g. np.log
     """
     bls = aa.bl_matrix
     amp = np.abs(aa.generate_vis_matrix(vis)[..., pol_idx])
@@ -97,7 +98,10 @@ def plot_uvdist_amp(aa: ApertureArray, vis: str='data', pol_idx: int=0, **kwargs
     if 'alpha' not in kwargs.keys():
         kwargs['alpha'] = 0.2
 
-    plt.scatter(bls.ravel(), amp.ravel(),  **kwargs)
+    # Apply scaling function
+    pdata = amp.ravel() if sfunc is None else sfunc(amp.ravel())
+
+    plt.scatter(bls.ravel(), pdata,  **kwargs)
     plt.xlabel("UV Distance [m]")
     plt.ylabel("Amplitude")
     plt.title(title)
@@ -113,6 +117,7 @@ class AaPlotter(AaBaseModule):
     plot_corr_matrix()
     plot_corr_matrix_4pol()
     plot_antennas()
+    plot_uv_dist_amp()
 
     """
     def __init__(self, aa: ApertureArray):

@@ -45,7 +45,7 @@ def generate_uv_config(name):
             fh.write(line.strip() + '\n')
 
     # Write antenna csv
-    antennas.to_csv(os.path.join(name, 'antenna_positions.txt'), sep=' ', header=('name', 'E', 'N', 'U', 'flagged'), index_label='idx')
+    antennas.to_csv(os.path.join(name, 'antenna_locations.txt'), sep=' ', header=('name', 'E', 'N', 'U', 'flagged'), index_label='idx')
 
     # Copy over baseline order
     os.system(f"cp config/baseline_order.txt {name}/")
