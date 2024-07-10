@@ -9,7 +9,7 @@ from .stefcal import stefcal
 
 
 def create_baseline_matrix(xyz: np.array) -> np.ndarray:
-    """ Create NxN array of baseline lengths
+    """Create NxN array of baseline lengths
 
     Args:
         xyz (np.array): (N_ant, 3) array of antenna locations
@@ -25,7 +25,7 @@ def create_baseline_matrix(xyz: np.array) -> np.ndarray:
 
 
 def simple_stefcal(aa: ApertureArray, model: dict, t_idx: int=0, f_idx: int=0, pol_idx: int=0) -> tuple[ApertureArray, np.ndarray]:
-    """ Apply stefcal to calibrate UV data
+    """Apply stefcal to calibrate UV data
 
     Args:
         aa (ApertureArray): A RadioArray with UV data to calibrate
@@ -38,8 +38,6 @@ def simple_stefcal(aa: ApertureArray, model: dict, t_idx: int=0, f_idx: int=0, p
         aa (ApertureArray): RadioArray with calibration applied
         g (np.ndarray): 1D gains vector, complex data
     """
-
-
     v = aa.generate_vis_matrix(f_idx=f_idx, t_idx=t_idx)[..., pol_idx]
     v_model = simulate_visibilities_pointsrc(aa, sky_model=model)
 

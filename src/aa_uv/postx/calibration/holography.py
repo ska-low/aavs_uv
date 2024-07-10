@@ -29,19 +29,19 @@ LIGHT_SPEED = c.value
 ##################
 
 def db(x):
-    """ Return dB value of power magnitude """
+    """Return dB value of power magnitude"""
     return 10*np.log10(x)
 
 
 def window2d(lmn: np.array, sigma: float=1) -> np.array:
-    """ Apply 2D-Gaussian window to lmn data """
+    """Apply 2D-Gaussian window to lmn data"""
     w2d = (1/np.sqrt(2*np.pi*sigma**2))
     w2d = w2d * np.exp(-(1/(2*sigma**2)) * (lmn[..., :2]**2).sum(axis=2))
     return w2d
 
 
 def fft_2d_4pol(x: np.array, NFFT: int):
-    """ Apply 2D FFT with FFT shift to 4-pol data """
+    """Apply 2D FFT with FFT shift to 4-pol data"""
     x_shifted = np.fft.ifftshift(x, axes=(0, 1))
     return np.fft.ifftshift(np.fft.ifft2(x_shifted, axes=(0, 1)), axes=(0, 1))
 
@@ -51,7 +51,7 @@ def fft_2d_4pol(x: np.array, NFFT: int):
 #################
 
 def generate_aperture_image(beam_corr: np.array, lm_matrix: np.array, sigma: float=1.0, NFFT:int=513) -> np.array:
-    """ Generate aperture illumination from beam correlation (far-field E-pattern)
+    """Generate aperture illumination from beam correlation (far-field E-pattern)
 
     Args:
         beam_corr (np.array): Beam cross-correlation between a calibrator source and a grid of
@@ -82,7 +82,7 @@ def generate_aperture_image(beam_corr: np.array, lm_matrix: np.array, sigma: flo
 
 
 def meas_corr_to_magcal(mc: np.array, target_mag: float=1.0, sigma_thr: float=10) -> np.array:
-    """ Compute magnitude calibration coefficients from meas_corr
+    """Compute magnitude calibration coefficients from meas_corr
 
     Args:
         meas_corr (np.array): Measured correlations between reference beam.
@@ -113,7 +113,7 @@ def meas_corr_to_magcal(mc: np.array, target_mag: float=1.0, sigma_thr: float=10
 
 
 def meas_corr_to_phasecal(mc: np.array) -> np.array:
-    """ Compute phase calibration coefficients from meas_corr
+    """Compute phase calibration coefficients from meas_corr
 
     Args:
         meas_corr (np.array): Measured correlations between reference beam.
@@ -147,7 +147,7 @@ def jishnu_selfholo(aa: ApertureArray, cal_src: SkyCoord,
                abs_max: int=4, aperture_padding: float=3, NFFT: int=2049,
                min_baseline_len: float=None, oversample_factor: int=3,
                vis: str='data') -> dict:
-    """ Calibrate aperture array data using self-holography
+    """Calibrate aperture array data using self-holography
 
     Implentation based on J. Thekkeppattu et al. (2024)
     https://ui.adsabs.harvard.edu/abs/2024RaSc...5907847T/abstract
@@ -251,7 +251,7 @@ def jishnu_selfholo(aa: ApertureArray, cal_src: SkyCoord,
 
 def jishnu_phasecal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=None,
                     n_iter_max: int=50, target_phs_std: float=1.0) -> UVXAntennaCal:
-    """ Iteratively apply Jishnu Cal phase calibration
+    """Iteratively apply Jishnu Cal phase calibration
 
     Args:
         aa (ApertureArray):
@@ -334,7 +334,7 @@ def jishnu_phasecal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=No
 def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
                     n_iter_max: int=50, target_phs_std: float=1.0, target_mag: float=1.0,
                     apply: bool=False) -> UVXAntennaCal:
-    """ Iteratively apply Jishnu Cal phase calibration, then compute magnitude calibraiton
+    """Iteratively apply Jishnu Cal phase calibration, then compute magnitude calibraiton
 
     Args:
         aa (ApertureArray):
@@ -392,17 +392,17 @@ def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
 ###########################
 
 def report_flagged_antennas(aa: ApertureArray, cal_dict: dict, cal_key: str='phs_cal') -> dict:
-    """ Find antennas that have been flagged during phase calibration
+    """Find antennas that have been flagged during phase calibration
 
-        Args:
-            aa (ApertureArray): Array object to use
-            cal_dict (dict): Dictionary returned by calibration routine, e.g.
-                             jishnu_phasecal
-            cal_key (str): Name of calibration kxey in dictionary
+    Args:
+        aa (ApertureArray): Array object to use
+        cal_dict (dict): Dictionary returned by calibration routine, e.g.
+                         jishnu_phasecal
+        cal_key (str): Name of calibration kxey in dictionary
 
-        Returns:
-            bad_ants (dict): Dictionary of bad antenna identifiers and indexes.
-                             Keys are 'x', 'y'
+    Returns:
+        bad_ants (dict): Dictionary of bad antenna identifiers and indexes.
+                         Keys are 'x', 'y'
     """
     ant_ids  = aa.uvx.antennas.identifier.values
     ant_idxs = aa.uvx.antennas.antenna.values
@@ -422,7 +422,7 @@ def report_flagged_antennas(aa: ApertureArray, cal_dict: dict, cal_key: str='phs
 ####################
 
 def ant_xyz_to_image_idx(xyz_enu: np.array, cal: dict, as_int: bool=True) -> tuple:
-    """ Convert an ENU antenna location to a pixel location in image
+    """Convert an ENU antenna location to a pixel location in image
 
     Args:
         xyz_enu (np.array): Antenna positions, in meters, ENU
@@ -447,7 +447,7 @@ def ant_xyz_to_image_idx(xyz_enu: np.array, cal: dict, as_int: bool=True) -> tup
 
 def plot_aperture(aa: ApertureArray, cal: dict, pol_idx: int=0, plot_type: str='mag',
                   vmin: float=-40, phs_range: tuple=None, annotate: bool=False, s: int=None):
-    """ Plot aperture illumnation for given polarization index
+    """Plot aperture illumnation for given polarization index
 
     Args:
         aa (ApertureArray): Aperture Array to use
@@ -461,7 +461,6 @@ def plot_aperture(aa: ApertureArray, cal: dict, pol_idx: int=0, plot_type: str='
         annotate (bool): Set to True to overlay antenna identifiers/names
         s (int): Sets circle size around antenna locations
     """
-    bcorr = cal['beam_corr']
     ap_ex = cal['aperture_size']
     apim  = cal['aperture_img']
 
@@ -519,7 +518,7 @@ def plot_aperture(aa: ApertureArray, cal: dict, pol_idx: int=0, plot_type: str='
 
 def plot_aperture_xy(aa: ApertureArray, cal: dict, vmin: float=-40,
                                phs_range: tuple=None, annotate: bool=False, figsize: tuple=(10,8)):
-    """ Plot aperture illumnation function magnitude and phase, both polarizations
+    """Plot aperture illumnation function magnitude and phase, both polarizations
 
     Plots a 2x2 grid for aperture illumination image, showing magnitude and phase
     for X and Y polarizations.
@@ -551,7 +550,7 @@ def plot_aperture_xy(aa: ApertureArray, cal: dict, vmin: float=-40,
 
 
 def plot_jishnu_phasecal_iterations(cc_dict: dict):
-    """ Plot the iterative phase corrections applied in phasecal
+    """Plot the iterative phase corrections applied in phasecal
 
     Args:
         cc_dict (dict): Output dict from jishnu_phasecal
@@ -564,7 +563,7 @@ def plot_jishnu_phasecal_iterations(cc_dict: dict):
 
 
 def plot_farfield_beam_pattern(holo_dict: dict):
-    """ Plot the far-field beam power pattern, 2D cuts
+    """Plot the far-field beam power pattern, 2D cuts
 
     Args:
         holo_dict (dict): Output of jishnu_selfholo()
@@ -592,7 +591,7 @@ def plot_farfield_beam_pattern(holo_dict: dict):
 ####################
 
 class AaHolographer(AaBaseModule):
-    """ A class version of the above jishnu-cal holography routines.
+    """A class version of the above jishnu-cal holography routines.
 
     Provides the following functions:
     set_cal_src() - set the reference source
@@ -605,7 +604,7 @@ class AaHolographer(AaBaseModule):
 
     """
     def __init__(self, aa: ApertureArray, cal_src: SkyCoord=None):
-        """ Setup Holographer
+        """Setup Holographer
 
         Args:
             aa (ApertureArray): Aperture array 'parent' object to use
@@ -618,7 +617,7 @@ class AaHolographer(AaBaseModule):
         self.__setup_docstrings('holography')
 
     def set_cal_src(self, cal_src: SkyCoord):
-        """ Set/change calibration source """
+        """Set/change calibration source"""
         self.cal_src = cal_src
 
     def __setup_docstrings(self, name):

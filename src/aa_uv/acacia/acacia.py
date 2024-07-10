@@ -11,9 +11,9 @@ from loguru import logger
 from aa_uv.io import read_uvx
 
 class AcaciaStorage(object):
-    """ rclone wrapper for acacia access """
+    """rclone wrapper for acacia access"""
     def __init__(self, config: str='acacia'):
-        """ Initialize AcaciaStorage object
+        """Initialize AcaciaStorage object
 
         Load client ID and secret keys
         Reads config from ~/.config/rclone/rclone.conf
@@ -37,7 +37,7 @@ class AcaciaStorage(object):
         self.secret_key = config['acacia']['secret_access_key']
 
     def add_keys(self, secret_id: str, secret_key: str, config_name: str='acacia'):
-        """ Create acacia config in .config/rclone/rclone.conf """
+        """Create acacia config in .config/rclone/rclone.conf"""
         rclone_config = {
             'provider': self.provider,
             'endpoint': self.endpoint,
@@ -47,7 +47,7 @@ class AcaciaStorage(object):
         rclone.create_remote(config_name, RemoteTypes.s3, **rclone_config)
 
     def download_obs(self, bucket: str, eb_code: str, dest: str='./', format='all'):
-        """ Download an observation from acacia
+        """Download an observation from acacia
 
         Args:
             bucket (str): name of bucket, e.g. 'aavs3'
@@ -68,7 +68,7 @@ class AcaciaStorage(object):
         return url
 
     def get_h5(self, bucket: str, fpath: str, debug: bool=False):
-        """ Load HDF5 as a virtual file, directly from acacia """
+        """Load HDF5 as a virtual file, directly from acacia"""
         if debug:
             logger.debug("Setting up h5py debug trace")
             h5py._errors.unsilence_errors()
@@ -86,7 +86,7 @@ class AcaciaStorage(object):
         return h5
 
     def read_uvx(self, bucket: str, fpath: str, debug: bool=False):
-        """ Load UVX data directly from Acacia """
+        """Load UVX data directly from Acacia"""
         h5 = self.get_h5(bucket, fpath, debug)
         uvx = read_uvx(h5)
         return uvx

@@ -10,15 +10,11 @@ from ..coords.coord_utils import hpix2sky
 from pyuvsim.analyticbeam import AnalyticBeam
 from matvis import simulate_vis
 
-def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None) -> xr.DataArray:  # noqa: F821
-    """ Use pygdsm + matvis to simulate visibilites, add in Sun """
-
+def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None, n_side: int=32) -> xr.DataArray:  # noqa: F821
+    """Use pygdsm + matvis to simulate visibilites, add in Sun"""
     f_mhz    = aa.uvx.data.frequency[0] / 1e6
     lsts_rad = aa.uvx.data.lst.values / 24 * np.pi * 2
-    flags    = aa.uvx.antennas.flags
-    array_lat_rad = float(aa.gsm.lat)
-
-    n_side   = 32
+    array_lat_rad = float(aa.gsm.lata)
 
     aa.gsm.generate(f_mhz)
 

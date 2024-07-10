@@ -21,7 +21,7 @@ from aa_uv.utils import get_resource_path, load_yaml
 from aa_uv import __version__
 
 def phase_to_sun(uv: UVData, t0: Time) -> UVData:
-    """ Phase UVData to sun, based on timestamp
+    """Phase UVData to sun, based on timestamp
 
     Computes the sun's RA/DEC in GCRS for the given time, then applies phasing.
     This will then recompute UVW and apply phase corrections to data.
@@ -52,7 +52,7 @@ def phase_to_sun(uv: UVData, t0: Time) -> UVData:
 
 def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
                      start_int: int=0, max_int: int=None) -> pyuvdata.UVData:
-    """ Convert AAVS2/3 HDF5 correlator output to UVData object
+    """Convert AAVS2/3 HDF5 correlator output to UVData object
 
     Args:
         filename (str):     Name of file to open
@@ -67,7 +67,6 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
         uv (pyuvdata.UVData): A UVData object that can be used to create
                               UVFITS/MIRIAD/UVH5/etc files
     """
-
     # Create empty UVData object
     uv = pyuvdata.UVData()
 
@@ -120,10 +119,8 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
     # Also instantiate an EarthLocation observer for LST / Zenith calcs
     xyz = np.array((uvx.origin.x.value, uvx.origin.y.value, uvx.origin.z.value))
     uv.telescope_location = xyz
-    telescope_earthloc = uvx.origin
 
-    # Load baselines and antenna locations (ENU)
-    antpos_ENU  = uvx.antennas.enu.values
+    # Load baselines and antenna locations (ECEF)
     antpos_ECEF = uvx.antennas.ecef.values
 
     # Now fill in antenna info fields
@@ -137,7 +134,6 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
     uv.baseline_array    = uvutils.antnums_to_baseline(uv.ant_1_array, uv.ant_2_array, md['n_antennas'])
 
     # Frequency axis
-    f0 = uvx.data.frequency.values[0]
     uv.freq_array = uvx.data.frequency.values
 
     # Polarization axis
@@ -241,7 +237,7 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
 
 def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=None, phase_to_t0: bool=True,
                      start_int: int=0, max_int: int=None, conj: bool=True) -> pyuvdata.UVData:
-    """ Convert AAVS2/3 HDF5 correlator output to UVData object
+    """Convert AAVS2/3 HDF5 correlator output to UVData object
 
     Args:
         filename (str):     Name of file to open
@@ -259,7 +255,6 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
         uv (pyuvdata.UVData): A UVData object that can be used to create
                               UVFITS/MIRIAD/UVH5/etc files
     """
-
     # Load metadata
     md = load_observation_metadata(filename, yaml_config, load_config=telescope_name)
 

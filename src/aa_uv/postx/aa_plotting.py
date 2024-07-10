@@ -11,7 +11,7 @@ import numpy as np
 
 def plot_corr_matrix(aa: ApertureArray, vis: str='data', t_idx: int=0, f_idx: int=0, p_idx: int=0,
                      sfunc: np.ufunc=np.log, **kwargs):
-        """ Plot correlation matrix
+        """Plot correlation matrix
 
         Args:
             vis (str): One of 'data', 'corrected', or 'model'
@@ -35,7 +35,7 @@ def plot_corr_matrix(aa: ApertureArray, vis: str='data', t_idx: int=0, f_idx: in
 
 
 def plot_corr_matrix_4pol(aa: ApertureArray, **kwargs):
-    """ Plot correlation matrix, for all pols
+    """Plot correlation matrix, for all pols
 
     Args:
         vis (str): One of 'data', 'corrected', or 'model'
@@ -52,7 +52,7 @@ def plot_corr_matrix_4pol(aa: ApertureArray, **kwargs):
 
 
 def plot_antennas(aa: ApertureArray, x: str='E', y: str='N', overlay_names: bool=False, overlay_fontsize: str='x-small', **kwargs):
-    """ Plot antenna locations in ENU
+    """Plot antenna locations in ENU
 
     Args:
         x (str): One of 'E', 'N', or 'U'
@@ -77,7 +77,7 @@ def plot_antennas(aa: ApertureArray, x: str='E', y: str='N', overlay_names: bool
 
 
 def plot_uvdist_amp(aa: ApertureArray, vis: str='data', pol_idx: int=0, sfunc: np.ufunc=None, **kwargs):
-    """ Plot amplitude as function of UV distance
+    """Plot amplitude as function of UV distance
 
     Args:
         vis (str): One of 'data', 'corrected', or 'model'
@@ -111,7 +111,7 @@ def plot_uvdist_amp(aa: ApertureArray, vis: str='data', pol_idx: int=0, sfunc: n
 ## AA_PLOTTER CLASS
 ####################
 class AaPlotter(AaBaseModule):
-    """ A class for plotting utilties
+    """A class for plotting utilties
 
     Provides the following functions:
     plot_corr_matrix()
@@ -121,7 +121,7 @@ class AaPlotter(AaBaseModule):
 
     """
     def __init__(self, aa: ApertureArray):
-        """ Setup AaPlotter
+        """Setup AaPlotter
 
         Args:
             aa (ApertureArray): Aperture array 'parent' object to use

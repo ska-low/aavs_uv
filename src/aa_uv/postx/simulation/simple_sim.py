@@ -10,7 +10,7 @@ LIGHT_SPEED = c.to('m/s').value
 cos, sin = np.cos, np.sin
 
 def simulate_visibilities_pointsrc(ant_arr: ApertureArray, sky_model: dict):
-    """ Simulate model visibilities for an antenna array
+    """Simulate model visibilities for an antenna array
 
     Args:
         ant_arr (AntArray): Antenna array to use

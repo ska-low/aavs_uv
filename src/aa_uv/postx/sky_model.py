@@ -1,5 +1,4 @@
-"""
-Simple sky model class for ephemeris using pyephem
+"""Simple sky model class for ephemeris using pyephem
 """
 from __future__ import annotations
 import typing
@@ -10,7 +9,7 @@ import numpy as np
 from astropy.coordinates import SkyCoord, get_body, get_sun
 
 class RadioSource(SkyCoord):
-    """ A SkyCoordinate with a magnitude """
+    """A SkyCoordinate with a magnitude"""
     def __init__(self, *args, mag: float=1.0, unit: str=None, **kwargs):
         if unit is None:
             unit=('hourangle', 'degree')
@@ -18,7 +17,7 @@ class RadioSource(SkyCoord):
         self.mag = mag
 
 def generate_skycat(observer: ApertureArray):
-    """ Generate a SkyModel for a given observer with major radio sources
+    """Generate a SkyModel for a given observer with major radio sources
 
     Args:
         observer (AntArray / ephem.Observer): Observatory instance
@@ -48,7 +47,7 @@ def generate_skycat(observer: ApertureArray):
 
 
 def generate_skycat_solarsys(observer: ApertureArray):
-    """ Generate Sun + Moon for observer """
+    """Generate Sun + Moon for observer"""
     sun_gcrs  = get_body('sun', observer._ws('t'))
     moon_gcrs = get_body('moon', observer._ws('t'))
     jupiter_gcrs = get_body('jupiter', observer._ws('t'))
@@ -62,7 +61,7 @@ def generate_skycat_solarsys(observer: ApertureArray):
 
 
 def sun_model(aa: ApertureArray, t_idx: int=0, scaling: str='hi') -> np.array:
-    """ Generate sun flux model at given frequencies.
+    """Generate sun flux model at given frequencies.
 
     Flux model values taken from Table 2 of Macario et al (2022).
     A 5th order polynomial is used to interpolate between frequencies.
@@ -92,7 +91,7 @@ def sun_model(aa: ApertureArray, t_idx: int=0, scaling: str='hi') -> np.array:
         https://doi.org/10.1051/swsc/2021039
     """
     f_i = (50, 100, 150, 200, 300)                      # Frequency in MHz
-    α_i = (2.15, 1.86, 1.61, 1.50, 1.31)                # Spectral index
+    α_i = (2.15, 1.86, 1.61, 1.50, 1.31)                # Spectral index  # noqa: F841
     S_i = np.array((5400, 24000, 5100, 81000, 149000))  # Flux in Jy
 
     if scaling == 'hi':

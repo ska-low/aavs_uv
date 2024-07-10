@@ -16,7 +16,7 @@ from aa_uv import __version__ as aa_uv_version
 
 
 def load_observation_metadata(filename: str, yaml_config: str=None, load_config: str=None) -> dict:
-    """ Load observation metadata from correlator output HDF5
+    """Load observation metadata from correlator output HDF5
 
     Args:
         filename (str): Path to HDF5 file
@@ -48,7 +48,7 @@ def load_observation_metadata(filename: str, yaml_config: str=None, load_config:
 
 
 def get_hdf5_metadata(filename: str) -> dict:
-    """ Extract metadata from HDF5 and perform checks """
+    """Extract metadata from HDF5 and perform checks"""
     with h5py.File(filename, mode='r') as datafile:
         expected_keys = ['n_antennas', 'ts_end', 'n_pols', 'n_beams', 'tile_id', 'n_chans', 'n_samples', 'type',
                          'data_type', 'data_mode', 'ts_start', 'n_baselines', 'n_stokes', 'channel_id', 'timestamp',
@@ -74,7 +74,7 @@ def get_hdf5_metadata(filename: str) -> dict:
 def hdf5_to_uvx(fn_data: str, telescope_name: str=None,
                yaml_config: str=None, conj: bool=True,
                from_platform_yaml: bool=False, context: dict=None, provenance: dict=None) -> UVX:
-    """ Create UV from HDF5 data and config file
+    """Create UV from HDF5 data and config file
 
     Args:
         fn_data (str): Path to HDF5 data
@@ -174,7 +174,7 @@ def hdf5_to_uvx(fn_data: str, telescope_name: str=None,
                     'daq_software_version':          h5['observation_info'].attrs['software_version'],
                     'station_config_yaml':           h5['observation_info'].attrs['station_config']
                 }
-            except:
+            except KeyError:
                 logger.warning("Could not find expected keys in observation_info")
                 obs_info_keys = h5['observation_info'].keys()
                 logger.warning(f"{obs_info_keys}")

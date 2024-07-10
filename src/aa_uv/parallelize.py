@@ -5,7 +5,7 @@ from joblib import delayed
 from .utils import reset_logger
 
 def task(*args, **kwargs):
-    """ Renames ``delayed`` to ``task``, and sets up logger
+    """Renames ``delayed`` to ``task``, and sets up logger
 
     Provides a decorator to mark a function as a task to run in parallel::
 
@@ -19,7 +19,7 @@ def task(*args, **kwargs):
     return delayed(*args, **kwargs)
 
 def run_in_parallel(task_list: list, n_workers: int=-1, show_progressbar=True, backend: str='loky', verbose: bool=False):
-    """ Run a list of tasks in parallel, using joblib + tqdm
+    """Run a list of tasks in parallel, using joblib + tqdm
 
     Args:
         task_list (list): A list of tasks (using @parallelize.task 'delayed' lazy loading)

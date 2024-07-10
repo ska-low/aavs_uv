@@ -15,7 +15,7 @@ from pyuvdata import UVData
 import pyuvdata.utils as uvutils
 
 def convert_data_to_uvx_convention(uv: UVData, check: bool=False) -> np.array:
-    """ Convert the uv.data_array to UVX data convention
+    """Convert the uv.data_array to UVX data convention
 
     Notes:
         * Assumes the data are in triangular format with baselines sorted and contiguous.
@@ -50,7 +50,7 @@ def convert_data_to_uvx_convention(uv: UVData, check: bool=False) -> np.array:
     return data
 
 def pyuvdata_to_uvx(uv: UVData, check: bool=False) -> UVX:
-    """ Convert pyuvdata UVData object to UVX
+    """Convert pyuvdata UVData object to UVX
 
     Notes:
         This is experimental, and will only work under certain

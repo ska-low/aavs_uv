@@ -21,7 +21,7 @@ from .aa_module import AaBaseModule
 ###################
 
 class AllSkyViewer(AaBaseModule):
-    """ An all-sky imager based on matplotlib imshow with WCS support
+    """An all-sky imager based on matplotlib imshow with WCS support
 
     Provides the following:
         orthview() - Plot all-sky image in Orthographic projection
@@ -44,7 +44,7 @@ class AllSkyViewer(AaBaseModule):
         self._update_wcs()
 
     def _update_wcs(self):
-        """ Update World Coordinate System (WCS) information """
+        """Update World Coordinate System (WCS) information"""
         zen_sc = self.observer.coords.get_zenith()
 
         self.wcsd = {
@@ -65,7 +65,7 @@ class AllSkyViewer(AaBaseModule):
         self.wcs = WCS(self.wcsd)
 
     def _update_skycat(self):
-        """ Update skycat with solar system objects """
+        """Update skycat with solar system objects"""
         # Update Sun/Moon position (if needed)
         sm = generate_skycat_solarsys(self.observer)
         for key in sm.keys():
@@ -73,12 +73,12 @@ class AllSkyViewer(AaBaseModule):
                 self.skycat[key] = sm[key]
 
     def update(self):
-        """ Update WCS information on timestamp or other change """
+        """Update WCS information on timestamp or other change"""
         self._update_wcs()
         self._update_skycat()
 
     def get_pixel(self, src: SkyCoord) -> tuple[int]:
-        """ Return the pixel index for a given SkyCoord
+        """Return the pixel index for a given SkyCoord
 
         Args:
             src (SkyCoord): sky coordinate of interest
@@ -86,7 +86,6 @@ class AllSkyViewer(AaBaseModule):
         Returns:
             idx (tuple): pixel index corresponding to source location
         """
-
         self._update_wcs()
 
         # WAR: world_to_pixel doesn't seem to like the Sun's GCRS coords
@@ -100,7 +99,7 @@ class AllSkyViewer(AaBaseModule):
             return (0, 0)
 
     def get_pixel_healpix(self, n_side: int, src: SkyCoord) -> int:
-        """ Return the healpix pixel index for a given SkyCoord
+        """Return the healpix pixel index for a given SkyCoord
 
         Args:
             src (SkyCoord): sky coordinate of interest
@@ -111,7 +110,7 @@ class AllSkyViewer(AaBaseModule):
         return sky2hpix(n_side, src)
 
     def load_labels(self, label_dict: dict):
-        """ Load a sky catalog
+        """Load a sky catalog
 
         Args:
             label_dict (dict): Dictionary of RadioSources or SkyCoords
@@ -119,13 +118,13 @@ class AllSkyViewer(AaBaseModule):
         self.skycat = label_dict
 
     def new_fig(self, size: int=6):
-        """ Create new matplotlib figure """
+        """Create new matplotlib figure"""
         plt.figure(self.name, figsize=(size, size), frameon=False)
 
     def orthview(self, data: np.array=None, pol_idx: int=0, sfunc: np.ufunc=np.abs,
                   overlay_srcs: bool=False,  overlay_grid: bool=True, return_data: bool=False,
                   title: str=None, colorbar: bool=False,  subplot_id: tuple=None, **kwargs):
-        """ Plot all-sky image
+        """Plot all-sky image
 
         Args:
             data (np.array): Data to plot. Shape (N_pix, N_pix, N_pol). If not set, an image
@@ -153,9 +152,9 @@ class AllSkyViewer(AaBaseModule):
         # Update WCS and then create imshow
         self._update_wcs()
         if subplot_id is not None:
-            ax = plt.subplot(*subplot_id, projection=self.wcs, frame_on=False)
+            plt.subplot(*subplot_id, projection=self.wcs, frame_on=False)
         else:
-            ax = plt.subplot(projection=self.wcs, frame_on=False)
+            plt.subplot(projection=self.wcs, frame_on=False)
 
         if data.ndim == 2:
             im = plt.imshow(sfunc(data), **kwargs)
@@ -193,11 +192,11 @@ class AllSkyViewer(AaBaseModule):
             return data
 
     def orthview_gsm(self, *args, **kwargs):
-        """ View diffuse sky model (Orthographic) """
+        """View diffuse sky model (Orthographic)"""
         return self.observer.simulation.orthview_gsm(*args, **kwargs)
 
     def mollview_gsm(self, *args, **kwargs):
-        """ View diffuse sky model (Mollweide) """
+        """View diffuse sky model (Mollweide)"""
         return self.observer.simulation.mollview_gsm(*args, **kwargs)
 
     def mollview(self,
@@ -212,7 +211,7 @@ class AllSkyViewer(AaBaseModule):
                  overlay_grid: bool=True,
                  colorbar: bool=False,
                  **kwargs):
-        """ Plot a healpix map in mollweide projection (healpy.mollview)
+        """Plot a healpix map in mollweide projection (healpy.mollview)
 
         Args:
             hmap (np.array): Healpix to plot. Shape (N_hpx, N_pol). If not set, an healpix map
@@ -268,7 +267,7 @@ class AllSkyViewer(AaBaseModule):
                     hp.projtext(src_sc.galactic.l.deg - 2, src_sc.galactic.b.deg + 2, s=src, color='#DDDDDD', lonlat=True)
 
     def write_fits(self, img_data: np.array, fn: str, pol_idx: int=0):
-        """ Write image to FITS. Supports both healpix and regular images.
+        """Write image to FITS. Supports both healpix and regular images.
 
         Args:
             img_data (np.array): Image data to write

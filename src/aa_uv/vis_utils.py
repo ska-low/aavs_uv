@@ -2,7 +2,7 @@ import numpy as np
 
 
 def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=None, conj=False):
-    """ Convert 1D visibility array (lower/upper) triangular to correlation matrix
+    """Convert 1D visibility array (lower/upper) triangular to correlation matrix
 
     Args:
         d (np.ndarray): 1D Numpy array with len N_ant * (N_ant + 1) / 2
@@ -41,7 +41,7 @@ def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=N
 
 
 def vis_arr_to_matrix_4pol(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=None, conj=False):
-    """ Convert 1D visibility array (lower/upper) triangular to correlation matrix, 4-pol
+    """Convert 1D visibility array (lower/upper) triangular to correlation matrix, 4-pol
 
     Args:
         d (np.ndarray): 1D Numpy array with len N_ant * (N_ant + 1) / 2

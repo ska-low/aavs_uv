@@ -8,14 +8,14 @@ import numpy as np
 from ..sky_model import RadioSource
 
 def peel(aa: ApertureArray, src: SkyCoord):
-    """ Basic source peeling routine
+    """Basic source peeling routine
 
     """
     m0 = RadioSource(src.ra, src.dec, mag=1.0)
     idx0 = aa.viewer.get_pixel(src)
 
     # Simulate point source with mag=1
-    v_m0   = aa.simulation.sim_vis_pointsrc({'src0': m0})
+    aa.simulation.sim_vis_pointsrc({'src0': m0})
     img_m0 = aa.make_image(vis='model')
     mag_m0 = img_m0[idx0]
 
