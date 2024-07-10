@@ -125,7 +125,7 @@ def parse_args(args):
 
 
 def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context):
-    """Convert a file"""
+    """Convert a file."""
     # Create subdirectories as needed
     if args.batch or args.megabatch:
         subdir = os.path.dirname(fn_out)

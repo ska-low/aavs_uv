@@ -55,7 +55,7 @@ myst-parser = ">3.0.0"
 
 [tool.ruff.lint]
 select = ["E", "F"]
-ignore = ["E221", "E501", "E741"]
+ignore = ["E221", "E501", "E741", "D100", "D102", "D101", "D105", "D104", "D103", "D107"]
 # E501 - line too long
 # E221 - lining up equals signs
 # E741 - ambiguous variable names (using l,m,n)

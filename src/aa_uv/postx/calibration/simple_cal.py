@@ -9,7 +9,7 @@ from .stefcal import stefcal
 
 
 def create_baseline_matrix(xyz: np.array) -> np.ndarray:
-    """Create NxN array of baseline lengths
+    """Create NxN array of baseline lengths.
 
     Args:
         xyz (np.array): (N_ant, 3) array of antenna locations

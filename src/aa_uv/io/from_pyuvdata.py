@@ -26,7 +26,7 @@ def convert_data_to_uvx_convention(uv: UVData, check: bool=False) -> np.array:
 
     Args:
         uv (UVData): UV data object with uv.data_array to convert
-        check (bool): Basic sanity checks on incoming data arrangement
+        check (bool): Run basic sanity checks on incoming data arrangement
 
     Returns:
         data (np.array): Numpy array of data after remapping to UVX convention
@@ -62,6 +62,7 @@ def pyuvdata_to_uvx(uv: UVData, check: bool=False) -> UVX:
 
     Args:
         uv (UVData): Pyuvdata input object
+        check (bool): Run basic sanity checks on incoming data arrangement
 
     Returns:
         uvx (UVX): Converted UVX object

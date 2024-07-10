@@ -48,7 +48,7 @@ def load_observation_metadata(filename: str, yaml_config: str=None, load_config:
 
 
 def get_hdf5_metadata(filename: str) -> dict:
-    """Extract metadata from HDF5 and perform checks"""
+    """Extract metadata from HDF5 and perform checks."""
     with h5py.File(filename, mode='r') as datafile:
         expected_keys = ['n_antennas', 'ts_end', 'n_pols', 'n_beams', 'tile_id', 'n_chans', 'n_samples', 'type',
                          'data_type', 'data_mode', 'ts_start', 'n_baselines', 'n_stokes', 'channel_id', 'timestamp',

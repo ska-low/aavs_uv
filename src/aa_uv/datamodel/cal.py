@@ -41,13 +41,14 @@ def create_provenance_dict():
     return provenance
 
 
-def _create_antenna_cal_coords(f: Quantity, a: np.ndarray, p: np.ndarray, cal_type: str='antenna') -> dict:
+def _create_antenna_cal_coords(f: Quantity, a: np.ndarray, p: np.ndarray) -> dict:
     """Create dictionary of coords, for xp.DataArray kwarg.
 
     Args:
         f (Quantity): Astropy Quantity array corresponding to frequency axis (specified at channel center)
-        a_or_bl (np.ndarray): List of antenna IDs
+        a (np.ndarray): List of antenna IDs
         p (np.ndarray): Polarization labels, e.g ('X', 'Y')
+        cal_type (str): Calibration type,
 
     Returns:
         coords (dict): coords for xarray DataArray kwarg

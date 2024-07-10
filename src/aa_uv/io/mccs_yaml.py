@@ -10,6 +10,7 @@ def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tupl
 
     Args:
         fn_yaml (str): Filename path to yaml config
+        station_name (str): Name of station, as it appears in YAML
 
     Returns:
         (earth_loc, ant_enu): astropy EarthLocation and antenna ENU locations in m

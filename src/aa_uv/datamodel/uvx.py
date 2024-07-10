@@ -143,6 +143,8 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
 
     Args:
         data (np.array): Numpy array or duck-type similar data (e.g. h5py.dataset)
+        t (Time): Astropy time array corresponding to timestamps
+        f (Quantity): Astropy quantity array of frequency for channel centers
         md (dict): Dictionary of metadata, as found in raw HDF5 file.
         eloc (EarthLocation): Astropy EarthLocation for array center
         conj (bool): Conjugate visibility data (default True).
@@ -150,8 +152,6 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
 
 
     Returns:
-        t (Time): Astropy time array corresponding to timestamps
-        f (Quantity): Astropy quantity array of frequency for channel centers
         vis (xp.DataArray): xarray DataArray object, see notes below
 
     Notes:

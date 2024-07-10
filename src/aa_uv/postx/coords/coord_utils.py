@@ -13,14 +13,14 @@ SPEED_OF_LIGHT = c.value
 
 
 def phase_vector(w: np.array, f: float, conj: bool=False, dtype='complex64') -> np.array:
-    """Compute Nx1 phase weight vector e(2πi w f)"""
+    """Compute Nx1 phase weight vector e(2πi w f)."""
     c0 = np.exp(1j * 2 * np.pi * w * f, dtype=dtype)
     c0 = np.conj(c0) if conj else c0
     return c0
 
 
 def hpix2sky(nside: int, pix_ids: np.ndarray) -> SkyCoord:
-    """Convert a healpix pixel_id into a SkyCoord
+    """Convert a healpix pixel_id into a SkyCoord.
 
     Args:
         nside (int): Healpix NSIDE parameter
@@ -35,7 +35,7 @@ def hpix2sky(nside: int, pix_ids: np.ndarray) -> SkyCoord:
 
 
 def sky2hpix(nside: int, sc: SkyCoord) -> np.ndarray:
-    """Convert a SkyCoord into a healpix pixel_id
+    """Convert a SkyCoord into a healpix pixel_id.
 
     Args:
         nside (int): Healpix NSIDE parameter
@@ -50,7 +50,7 @@ def sky2hpix(nside: int, sc: SkyCoord) -> np.ndarray:
 
 
 def skycoord_to_lmn(src: SkyCoord, zen: SkyCoord) -> np.array:
-    """Calculate lmn coordinates for a SkyCoord, given current zenith
+    """Calculate lmn coordinates for a SkyCoord, given current zenith.
 
     Args:
         src (SkyCoord): SkyCoord of interest (can be SkyCoord vector of length N)
@@ -84,7 +84,7 @@ def skycoord_to_lmn(src: SkyCoord, zen: SkyCoord) -> np.array:
 
 
 def loc_xyz_ECEF_to_ENU(loc: EarthLocation, xyz: np.ndarray):
-    """Convert EarthLocation and antenna array in ECEF format to ENU
+    """Convert EarthLocation and antenna array in ECEF format to ENU.
 
     Args:
         loc (EarthLocation): Astropy EarthLocation or array center
@@ -99,7 +99,7 @@ def loc_xyz_ECEF_to_ENU(loc: EarthLocation, xyz: np.ndarray):
 
 
 def generate_lmn_grid(n_pix: int, abs_max: int=1, nan_below_horizon: bool=True):
-    """Generate a grid of direction cosine unit vectors
+    """Generate a grid of direction cosine unit vectors.
 
     Generates a square lmn grid across l=(-abs_max, abs_max), m=(-abs_max, abs_max).
 

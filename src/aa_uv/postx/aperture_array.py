@@ -1,5 +1,4 @@
-"""Basic antenna array geometry class
-"""
+"""Basic antenna array geometry class."""
 import numpy as np
 from pygdsm import init_observer
 
@@ -18,10 +17,10 @@ from .calibration.aa_calibration import AaCalibrator
 
 
 class ApertureArray(object):
-    """RadioArray class, designed for post-correlation beamforming and all-sky imaging"""
+    """RadioArray class, designed for post-correlation beamforming and all-sky imaging."""
 
     def __init__(self, uvx: UVX, conjugate_data: bool=False, verbose: bool=False, gsm: str='gsm08'):
-        """Initialize RadioArray class (based on astropy EarthLocation)
+        """Initialize RadioArray class (based on astropy EarthLocation).
 
         Args:
             vis (UV):                datamodel visibility dataclass
@@ -78,7 +77,7 @@ class ApertureArray(object):
         return s
 
     def set_gsm(self, gsm_str: str='gsm08'):
-        """Set the Global Sky Model to use"""
+        """Set the Global Sky Model to use."""
         self.simulation.model.gsm       = init_observer(gsm_str)
         self.simulation.model.gsm.lat   = self.uvx.origin.lat.to('rad').value
         self.simulation.model.gsm.lon   = self.uvx.origin.lon.to('rad').value
@@ -87,7 +86,7 @@ class ApertureArray(object):
         self.gsm = self.simulation.model.gsm
 
     def set_idx(self, f: int=None, t: int=None, p: int=None):
-        """Set index of UVX data array
+        """Set index of UVX data array.
 
         Args:
             f (int): Frequency index
@@ -106,7 +105,7 @@ class ApertureArray(object):
             self.idx['p'] = p
 
     def _ws(self, key: str):
-        """Return value of current index for freq / pol / time or workspace entry
+        """Return value of current index for freq / pol / time or workspace entry.
 
         Helper function to act as 'workspace'.
         Uses self.idx dictionary which stores selected index

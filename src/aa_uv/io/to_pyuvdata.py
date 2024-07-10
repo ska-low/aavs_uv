@@ -52,10 +52,10 @@ def phase_to_sun(uv: UVData, t0: Time) -> UVData:
 
 def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
                      start_int: int=0, max_int: int=None) -> pyuvdata.UVData:
-    """Convert AAVS2/3 HDF5 correlator output to UVData object.
+    """Convert UVX visibility format into UVData object.
 
     Args:
-        filename (str):     Name of file to open
+        uvx (UVX):          UVX object to convert
         phase_to_t0 (bool): Instead of phasing to Zenith, phase all timestamps to
                             the RA/DEC position of zenith at the first timestamp (t0).
                             This is needed if writing UVFITS files, but not if you

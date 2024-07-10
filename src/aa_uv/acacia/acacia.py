@@ -46,7 +46,7 @@ class AcaciaStorage(object):
         }
         rclone.create_remote(config_name, RemoteTypes.s3, **rclone_config)
 
-    def download_obs(self, bucket: str, eb_code: str, dest: str='./', format='all'):
+    def download_obs(self, bucket: str, eb_code: str, dest: str='./'):
         """Download an observation from acacia.
 
         Args:
