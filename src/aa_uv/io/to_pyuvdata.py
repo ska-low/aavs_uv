@@ -1,20 +1,15 @@
 # Basic imports
-import glob
-import os
 import warnings
 from loguru import logger
-from pprint import pprint
 from datetime import datetime
 
 # Basic science stuff
 import h5py
-import pylab as plt
 import pandas as pd
 import numpy as np
 
 # Astropy + pyuvdata
-from astropy.io import fits as pf
-from astropy.time import Time, TimeDelta
+from astropy.time import Time
 from astropy.coordinates import EarthLocation, AltAz, Angle, SkyCoord, get_sun
 import pyuvdata
 from pyuvdata import UVData

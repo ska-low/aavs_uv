@@ -1,15 +1,8 @@
-import os
-import h5py
 import numpy as np
 import xarray as xp
-import pandas as pd
 from dataclasses import dataclass
-from loguru import logger
 
-from astropy.coordinates import EarthLocation, SkyCoord, AltAz, Angle
-from astropy.time import Time
 from astropy.units import Quantity
-import pyuvdata.utils as uvutils
 
 from aa_uv.utils import get_resource_path, load_yaml, get_software_versions
 
@@ -39,6 +32,7 @@ class UVXAntennaCal:
         cal_mat[..., 3] = np.outer(gc[f_idx, ..., 1], gc[f_idx, ..., 1])
 
         return cal_mat
+
 
 def create_provenance_dict():
     provenance = {

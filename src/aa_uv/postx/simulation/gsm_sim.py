@@ -6,7 +6,7 @@ import numpy as np
 import healpy as hp
 import xarray as xr
 
-from ..coords.coord_utils import hpix2sky, sky2hpix
+from ..coords.coord_utils import hpix2sky
 from pyuvsim.analyticbeam import AnalyticBeam
 from matvis import simulate_vis
 

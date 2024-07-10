@@ -4,7 +4,6 @@ import typing
 
 import numpy as np
 
-from astropy.time import Time
 from astropy.coordinates import SkyCoord, AltAz, Angle
 from astropy.coordinates import get_sun as astropy_get_sun
 

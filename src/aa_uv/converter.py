@@ -6,7 +6,6 @@ import glob
 
 import warnings
 from loguru import logger
-import pprint
 
 from .parallelize import task, run_in_parallel
 from .utils import reset_logger, zipit, import_optional_dependency

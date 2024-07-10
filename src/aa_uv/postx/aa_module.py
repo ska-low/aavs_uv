@@ -1,4 +1,3 @@
-from types import ModuleType
 
 class AaBaseModule(object):
     """ A basic class for ApertureArray child objects """

@@ -4,7 +4,6 @@ if typing.TYPE_CHECKING:
     from .aperture_array import ApertureArray
 
 import numpy as np
-import matplotlib as mpl
 from matplotlib import pyplot as plt
 from astropy.time import Time
 from astropy.coordinates import SkyCoord

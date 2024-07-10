@@ -10,5 +10,7 @@ try:
 except ImportError:
     pass
 
-from .to_pyuvdata import hdf5_to_pyuvdata, phase_to_sun
-from .uvx import read_uvx, write_uvx
+from .to_pyuvdata import hdf5_to_pyuvdata as hdf5_to_pyuvdata
+from .to_pyuvdata import phase_to_sun as phase_to_sun
+from .uvx import read_uvx as read_uvx
+from .uvx import write_uvx as write_uvx

@@ -3,11 +3,8 @@ Basic antenna array geometry class
 """
 import numpy as np
 from pygdsm import init_observer
-import pylab as plt
 
-from astropy.constants import c
 from astropy.units import Quantity
-import healpy as hp
 from loguru import logger
 
 from aa_uv.vis_utils import  vis_arr_to_matrix_4pol

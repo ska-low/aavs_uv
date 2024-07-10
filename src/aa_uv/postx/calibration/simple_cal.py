@@ -6,7 +6,6 @@ if typing.TYPE_CHECKING:
 import numpy as np
 from ..simulation.simple_sim import simulate_visibilities_pointsrc
 from .stefcal import stefcal
-from aa_uv.vis_utils import vis_arr_to_matrix
 
 
 def create_baseline_matrix(xyz: np.array) -> np.ndarray:

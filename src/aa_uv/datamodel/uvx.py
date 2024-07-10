@@ -1,12 +1,10 @@
-import os
-import h5py
 import numpy as np
 import xarray as xp
 import pandas as pd
 from dataclasses import dataclass
 from loguru import logger
 
-from astropy.coordinates import EarthLocation, SkyCoord, AltAz, Angle
+from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
 import pyuvdata.utils as uvutils
