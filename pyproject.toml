@@ -55,7 +55,9 @@ myst-parser = ">3.0.0"
 
 [tool.ruff.lint]
 select = ["E", "F"]
-ignore = ["E221", "E501", "E722", "E741", "F841"]
+ignore = ["E221", "E501", "E722", "E741", "F841", "F401"]
+# E501 - line too long
+# E221 - lining up equals signs
 # E722 Do not use bare `except`
 # F841 Local variable `antpos_ENU` is assigned to but never used
 # F401 `.to_pyuvdata.phase_to_sun` imported but unused; consider removing, adding to `__all__`
