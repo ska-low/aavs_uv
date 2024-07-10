@@ -6,13 +6,13 @@
 """
 import os
 from datetime import datetime
-from astropy.coordinates import EarthLocation
 from astropy.time import Time
 
 from aa_uv.io.mccs_yaml import station_location_from_platform_yaml
-from aa_uv.utils import load_yaml
+
 
 MCCS_CONFIG_PATH = 'ska-low-deployment/tmdata/instrument/mccs-configuration'
+
 
 def generate_uv_config(name):
     """ Generate UV configs, create directories """
@@ -49,6 +49,7 @@ def generate_uv_config(name):
 
     # Copy over baseline order
     os.system(f"cp config/baseline_order.txt {name}/")
+
 
 if __name__ == "__main__":
     import glob

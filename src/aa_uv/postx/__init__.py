@@ -1,1 +1,1 @@
-from .aperture_array import ApertureArray
+from .aperture_array import ApertureArray as ApertureArray

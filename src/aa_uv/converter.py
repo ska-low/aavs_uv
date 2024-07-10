@@ -161,7 +161,7 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
             uv = hdf5_to_pyuvdata(fn_in, yaml_config=array_config, conj=conj, max_int=args.n_int_per_file, start_int=start_int)
 
             if args.phase_to_sun:
-                logger.info(f"Phasing to sun")
+                logger.info("Phasing to sun")
                 ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
                 uv = phase_to_sun(uv, ts0)
             tr = time.time() - tr0
@@ -200,6 +200,8 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
             del uv
 
     elif output_format == 'sdp':
+        import_optional_dependency('ska_sdp_datamodels', 'raise')
+
         tr0 = time.time()
         if context is not None:
             vis = hdf5_to_sdp_vis(fn_in, yaml_config=array_config, scan_intent=context['intent'], execblock_id=context['execution_block'])
@@ -250,7 +252,7 @@ def run(args=None):
         array_config = get_config_path(args.telescope_name)
 
     if array_config is None:
-        logger.error(f"No telescope name or array config file passed. Please re-run with -n or -c flag set")
+        logger.error("No telescope name or array config file passed. Please re-run with -n or -c flag set")
         config_error_found = True
     else:
         if not os.path.exists(array_config):

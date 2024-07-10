@@ -10,7 +10,7 @@ from astropy.coordinates import get_sun as astropy_get_sun
 
 from aa_uv.postx.coords.coord_utils import phase_vector, skycoord_to_lmn
 from aa_uv.postx.imaging.aa_imaging import SPEED_OF_LIGHT
-from astropy.coordinates import SkyCoord
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 

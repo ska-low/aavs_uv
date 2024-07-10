@@ -1,7 +1,18 @@
 from __future__ import annotations
 import typing
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
+
+from loguru import logger
+import warnings
+import numpy as np
+import matplotlib as mpl
+import pylab as plt
+
+from astropy.constants import c
+from astropy.coordinates import SkyCoord
+
 
 from ..coords.coord_utils import gaincal_vec_to_matrix
 from ..imaging.aa_imaging import generate_weight_grid
@@ -9,17 +20,8 @@ from ..aa_module import AaBaseModule
 
 from aa_uv.datamodel.cal import UVXAntennaCal, create_uvx_antenna_cal
 
-import numpy as np
 
-from astropy.constants import c
-from astropy.coordinates import SkyCoord
 LIGHT_SPEED = c.value
-
-import matplotlib as mpl
-import pylab as plt
-
-from loguru import logger
-import warnings
 
 
 ##################

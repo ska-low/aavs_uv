@@ -5,7 +5,8 @@ import sys
 from tqdm import tqdm
 import shutil
 import yaml
-import types, typing
+import types
+import typing
 import importlib
 
 def reset_logger(use_tqdm: bool=False, disable: bool=False, level: str="INFO", *args, **kwargs) -> logger:

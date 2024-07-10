@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 import typing
 if typing.TYPE_CHECKING:
@@ -11,7 +10,7 @@ from ..coords.coord_utils import hpix2sky, sky2hpix
 from pyuvsim.analyticbeam import AnalyticBeam
 from matvis import simulate_vis
 
-def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None) -> xr.DataArray:
+def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None) -> xr.DataArray:  # noqa: F821
     """ Use pygdsm + matvis to simulate visibilites, add in Sun """
 
     f_mhz    = aa.uvx.data.frequency[0] / 1e6

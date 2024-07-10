@@ -1,1 +1,1 @@
-from .acacia import AcaciaStorage
+from .acacia import AcaciaStorage as AcaciaStorage

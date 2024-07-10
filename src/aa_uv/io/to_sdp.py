@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 import h5py
@@ -8,15 +7,12 @@ from astropy.time import Time
 
 from pyuvdata import UVData
 
-from aa_uv.utils import import_optional_dependency
+from aa_uv.io.to_uvx import hdf5_to_uvx
+from aa_uv.uvw_utils import calc_uvw, calc_zenith_tracking_phase_corr, calc_zenith_apparent_coords
 
-import_optional_dependency('ska_sdp_datamodels')
 from ska_sdp_datamodels.visibility import Visibility
 from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model import ReceptorFrame, PolarisationFrame
-
-from aa_uv.io.to_uvx import hdf5_to_uvx
-from aa_uv.uvw_utils import calc_uvw, calc_zenith_tracking_phase_corr, calc_zenith_apparent_coords
 
 
 def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None, conj: bool=True,
