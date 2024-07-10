@@ -12,7 +12,7 @@ from ..aa_module import AaBaseModule
 
 
 class AaSimulator(AaBaseModule):
-    """Simulate visibilities using matvix
+    """Simulate visibilities using matvis.
 
     Provides the following:
         sim_vis_pointsrc(): Simulate visibilities from point source dictionary
@@ -21,7 +21,7 @@ class AaSimulator(AaBaseModule):
         mollview_gsm(): View observed diffuse sky model (Mollview)
     """
     def __init__(self, aa: ApertureArray):
-        """Setup AaPlotter
+        """Setup AaPlotter.
 
         Args:
             aa (ApertureArray): Aperture array 'parent' object to use
@@ -53,13 +53,13 @@ class AaSimulator(AaBaseModule):
         return self.model.visibilities
 
     def orthview_gsm(self, *args, **kwargs):
-        """View diffuse sky model (Orthographic)"""
+        """View diffuse sky model (Orthographic)."""
         if self.model.gsm.observed_sky is None:
             self.model.gsm.generate()
         self.model.gsm.view()
 
     def mollview_gsm(self, *args, **kwargs):
-        """View diffuse sky model (Mollweide)"""
+        """View diffuse sky model (Mollweide)."""
         if self.model.gsm.observed_sky is None:
             self.model.gsm.generate()
         self.model.gsm.view_observed_gsm()

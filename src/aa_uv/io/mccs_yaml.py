@@ -6,7 +6,7 @@ import numpy as np
 from astropy.coordinates import EarthLocation
 
 def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tuple[EarthLocation, pd.DataFrame]:
-    """Load station location from AAVS3 MCCS yaml config
+    """Load station location from AAVS3 MCCS yaml config.
 
     Args:
         fn_yaml (str): Filename path to yaml config
@@ -36,7 +36,7 @@ def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tupl
     return  earth_loc, ant_enu
 
 def read_flags_from_platform_yaml(fn_yaml: str) -> np.array:
-    """Read antenna flags from AAVS MCCS yaml config
+    """Read antenna flags from AAVS MCCS yaml config.
 
     Args:
         fn_yaml (str): Filename path to yaml config

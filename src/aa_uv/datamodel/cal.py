@@ -16,7 +16,7 @@ class UVXAntennaCal:
     provenance: dict         # Provenance/history information and other metadata
 
     def to_matrix(self, f_idx: int=0) -> np.ndarray:
-        """Convert to visibility matrix
+        """Convert to visibility matrix.
 
         Args:
             f_idx (int): Frequency index to load
@@ -42,7 +42,7 @@ def create_provenance_dict():
 
 
 def _create_antenna_cal_coords(f: Quantity, a: np.ndarray, p: np.ndarray, cal_type: str='antenna') -> dict:
-    """Create dictionary of coords, for xp.DataArray kwarg
+    """Create dictionary of coords, for xp.DataArray kwarg.
 
     Args:
         f (Quantity): Astropy Quantity array corresponding to frequency axis (specified at channel center)
@@ -82,7 +82,7 @@ def _create_antenna_cal_coords(f: Quantity, a: np.ndarray, p: np.ndarray, cal_ty
 
 def create_antenna_flags(antenna_flag_arr: np.ndarray,
                        f: Quantity, a: np.ndarray, p: np.ndarray) -> xp.DataArray:
-    """Create an xarray dataarray for antenna calibration cofficients
+    """Create an xarray dataarray for antenna calibration cofficients.
 
     Args:
         antenna_flag_arr (np.array): Boolean antenna flags.
@@ -108,7 +108,7 @@ def create_antenna_flags(antenna_flag_arr: np.ndarray,
 
 def create_antenna_cal(antenna_cal_arr: np.ndarray,
                        f: Quantity, a: np.ndarray, p: np.ndarray) -> xp.DataArray:
-    """Create an xarray dataarray for antenna calibration cofficients
+    """Create an xarray dataarray for antenna calibration cofficients.
 
     Args:
         antenna_cal_arr (np.array): Complex antenna calibration coefficients.
@@ -136,7 +136,7 @@ def create_uvx_antenna_cal(telescope: str, method: str,
                        antenna_cal_arr: np.ndarray, antenna_flags_arr: np.ndarray,
                        f: Quantity, a: np.ndarray, p: np.ndarray,
                        provenance: dict=None) -> UVXAntennaCal:
-    """Create an UVXAntennaCal for antenna locations
+    """Create an UVXAntennaCal for antenna locations.
 
     Args:
         telescope (str): Name of telescope

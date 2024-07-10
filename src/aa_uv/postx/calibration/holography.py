@@ -422,7 +422,7 @@ def report_flagged_antennas(aa: ApertureArray, cal_dict: dict, cal_key: str='phs
 ####################
 
 def ant_xyz_to_image_idx(xyz_enu: np.array, cal: dict, as_int: bool=True) -> tuple:
-    """Convert an ENU antenna location to a pixel location in image
+    """Convert an ENU antenna location to a pixel location in image.
 
     Args:
         xyz_enu (np.array): Antenna positions, in meters, ENU
@@ -447,7 +447,7 @@ def ant_xyz_to_image_idx(xyz_enu: np.array, cal: dict, as_int: bool=True) -> tup
 
 def plot_aperture(aa: ApertureArray, cal: dict, pol_idx: int=0, plot_type: str='mag',
                   vmin: float=-40, phs_range: tuple=None, annotate: bool=False, s: int=None):
-    """Plot aperture illumnation for given polarization index
+    """Plot aperture illumnation for given polarization index.
 
     Args:
         aa (ApertureArray): Aperture Array to use
@@ -518,7 +518,7 @@ def plot_aperture(aa: ApertureArray, cal: dict, pol_idx: int=0, plot_type: str='
 
 def plot_aperture_xy(aa: ApertureArray, cal: dict, vmin: float=-40,
                                phs_range: tuple=None, annotate: bool=False, figsize: tuple=(10,8)):
-    """Plot aperture illumnation function magnitude and phase, both polarizations
+    """Plot aperture illumnation function magnitude and phase, both polarizations.
 
     Plots a 2x2 grid for aperture illumination image, showing magnitude and phase
     for X and Y polarizations.
@@ -550,7 +550,7 @@ def plot_aperture_xy(aa: ApertureArray, cal: dict, vmin: float=-40,
 
 
 def plot_jishnu_phasecal_iterations(cc_dict: dict):
-    """Plot the iterative phase corrections applied in phasecal
+    """Plot the iterative phase corrections applied in phasecal.
 
     Args:
         cc_dict (dict): Output dict from jishnu_phasecal
@@ -563,7 +563,7 @@ def plot_jishnu_phasecal_iterations(cc_dict: dict):
 
 
 def plot_farfield_beam_pattern(holo_dict: dict):
-    """Plot the far-field beam power pattern, 2D cuts
+    """Plot the far-field beam power pattern, 2D cuts.
 
     Args:
         holo_dict (dict): Output of jishnu_selfholo()
@@ -604,7 +604,7 @@ class AaHolographer(AaBaseModule):
 
     """
     def __init__(self, aa: ApertureArray, cal_src: SkyCoord=None):
-        """Setup Holographer
+        """Setup Holographer.
 
         Args:
             aa (ApertureArray): Aperture array 'parent' object to use

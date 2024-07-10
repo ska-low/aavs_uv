@@ -12,7 +12,7 @@ from astropy.constants import c
 SPEED_OF_LIGHT = c.value
 
 def generate_weight_grid(aa, n_pix: int, abs_max: int=1, nan_below_horizon: bool=True):
-    """Generate a grid of direction cosine pointing weights
+    """Generate a grid of direction cosine pointing weights.
 
     Generates a square lmn grid across l=(-abs_max, abs_max), m=(-abs_max, abs_max).
 
@@ -60,7 +60,7 @@ def generate_weight_grid(aa, n_pix: int, abs_max: int=1, nan_below_horizon: bool
 
 
 def make_image(aa: ApertureArray, n_pix: int=128, update: bool=True, vis: str='data') -> np.array:
-    """Make an image out of a beam grid
+    """Make an image out of a beam grid.
 
     Args:
         n_pix (int): Image size in pixels (N_pix x N_pix)
@@ -88,7 +88,7 @@ def make_image(aa: ApertureArray, n_pix: int=128, update: bool=True, vis: str='d
 
 def make_healpix(aa, n_side: int=128, fov: float=np.pi/2, update: bool=True, apply_mask: bool=True,
                     vis: str='data') -> np.array:
-    """Generate a grid of beams on healpix coordinates
+    """Generate a grid of beams on healpix coordinates.
 
     Args:
         n_side (int): Healpix NSIDE array size
@@ -172,7 +172,7 @@ def make_healpix(aa, n_side: int=128, fov: float=np.pi/2, update: bool=True, app
 ####################
 
 class AaImager(AaBaseModule):
-    """ApertureArray Imaging module
+    """ApertureArray Imaging module.
 
     Provides the following functions:
     make_image()   - Make a 2D all-sky image (orthographic)
@@ -180,7 +180,7 @@ class AaImager(AaBaseModule):
 
     """
     def __init__(self, aa: ApertureArray):
-        """Setup AaImager
+        """Setup AaImager.
 
         Args:
             aa (ApertureArray): Aperture array 'parent' object to use

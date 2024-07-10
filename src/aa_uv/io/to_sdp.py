@@ -17,7 +17,7 @@ from ska_sdp_datamodels.science_data_model import ReceptorFrame, PolarisationFra
 def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None, conj: bool=True,
                     scan_id: int=0, scan_intent: str="", execblock_id: str="", flip_uvw=True,
                     apply_phasing: bool=True) -> Visibility:
-    """Generate a SDP Visibility object from a AAVS2 HDF5 file
+    """Generate a SDP Visibility object from a AAVS2 HDF5 file.
 
     Args:
         fn_raw (str): Filename of raw HDF5 data to load.
@@ -115,7 +115,7 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None
 
 def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock_id: str="",
                       conj: bool=False, flip_uvw=True) -> Visibility:
-    """Convert pyuvdata object to SDP Visibility
+    """Convert pyuvdata object to SDP Visibility.
 
     Args:
         uv (UVData): pyuvdata UVData object

@@ -14,7 +14,7 @@ from . import stefcal
 ######################
 
 class AaCalibrator(AaBaseModule):
-    """ApertureArray Calibration module
+    """ApertureArray Calibration module.
 
     Provides the following sub-modules:
     holography - self-holography techniques
@@ -22,7 +22,7 @@ class AaCalibrator(AaBaseModule):
 
     """
     def __init__(self, aa: ApertureArray):
-        """Setup AaCalibrator
+        """Setup AaCalibrator.
 
         Args:
             aa (ApertureArray): Aperture array 'parent' object to use

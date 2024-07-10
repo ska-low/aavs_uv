@@ -134,7 +134,7 @@ def generate_lmn_grid(n_pix: int, abs_max: int=1, nan_below_horizon: bool=True):
     return lmn
 
 def gaincal_vec_to_matrix(gc: np.array) -> np.array:
-    """Create a gain calibration matrix out of 4-pol vector
+    """Create a gain calibration matrix out of 4-pol vector.
 
     Args:
         gc (np.array): Per-antenna gain calibration solutions.

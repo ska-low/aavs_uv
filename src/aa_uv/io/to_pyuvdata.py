@@ -21,7 +21,7 @@ from aa_uv.utils import get_resource_path, load_yaml
 from aa_uv import __version__
 
 def phase_to_sun(uv: UVData, t0: Time) -> UVData:
-    """Phase UVData to sun, based on timestamp
+    """Phase UVData to sun, based on timestamp.
 
     Computes the sun's RA/DEC in GCRS for the given time, then applies phasing.
     This will then recompute UVW and apply phase corrections to data.
@@ -52,7 +52,7 @@ def phase_to_sun(uv: UVData, t0: Time) -> UVData:
 
 def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
                      start_int: int=0, max_int: int=None) -> pyuvdata.UVData:
-    """Convert AAVS2/3 HDF5 correlator output to UVData object
+    """Convert AAVS2/3 HDF5 correlator output to UVData object.
 
     Args:
         filename (str):     Name of file to open
@@ -237,7 +237,7 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
 
 def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=None, phase_to_t0: bool=True,
                      start_int: int=0, max_int: int=None, conj: bool=True) -> pyuvdata.UVData:
-    """Convert AAVS2/3 HDF5 correlator output to UVData object
+    """Convert AAVS2/3 HDF5 correlator output to UVData object.
 
     Args:
         filename (str):     Name of file to open

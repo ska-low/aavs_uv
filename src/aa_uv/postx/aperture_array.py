@@ -132,7 +132,7 @@ class ApertureArray(object):
 
 
     def _generate_bl_matrix(self):
-        """Compute a matrix of baseline lengths"""
+        """Compute a matrix of baseline lengths."""
 
         # Helper fn to compute length for one row
         def bl_len(xyz, idx):
@@ -145,7 +145,7 @@ class ApertureArray(object):
         return bls
 
     def set_cal(self, cal: UVXAntennaCal):
-        """Set gaincal solution (used when generating vis matrix)
+        """Set gaincal solution (used when generating vis matrix).
 
         Args:
             cal (UVXAntennaCal): Calibration to apply
@@ -153,7 +153,7 @@ class ApertureArray(object):
         self.workspace['cal'] = cal
 
     def generate_vis_matrix(self, vis: str='data', t_idx=None, f_idx=None) -> np.array:
-        """Generate visibility matrix from underlying array data
+        """Generate visibility matrix from underlying array data.
 
         Underlying UVX data has axes (time, frequency, baseline, polarization)
         Model data should have axes (time, frequency, antenna1, antenna2) and be an xr.DataArray

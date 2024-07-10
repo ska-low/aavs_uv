@@ -8,9 +8,7 @@ import numpy as np
 from ..sky_model import RadioSource
 
 def peel(aa: ApertureArray, src: SkyCoord):
-    """Basic source peeling routine
-
-    """
+    """Basic source peeling routine."""
     m0 = RadioSource(src.ra, src.dec, mag=1.0)
     idx0 = aa.viewer.get_pixel(src)
 

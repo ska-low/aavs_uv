@@ -25,7 +25,7 @@ def create_baseline_matrix(xyz: np.array) -> np.ndarray:
 
 
 def simple_stefcal(aa: ApertureArray, model: dict, t_idx: int=0, f_idx: int=0, pol_idx: int=0) -> tuple[ApertureArray, np.ndarray]:
-    """Apply stefcal to calibrate UV data
+    """Apply stefcal to calibrate UV data.
 
     Args:
         aa (ApertureArray): A RadioArray with UV data to calibrate

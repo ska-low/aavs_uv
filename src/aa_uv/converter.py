@@ -36,7 +36,7 @@ EXT_LUT = {
 PYUVDATA_FORMATS = ('uvfits', 'miriad', 'mir', 'ms', 'uvh5')
 
 def parse_args(args):
-    """Parse command-line arguments"""
+    """Parse command-line arguments."""
     p = argparse.ArgumentParser(description="AAVS UV file conversion utility")
     p.add_argument("infile", help="Input filename")
     p.add_argument("outfile", help="Output filename")
@@ -234,7 +234,7 @@ def convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, co
     convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 def run(args=None):
-    """Command-line utility for file conversion"""
+    """Command-line utility for file conversion."""
     args = parse_args(args)
     config_error_found = False
 

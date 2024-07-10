@@ -45,7 +45,7 @@ def create_empty_provenance_dict():
 
 
 def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.Dataset:
-    """Create an xarray Dataset for antenna locations
+    """Create an xarray Dataset for antenna locations.
 
     Args:
         antpos (pd.Dataframe): Pandas dataframe with antenna positions. Should have
@@ -136,7 +136,7 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
 
 def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthLocation,
                             conj: bool=True, N_ant: int=256) -> xp.DataArray:
-    """Create visibility array out of data array + metadata
+    """Create visibility array out of data array + metadata.
 
     Takes a data array, frequency and time axes, and an EarthLocation.
     Currently assumes XX/XY/YX/YY polarization and upper triangle baseline coordinates.

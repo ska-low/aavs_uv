@@ -3,7 +3,7 @@ from aa_uv.datamodel.cal import UVXAntennaCal
 
 
 def write_uvx(cal: UVXAntennaCal, filename: str):
-    """Write a UVXAntennaCAl object to a HDF5 file
+    """Write a UVXAntennaCAl object to a HDF5 file.
 
     Args:
         cal (UVXAntennaCal): aa_uv.datamodel.UVXAntennaCal object

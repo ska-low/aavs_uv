@@ -1,5 +1,4 @@
-"""Simple sky model class for ephemeris using pyephem
-"""
+"""Simple sky model class."""
 from __future__ import annotations
 import typing
 if typing.TYPE_CHECKING:
@@ -9,7 +8,7 @@ import numpy as np
 from astropy.coordinates import SkyCoord, get_body, get_sun
 
 class RadioSource(SkyCoord):
-    """A SkyCoordinate with a magnitude"""
+    """A SkyCoordinate with a magnitude."""
     def __init__(self, *args, mag: float=1.0, unit: str=None, **kwargs):
         if unit is None:
             unit=('hourangle', 'degree')
@@ -17,7 +16,7 @@ class RadioSource(SkyCoord):
         self.mag = mag
 
 def generate_skycat(observer: ApertureArray):
-    """Generate a SkyModel for a given observer with major radio sources
+    """Generate a SkyModel for a given observer with major radio sources.
 
     Args:
         observer (AntArray / ephem.Observer): Observatory instance
@@ -47,7 +46,7 @@ def generate_skycat(observer: ApertureArray):
 
 
 def generate_skycat_solarsys(observer: ApertureArray):
-    """Generate Sun + Moon for observer"""
+    """Generate Sun + Moon for observer."""
     sun_gcrs  = get_body('sun', observer._ws('t'))
     moon_gcrs = get_body('moon', observer._ws('t'))
     jupiter_gcrs = get_body('jupiter', observer._ws('t'))

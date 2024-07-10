@@ -1,6 +1,6 @@
 
 class AaBaseModule(object):
-    """A basic class for ApertureArray child objects"""
+    """A basic class for ApertureArray child objects."""
     def __init__(self, name):
         self.name = name
 

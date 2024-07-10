@@ -11,7 +11,7 @@ from pyuvsim.analyticbeam import AnalyticBeam
 from matvis import simulate_vis
 
 def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None, n_side: int=32) -> xr.DataArray:  # noqa: F821
-    """Use pygdsm + matvis to simulate visibilites, add in Sun"""
+    """Use pygdsm + matvis to simulate visibilites, add in Sun."""
     f_mhz    = aa.uvx.data.frequency[0] / 1e6
     lsts_rad = aa.uvx.data.lst.values / 24 * np.pi * 2
     array_lat_rad = float(aa.gsm.lata)
