@@ -9,6 +9,7 @@ def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=N
         n_ant (int): Number of antennas in array
         tri (str): Either 'upper' or 'lower' triangular, to match data
         V (np.ndarray): Either None (create new array) or an (N_ant x N_ant) Numpy array
+        conj (bool): Apply conjugation to data (default False)
 
     Returns:
         V (np.ndarray): (N_ant x N_ant) correlation matrix
@@ -48,6 +49,7 @@ def vis_arr_to_matrix_4pol(d: np.ndarray, n_ant: int, tri: str='upper', V: np.ar
         n_ant (int): Number of antennas in array
         tri (str): Either 'upper' or 'lower' triangular, to match data
         V (np.ndarray): Either None (create new array) or an (N_ant x N_ant) Numpy array
+        conj (bool): Apply conjugation to data (default False)
 
     Returns:
         V (np.ndarray): (N_ant x N_ant x 4 pol) correlation matrix, 4-pol

@@ -237,12 +237,14 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
 
 def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=None, phase_to_t0: bool=True,
                      start_int: int=0, max_int: int=None, conj: bool=True) -> pyuvdata.UVData:
-    """Convert AAVS2/3 HDF5 correlator output to UVData object.
+    """Convert MCCS HDF5 correlator output to UVData object.
 
     Args:
         filename (str):     Name of file to open
         yaml_config (str):  YAML configuration file with basic telescope info.
-                            See README for more information
+                            See README for more information.
+        telescope_name (str): Name of telescope/station. If set, will attempt to use
+                              internal antenna location files.
         phase_to_t0 (bool): Instead of phasing to Zenith, phase all timestamps to
                             the RA/DEC position of zenith at the first timestamp (t0).
                             This is needed if writing UVFITS files, but not if you

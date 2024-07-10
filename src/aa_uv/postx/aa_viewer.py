@@ -103,6 +103,7 @@ class AllSkyViewer(AaBaseModule):
 
         Args:
             src (SkyCoord): sky coordinate of interest
+            n_side (int): Healpix NSIDE parameter
 
         Returns:
             idx (tuple): pixel index corresponding to source location
@@ -137,7 +138,7 @@ class AllSkyViewer(AaBaseModule):
             title (str): Title of plot. If not set, a title will be generated from LST and frequency.
             overlay_srcs (bool): Overlay sources in sky catalog (Default False)
             overlay_grid (bool): Overlay grid (Default true)
-            colorbal (bool): Show colorbar (default False)
+            colorbar (bool): Show colorbar (default False)
             subplot_id (tuple): Subplot ID, e.g. (2,2,1). Use if making multi-panel figures
             **kwargs: These are passed on to imshow()
 

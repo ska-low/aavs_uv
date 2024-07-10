@@ -144,9 +144,12 @@ def create_uvx_antenna_cal(telescope: str, method: str,
         method (str): Calibration method used to generate
         antenna_cal_arr (np.array): Antenna calibration coefficients.
                                     Shape: (freq, antenna, pol) complex-valued
+        antenna_flags_arr (np.ndarray): Boolean antenna flag array, True = flagged (bad)
+                                        Shape: (freq, antenna, pol), boolean
         a (np.ndarray): List of antenna IDs
         f (Quantity): Astropy Quantity array corresponding to frequency axis (specified at channel center)
         p (np.ndarray): Polarization labels, e.g ('XX','XY','YX','YY')
+        provenance (dict): Dictionary of provenance metadata to add
 
     Returns:
         antenna_cal (xp.Dataset): xarray Dataset with antenna locations

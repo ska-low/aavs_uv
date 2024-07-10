@@ -23,7 +23,7 @@ class ApertureArray(object):
         """Initialize RadioArray class (based on astropy EarthLocation).
 
         Args:
-            vis (UV):                datamodel visibility dataclass
+            uvx (UVX):                datamodel visibility dataclass, UVX
             conjugate_data (bool):   Flag to conjugate data (in case upper/lower triangle confusion)
             verbose (bool):          Print extra details to screen
             gsm (str):               Name of global sky model (gsm08, gsm16, lfsm, haslam)

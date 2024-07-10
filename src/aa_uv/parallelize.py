@@ -26,6 +26,7 @@ def run_in_parallel(task_list: list, n_workers: int=-1, show_progressbar=True, b
         n_workers (int): Number of workers to use. Defaults to -1, i.e. use all cores.
         show_progressbar (bool): Show tqdm progress bar (default True)
         backend (str): Parallel processing backend, one of 'loky' (default) or 'dask'
+        verbose (bool): Set to verbose mode (INFO instead of WARNING, default False)
 
     Example usage:
         ::

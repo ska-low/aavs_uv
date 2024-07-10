@@ -9,7 +9,7 @@ import types
 import typing
 import importlib
 
-def reset_logger(use_tqdm: bool=False, disable: bool=False, level: str="INFO", *args, **kwargs) -> logger:
+def reset_logger(use_tqdm: bool=False, disable: bool=False, level: str="INFO") -> logger:
     """Reset loguru logger and setup output format.
 
     Helps loguru (logger), tqdm (progress bar) and joblib/dask (parallel) work together.
@@ -132,6 +132,10 @@ def import_optional_dependency(name: str,
 
     Notes:
         Adapted from pandas/pandas/compat/_optional.py (BSD-3)
+
+    Args:
+        name (str): Name of dependency to import
+        errors (typing.Literal): What to do if not installed; one of raise, warn, or ignore
     """
     msg = (
         f"Missing optional dependency '{name}'. "

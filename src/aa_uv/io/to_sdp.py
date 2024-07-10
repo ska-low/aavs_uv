@@ -21,7 +21,7 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None
 
     Args:
         fn_raw (str): Filename of raw HDF5 data to load.
-        yaml_raw (str): YAML config data with telescope information.
+        yaml_config (str): YAML config data with telescope information.
         telescope_name (str=None): If set, aa_uv will try and use internal config file
                                    for telescope_name, e.g. 'aavs2' or 'aavs3'
         conj (bool): Conjugate visibility data (default True).
@@ -114,11 +114,20 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None
 
 
 def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock_id: str="",
-                      conj: bool=False, flip_uvw=True) -> Visibility:
+                      conj: bool=False, flip_uvw: bool=True) -> Visibility:
     """Convert pyuvdata object to SDP Visibility.
+
+    Notes:
+        Visibility data conjugation and UVW convention need to match. Default for
+        HDF5 data from SKA-Low is to flip UVW (ant1 - ant2) and NOT conjugate.
 
     Args:
         uv (UVData): pyuvdata UVData object
+        scan_id (int): Scan ID number
+        scan_intent (str): Contexual information about why scan was done
+        execblock_id (str): Execution Block ID (optional)
+        conj (bool): Conjugate visibility data (default False)
+        flip_uvw (bool): Flip UVW coordinates (multiply by -1, default True)
 
     Returns:
         v (Visibility): SDP Visibility object

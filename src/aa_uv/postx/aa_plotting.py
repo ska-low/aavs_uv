@@ -14,11 +14,13 @@ def plot_corr_matrix(aa: ApertureArray, vis: str='data', t_idx: int=0, f_idx: in
         """Plot correlation matrix.
 
         Args:
+            aa (ApertureArray): Aperture array 'parent' object to use
             vis (str): One of 'data', 'corrected', or 'model'
             t_idx (int): Time index of visibility data
             f_idx (int): Frequency index of visibility data
             p_idx (int): Polarization index of visibility data
             sfunc (np.ufunc): scaling function to apply to data, e.g. np.log
+            **kwargs (dict): Keyword arguments to pass on to plt.imshow
         """
         data = np.abs(aa.generate_vis_matrix(vis, t_idx, f_idx))
         data = data[..., p_idx]
@@ -38,10 +40,12 @@ def plot_corr_matrix_4pol(aa: ApertureArray, **kwargs):
     """Plot correlation matrix, for all pols.
 
     Args:
+        aa (ApertureArray): Aperture array 'parent' object to use
         vis (str): One of 'data', 'corrected', or 'model'
         t_idx (int): Time index of visibility data
         f_idx (int): Frequency index of visibility data
         sfunc (np.ufunc): scaling function to apply to data, e.g. np.log
+        **kwargs (dict): Keyword arguments to pass on to plt.imshow
     """
     plt.figure(figsize=(10, 8))
     for ii in range(4):
@@ -51,15 +55,18 @@ def plot_corr_matrix_4pol(aa: ApertureArray, **kwargs):
     plt.show()
 
 
-def plot_antennas(aa: ApertureArray, x: str='E', y: str='N', overlay_names: bool=False, overlay_fontsize: str='x-small', **kwargs):
+def plot_antennas(aa: ApertureArray, x: str='E', y: str='N', overlay_names: bool=False,
+                  overlay_fontsize: str='x-small', **kwargs):
     """Plot antenna locations in ENU.
 
     Args:
+        aa (ApertureArray): Aperture array 'parent' object to use
         x (str): One of 'E', 'N', or 'U'
         y (str): One of 'E', 'N', or 'U'
         overlay_names (bool): Overlay the antenna names on the plot. Default False
         overlay_fontsize (str): Font size for antenna names 'xx-small', 'x-small', 'small', 'medium',
                                                             'large', 'x-large', 'xx-large'
+        **kwargs (dict): Keyword arguments to pass on to plt.scatter
     """
     ax = plt.subplot(1,1,1)
     ax.axis('equal')
@@ -80,9 +87,11 @@ def plot_uvdist_amp(aa: ApertureArray, vis: str='data', pol_idx: int=0, sfunc: n
     """Plot amplitude as function of UV distance.
 
     Args:
+        aa (ApertureArray): Aperture array 'parent' object to use
         vis (str): One of 'data', 'corrected', or 'model'
         pol_idx (int): Polarization index
         sfunc (np.unfunc): Scaling function to apply, e.g. np.log
+        **kwargs (dict): Keyword arguments to pass on to plt.scatter
     """
     bls = aa.bl_matrix
     amp = np.abs(aa.generate_vis_matrix(vis)[..., pol_idx])

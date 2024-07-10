@@ -85,10 +85,13 @@ def meas_corr_to_magcal(mc: np.array, target_mag: float=1.0, sigma_thr: float=10
     """Compute magnitude calibration coefficients from meas_corr.
 
     Args:
-        meas_corr (np.array): Measured correlations between reference beam.
-                              and each antenna.
-                              Shape (N_ant, N_pol=4), dtype complex.
-                              Pol ordering is XX, XY, YX, YY
+        mc (np.array): Measured correlations between reference beam.
+                       and each antenna.
+                       Shape (N_ant, N_pol=4), dtype complex.
+                       Pol ordering is XX, XY, YX, YY
+        target_mag (float): Target magnitude to normalize to.
+        sigma_thr (float): Masking threshold in terms of standard deviation
+
     Returns:
         pc (np.array): Phase calibration solutions.
                        Shape (N_ant, N_pol=2), dtype complex
@@ -116,7 +119,7 @@ def meas_corr_to_phasecal(mc: np.array) -> np.array:
     """Compute phase calibration coefficients from meas_corr.
 
     Args:
-        meas_corr (np.array): Measured correlations between reference beam.
+        mc (np.array): Measured correlations between reference beam.
                               and each antenna.
                               Shape (N_ant, N_pol=4), dtype complex.
                               Pol ordering is XX, XY, YX, YY
@@ -178,6 +181,8 @@ def jishnu_selfholo(aa: ApertureArray, cal_src: SkyCoord,
         NFFT (int): Size of FFT applied to produce aperture illumination. Default 1025.
                     Values of 2^N + 1 are the best choice. Data will be zero-padded before
                     the FFT is applied, which improves resolution in final image.
+        min_baseline_len (float): Flags baselines shorter than this distance, if set.
+                                  Note this does not seem to help much.
         oversample_factor (int): Amount to oversample lmn direction cosine plane. This increases
                                  resolution for the beam_corr (far-field E-pattern), at the
                                  expense of increasing the aperture illumination image size.
@@ -254,8 +259,9 @@ def jishnu_phasecal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=No
     """Iteratively apply Jishnu Cal phase calibration.
 
     Args:
-        aa (ApertureArray):
-        cal_src (SkyCoord):
+        aa (ApertureArray): Aperture Array object to apply calibration to
+        cal_src (SkyCoord): Reference calibration source sky coordinates.
+                            Must be dominant source in sky to work (e.g. the Sun)
         n_iter_max (int): Maximum number of iterations. Default 50
         min_baseline_len (float): Minimum baseline length to use in visibilty array
         target_phs_std (float): Target phase STDEV (in deg) at which to stop iterating.
@@ -337,8 +343,9 @@ def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
     """Iteratively apply Jishnu Cal phase calibration, then compute magnitude calibraiton.
 
     Args:
-        aa (ApertureArray):
-        cal_src (SkyCoord):
+        aa (ApertureArray): Aperture Array object to apply calibration to
+        cal_src (SkyCoord): Reference calibration source sky coordinates.
+                            Must be dominant source in sky to work (e.g. the Sun)
         n_iter_max (int): Maximum number of iterations. Default 50
         min_baseline_len (float): Minimum baseline length to use in visibilty array
         target_phs_std (float): Target phase STDEV (in deg) at which to stop iterating.
@@ -427,6 +434,7 @@ def ant_xyz_to_image_idx(xyz_enu: np.array, cal: dict, as_int: bool=True) -> tup
     Args:
         xyz_enu (np.array): Antenna positions, in meters, ENU
         cal (dict): Calibration dictionary from jishnu_cal
+        as_int (bool): Round and returns indexes as integers (default True)
 
     Returns:
         an_x, an_y (np.array, np.array): Antenna locations in image. If as_int=True,

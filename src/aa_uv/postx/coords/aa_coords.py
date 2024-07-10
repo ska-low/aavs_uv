@@ -16,12 +16,13 @@ if typing.TYPE_CHECKING:
 from ..aa_module import AaBaseModule
 
 
-def generate_phase_vector(aa, src: SkyCoord, conj: bool=False, coplanar: bool=False, apply_cal: bool=True):
+def generate_phase_vector(aa, src: SkyCoord, conj: bool=False, coplanar: bool=False):
     """Generate a phase vector for a given source.
 
     Args:
+        aa (ApertureArray): Aperture array 'parent' object to use
         src (astropy.SkyCoord or ephem.FixedBody): Source to compute delays toward
-        conj (bool); Conjugate data if True
+        conj (bool): Conjugate data if True
         coplanar (bool): Treat array as coplanar if True. Sets antenna z-pos to zero
 
     Returns:
@@ -40,6 +41,9 @@ def generate_phase_vector(aa, src: SkyCoord, conj: bool=False, coplanar: bool=Fa
 def get_zenith(aa) -> SkyCoord:
     """Return the sky coordinates at zenith.
 
+    Args:
+        aa (ApertureArray): Aperture array objecy to use
+
     Returns:
         zenith (SkyCoord): Zenith SkyCoord object
     """
@@ -53,6 +57,7 @@ def get_alt_az(aa, sc: SkyCoord) -> SkyCoord:
     """Convert SkyCoord into alt/az coordinates.
 
     Args:
+        aa (ApertureArray): Aperture array object to use
         sc (SkyCoord): Input sky coordinate
 
     Returns:
@@ -65,6 +70,9 @@ def get_alt_az(aa, sc: SkyCoord) -> SkyCoord:
 
 def get_sun(aa) -> SkyCoord:
     """Return the sky coordinates of the Sun.
+
+    Args:
+        aa (ApertureArray): Aperture array object to use
 
     Returns:
         sun_sc (SkyCoord): sun SkyCoord object

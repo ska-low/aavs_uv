@@ -20,6 +20,7 @@ def generate_weight_grid(aa, n_pix: int, abs_max: int=1, nan_below_horizon: bool
         For unit pointing vector, l^2 + m^2 + n^2 = 1
 
     Args:
+        aa (ApertureArray): Aperture array 'parent' object to use
         n_pix (int): Number of pixels in image
         abs_max (int): Maximum absolute values for l and m (default 1).
         nan_below_horizon (bool): If True, n is NaN below horizon.
@@ -63,6 +64,7 @@ def make_image(aa: ApertureArray, n_pix: int=128, update: bool=True, vis: str='d
     """Make an image out of a beam grid.
 
     Args:
+        aa (ApertureArray): Aperture array 'parent' object to use
         n_pix (int): Image size in pixels (N_pix x N_pix)
         update (bool): Rerun the grid generation (needed when image size changes).
         vis (str): Select visibilities to be either real data or model visibilities ('data' or 'model')
@@ -91,6 +93,7 @@ def make_healpix(aa, n_side: int=128, fov: float=np.pi/2, update: bool=True, app
     """Generate a grid of beams on healpix coordinates.
 
     Args:
+        aa (ApertureArray): Aperture array 'parent' object to use
         n_side (int): Healpix NSIDE array size
         fov (float): Field of view in radians, within which to generate healpix beams. Defaults to pi/2.
         apply_mask (bool): Apply mask for pixels that are below the horizon (default True)
