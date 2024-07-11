@@ -39,7 +39,7 @@ def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tupl
     earth_loc = EarthLocation.from_geodetic(loc['longitude'], loc['latitude'], loc['ellipsoidal_height'])
 
     # Add station rotation info
-    ant_enu['rotation'] = d_station['rotation']
+    ant_enu['rotation'] = d_station.get('rotation', 0.0)
 
     return  earth_loc, ant_enu
 

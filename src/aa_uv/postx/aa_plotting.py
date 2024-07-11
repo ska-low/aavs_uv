@@ -50,12 +50,12 @@ def plot_corr_matrix_4pol(aa: ApertureArray, **kwargs):
         sfunc (np.ufunc): scaling function to apply to data, e.g. np.log
         **kwargs (dict): Keyword arguments to pass on to plt.imshow
     """
-    plt.figure(figsize=(10, 8))
+    fig = plt.figure(figsize=(10, 8))
     for ii in range(4):
         plt.subplot(2,2,ii+1)
         plot_corr_matrix(aa, p_idx=ii, **kwargs)
     plt.tight_layout()
-    plt.show()
+    return fig
 
 
 def plot_antennas(aa: ApertureArray, x: str='E', y: str='N', overlay_names: bool=False,
@@ -156,7 +156,7 @@ class AaPlotter(AaBaseModule):
 
     def plot_corr_matrix_4pol(self, *args, **kwargs):
         # Docstring inherited
-        plot_corr_matrix_4pol(self.aa, *args, **kwargs)
+        return plot_corr_matrix_4pol(self.aa, *args, **kwargs)
 
     def plot_antennas(self, *args, **kwargs):
         # Docstring inherited

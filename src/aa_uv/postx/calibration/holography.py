@@ -341,8 +341,7 @@ def jishnu_phasecal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=No
 
 
 def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
-                    n_iter_max: int=50, target_phs_std: float=1.0, target_mag: float=1.0,
-                    apply: bool=False) -> UVXAntennaCal:
+                    n_iter_max: int=50, target_phs_std: float=1.0, target_mag: float=1.0) -> UVXAntennaCal:
     """Iteratively apply Jishnu Cal phase calibration, then compute magnitude calibraiton.
 
     Args:
@@ -353,7 +352,6 @@ def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
         min_baseline_len (float): Minimum baseline length to use in visibilty array
         target_phs_std (float): Target phase STDEV (in deg) at which to stop iterating.
         target_mag (float): Target magnitude. Default 1.0 (unity)
-        apply (bool): If True, will apply calibration to aa object
 
     Returns:
         cc_dict (dict): Phase calibration solution and runtime info, in dictionary with keys:
@@ -368,11 +366,10 @@ def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
                         'cal': Magnitude + Phase calibration
     """
     # First, compute phase calibration
-    cc_dict = jishnu_phasecal(aa, cal_src, min_baseline_len, n_iter_max, target_phs_std)
-    phs_cal = cc_dict['phs_cal']
+    cal = jishnu_phasecal(aa, cal_src, min_baseline_len, n_iter_max, target_phs_std)
 
     # Now we apply the phase calibration to the data
-    aa.set_cal(phs_cal)
+    aa.set_cal(cal)
     V = aa.generate_vis_matrix()
 
     # Compute the measured correlation between the source and each antenna
@@ -381,20 +378,10 @@ def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
 
     # Now, get gain coefficients and combine with phase corrs
     mag_cal = meas_corr_to_magcal(meas_corr_src, target_mag)
-    mp_cal = mag_cal * phs_cal
-    mp_cal.mask = np.logical_or(mag_cal.mask, phs_cal.mask)
+    cal.cal = mag_cal * cal.cal
+    cal.flags = np.logical_or(mag_cal.mask, cal.flags)
 
-    # Add to dictionary and return
-    cc_dict['mag_cal']    = mag_cal
-    cc_dict['cal']        = mp_cal
-    cc_dict['target_mag'] = target_mag
-
-    # And also apply mag+phs cal to aa object
-    if apply:
-        logger.info(f"Applying calibration to {aa.name}")
-        aa.set_cal(mp_cal)
-
-    return cc_dict
+    return cal
 
 
 ###########################
@@ -623,8 +610,9 @@ class AaHolographer(AaBaseModule):
         """
         self.aa = aa
         self.cal_src = cal_src
-        self.phs_dict = None
+        self.phs_cal = None
         self.holo_dict = None
+        self.cal = None
         self.__setup_docstrings('holography')
 
     def set_cal_src(self, cal_src: SkyCoord):
@@ -636,6 +624,7 @@ class AaHolographer(AaBaseModule):
         self.name = name
         # Inherit docstrings
         self.run_phasecal.__func__.__doc__  = jishnu_phasecal.__doc__
+        self.run_jishnucal.__func__.__doc__  = jishnu_cal.__doc__
         self.run_selfholo.__func__.__doc__  = jishnu_selfholo.__doc__
         self.report_flagged_antennas.__func__.__doc__ = report_flagged_antennas.__doc__
         self.plot_aperture.__func__.__doc__ = plot_aperture.__doc__
@@ -655,8 +644,8 @@ class AaHolographer(AaBaseModule):
             logger.error(e)
             raise RuntimeError(e)
 
-    def __check_phs_dict_set(self):
-        if self.phs_dict is None:
+    def __check_phs_cal_set(self):
+        if self.phs_cal is None:
             e = "Phase calibration not run yet! Run run_phasecal() first."
             logger.error(e)
             raise RuntimeError(e)
@@ -664,8 +653,14 @@ class AaHolographer(AaBaseModule):
     def run_phasecal(self, *args, **kwargs):
         # Docstring inherited from jishnu_phasecal function
         self.__check_cal_src_set()
-        self.phs_dict = jishnu_phasecal(self.aa, self.cal_src, *args, **kwargs)
-        return self.phs_dict
+        self.phs_cal = jishnu_phasecal(self.aa, self.cal_src, *args, **kwargs)
+        return self.phs_cal
+
+    def run_jishnucal(self, *args, **kwargs):
+        # Docstring inherited from jishnu_phasecal function
+        self.__check_cal_src_set()
+        self.cal = jishnu_cal(self.aa, self.cal_src, *args, **kwargs)
+        return self.cal
 
     def run_selfholo(self, *args, **kwargs):
         # Docstring inherited from jishnu_selfholo function
@@ -675,13 +670,13 @@ class AaHolographer(AaBaseModule):
 
     def report_flagged_antennas(self, *args, **kwargs):
         # Docstring inherited from report_flagged_antennas
-        self.__check_phs_dict_set()
-        return report_flagged_antennas(self.aa, self.phs_dict)
+        self.__check_phs_cal_set()
+        return report_flagged_antennas(self.aa, self.phs_cal)
 
     def plot_phasecal_iterations(self, *args, **kwargs):
         # Docstring inherited from plot_jishnu_phasecal_iterations function
-        self.__check_phs_dict_set()
-        plot_jishnu_phasecal_iterations(self.phs_dict)
+        self.__check_phs_cal_set()
+        plot_jishnu_phasecal_iterations(self.phs_cal.provenance['jishnu_phasecal'])
 
     def plot_aperture(self, *args, **kwargs):
         # Docstring inherited from plot_aperture function
