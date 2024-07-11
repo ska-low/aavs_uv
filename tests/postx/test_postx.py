@@ -1,4 +1,7 @@
 """test_postx: tests for postx utilities and tools."""
+import os
+
+import pytest
 from aa_uv.io import hdf5_to_uvx
 from aa_uv.postx import ApertureArray
 from aa_uv.postx.aa_viewer import AllSkyViewer
@@ -48,6 +51,44 @@ def test_postx():
     sc_north = SkyCoord('12:00', '80:00:00', unit=('hourangle', 'deg'))
     assert asv.get_pixel(sc_north) == (0, 0)
 
+
+
+def test_viewer():
+    """Test viewer tools."""
+    aa = setup_test()
+
+    # All-sky-viewer via aa
+    aa.viewer.orthview()
+    aa.viewer.mollview()
+
+    img  = aa.imaging.make_image(n_pix=150)
+    hmap = aa.imaging.make_healpix(n_side=64)
+    aa.viewer.orthview(img)
+    aa.viewer.mollview(hmap)
+
+    try:
+        aa.viewer.write_fits(img, 'tests/test.fits')
+    finally:
+        if os.path.exists('tests/test.fits'):
+            os.system('rm tests/test.fits')
+
+
+@pytest.mark.mpl_image_compare
+def test_viewer_orthview():
+    """Test orthview."""
+    aa = setup_test()
+    fig = aa.viewer.new_fig()
+    aa.viewer.orthview()
+    return fig
+
+
+@pytest.mark.mpl_image_compare
+def test_viewer_mollview():
+    """Test mollview."""
+    aa = setup_test()
+    fig = aa.viewer.new_fig()
+    aa.viewer.mollview(fig=fig)
+    return fig
 
 if __name__ == "__main__":
     test_postx()

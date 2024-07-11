@@ -134,7 +134,8 @@ class AllSkyViewer(AaBaseModule):
 
     def new_fig(self, size: int=6):
         """Create new matplotlib figure."""
-        plt.figure(self.name, figsize=(size, size), frameon=False)
+        fig = plt.figure(self.name, figsize=(size, size), frameon=False)
+        return fig
 
     def orthview(self, data: np.array=None, pol_idx: int=0, sfunc: np.ufunc=np.abs,
                   overlay_srcs: bool=False,  overlay_grid: bool=True, return_data: bool=False,
@@ -245,7 +246,7 @@ class AllSkyViewer(AaBaseModule):
             overlay_srcs (bool): Overlay sources in sky catalog (Default False)
             overlay_grid (bool): Overlay grid (Default true)
             colorbar (bool): Show colorbar (default False)
-            **kwargs: These are passed on to imshow()
+            **kwargs: These are passed on to mollview()
         """
         if hmap is None:
             hmap = self.observer.imaging.make_healpix(n_side=n_side, fov=fov, apply_mask=apply_mask)
