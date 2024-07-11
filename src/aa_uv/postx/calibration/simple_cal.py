@@ -1,3 +1,4 @@
+"""simple_cal: tools to apply simple stefcal."""
 from __future__ import annotations
 import typing
 if typing.TYPE_CHECKING:

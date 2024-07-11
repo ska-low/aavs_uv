@@ -1,3 +1,4 @@
+"""parallelize: tools to help parallelize tasks with dask/joblib."""
 import tqdm
 import joblib
 from joblib import Parallel

@@ -1,3 +1,4 @@
+"""uvw_utils: Utilities for UVW coordinates."""
 import numpy as np
 from pyuvdata import utils as uvutils
 

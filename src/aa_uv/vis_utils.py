@@ -1,3 +1,4 @@
+"""vis_utils: Visibility matrix helper tools and utilities."""
 import numpy as np
 
 

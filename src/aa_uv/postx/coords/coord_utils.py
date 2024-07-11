@@ -1,3 +1,4 @@
+"""coord_utils: Coordinate utilities."""
 import numpy as np
 import healpy as hp
 

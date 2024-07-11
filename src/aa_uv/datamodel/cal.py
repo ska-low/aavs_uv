@@ -1,3 +1,4 @@
+"""cal: Data models for calibration data."""
 import numpy as np
 import xarray as xp
 from dataclasses import dataclass
@@ -9,6 +10,7 @@ from aa_uv.utils import get_resource_path, load_yaml, get_software_versions
 
 @dataclass
 class UVXAntennaCal:
+    """Dataclass for antenna calibration to accompany UVX data."""
     telescope: str           # Antenna array name, e.g. AAVS3
     method: str              # Calibration method name (e.g. JishnuCal)
     cal: xp.DataArray        # An xarray dataset  (frequency, antenna, pol)
@@ -35,6 +37,7 @@ class UVXAntennaCal:
 
 
 def create_provenance_dict():
+    """Create a provenance dict, fill in software versions."""
     provenance = {
         'aa_uv_config': get_software_versions()
     }

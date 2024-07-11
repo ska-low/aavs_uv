@@ -1,3 +1,4 @@
+"""mccs_yaml: tools for reading MCCS YAML files."""
 from operator import itemgetter
 
 from aa_uv.utils import load_yaml

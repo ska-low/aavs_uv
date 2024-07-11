@@ -1,3 +1,4 @@
+"""to_pyuvdata: Convert data into pyuvdata standards."""
 # Basic imports
 import warnings
 from loguru import logger

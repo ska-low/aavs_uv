@@ -1,3 +1,4 @@
+"""to_sdp: Convert data into SDP Visibility format."""
 import numpy as np
 import pandas as pd
 

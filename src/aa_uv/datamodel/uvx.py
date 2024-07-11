@@ -1,3 +1,4 @@
+"""uvx: Data models for interferometer data (UVX)."""
 import numpy as np
 import xarray as xp
 import pandas as pd
@@ -9,11 +10,13 @@ from astropy.time import Time
 from astropy.units import Quantity
 import pyuvdata.utils as uvutils
 
-from aa_uv.utils import get_resource_path, load_yaml
+from aa_uv.utils import get_resource_path, load_yaml, get_software_versions
+
 
 # Define the data class for UV data
 @dataclass
 class UVX:
+    """Dataclass for storing UVX interferometer data."""
     name: str               # Antenna array name, e.g. AAVS3
     context: dict           # Contextual information (observation intent, notes, observer name)
     antennas: xp.Dataset    # An xarray dataset (generated with create_antenna_data_array)
@@ -25,6 +28,7 @@ class UVX:
 
 
 def create_empty_context_dict():
+    """Create an empty context dictionary with default keys."""
     context = {
         'intent': '',
         'date': '',
@@ -36,8 +40,9 @@ def create_empty_context_dict():
 
 
 def create_empty_provenance_dict():
+    """Create a provenance dict with default keys."""
     provenance = {
-        'aa_uv_config': {},
+        'aa_uv_config': get_software_versions(),
         'input_files': {},
         'input_metadata': {}
     }

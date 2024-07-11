@@ -1,3 +1,4 @@
+"""simple_sim: Simple point-source simulation tools."""
 from __future__ import annotations
 import typing
 if typing.TYPE_CHECKING:

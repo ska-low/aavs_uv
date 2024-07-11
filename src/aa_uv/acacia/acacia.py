@@ -1,3 +1,4 @@
+"""acacia: tools to interact with Acacia datastore."""
 import os
 from configparser import ConfigParser
 from pathlib import Path

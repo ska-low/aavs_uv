@@ -1,3 +1,4 @@
+"""converter: Command-line utility for file conversion."""
 import argparse
 import sys
 import os
@@ -124,8 +125,19 @@ def parse_args(args):
     return args
 
 
-def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context):
-    """Convert a file."""
+def convert_file(args: argparse.Namespace, fn_in: str, fn_out: str, array_config: str,
+                 output_format: str, conj: bool, context: dict):
+    """Convert a file.
+
+    Args:
+        args (argparse.Namespace): Namespace (output of argparse's parse_args() )
+        fn_in (str): Input filename
+        fn_out (str): Output filename
+        array_config (str): Path to array config directory
+        output_format (str): Output format, one of uvfits, miriad, mir, ms, uvh5, sdp, uvx
+        conj (bool): Apply conjugation to visibility data. Useful for matching UVW convention.
+        context (dict): Dictionary of additional metadata. Only supported by SDP and UVX formats.
+    """
     # Create subdirectories as needed
     if args.batch or args.megabatch:
         subdir = os.path.dirname(fn_out)
@@ -226,7 +238,20 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
     return (fn_in, tr, tw)
 
 @task
-def convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, context, verbose):
+def convert_file_task(args: argparse.Namespace, fn_in: str, fn_out: str, array_config: str,
+                      output_format: str, conj: bool, context: dict, verbose: bool):
+    """Parallelizable task for file conversion.
+
+    Args:
+        args (argparse.Namespace): Namespace (output of argparse's parse_args() )
+        fn_in (str): Input filename
+        fn_out (str): Output filename
+        array_config (str): Path to array config directory
+        output_format (str): Output format, one of uvfits, miriad, mir, ms, uvh5, sdp, uvx
+        conj (bool): Apply conjugation to visibility data. Useful for matching UVW convention.
+        context (dict): Dictionary of additional metadata. Only supported by SDP and UVX formats.
+        verbose (bool): Turn on verbose mode
+    """
     if not verbose:
         # Silence warnings from other packages (e.g. pyuvdata)
         warnings.simplefilter("ignore")
@@ -234,7 +259,11 @@ def convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, co
     convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 def run(args=None):
-    """Command-line utility for file conversion."""
+    """Command-line utility for file conversion.
+
+    Args:
+        args (list): List of command line arguments to pass to convert_file().
+    """
     args = parse_args(args)
     config_error_found = False
 

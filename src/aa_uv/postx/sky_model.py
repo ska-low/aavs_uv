@@ -1,4 +1,4 @@
-"""Simple sky model class."""
+"""sky_model: Simple sky model class and tools."""
 from __future__ import annotations
 import typing
 if typing.TYPE_CHECKING:

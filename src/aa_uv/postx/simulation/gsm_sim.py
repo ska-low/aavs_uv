@@ -1,3 +1,4 @@
+"""gsm_sim: Simulation tools using pygdsm diffuse sky model."""
 from __future__ import annotations
 import typing
 if typing.TYPE_CHECKING:

@@ -1,4 +1,4 @@
-"""Basic antenna array geometry class."""
+"""aperture_array: Basic antenna array geometry class."""
 import numpy as np
 from pygdsm import init_observer
 

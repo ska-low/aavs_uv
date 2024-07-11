@@ -1,3 +1,8 @@
+"""holography: Tools for holographic calibration.
+
+Implementation based on J. Thekkeppattu et al. (2024)
+https://ui.adsabs.harvard.edu/abs/2024RaSc...5907847T/abstract
+"""
 from __future__ import annotations
 import typing
 
@@ -152,7 +157,7 @@ def jishnu_selfholo(aa: ApertureArray, cal_src: SkyCoord,
                vis: str='data') -> dict:
     """Calibrate aperture array data using self-holography.
 
-    Implentation based on J. Thekkeppattu et al. (2024)
+    Implementation based on J. Thekkeppattu et al. (2024)
     https://ui.adsabs.harvard.edu/abs/2024RaSc...5907847T/abstract
 
     Computes gain and phase calibration via self-holography on visibility data.

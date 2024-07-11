@@ -1,3 +1,4 @@
+"""uvx: I/O tools for UVX data."""
 import h5py
 from loguru import logger
 import xarray as xp
