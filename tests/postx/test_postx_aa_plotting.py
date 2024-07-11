@@ -1,6 +1,7 @@
-from aa_uv.postx import ApertureArray
-from aa_uv.io import hdf5_to_uvx
 import pylab as plt
+from aa_uv.io import hdf5_to_uvx
+from aa_uv.postx import ApertureArray
+
 
 def test_aa_plotter():
     uvx = hdf5_to_uvx('./test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5', telescope_name='aavs2')

@@ -1,12 +1,11 @@
 import numpy as np
 import pylab as plt
-from astropy.coordinates import SkyCoord
-
+from aa_uv.io import hdf5_to_uvx
 from aa_uv.postx import ApertureArray
 from aa_uv.postx.aa_viewer import AllSkyViewer
-from aa_uv.postx.sky_model import sun_model, generate_skycat
+from aa_uv.postx.sky_model import generate_skycat, sun_model
+from astropy.coordinates import SkyCoord
 
-from aa_uv.io import hdf5_to_uvx
 
 def setup_test():
 

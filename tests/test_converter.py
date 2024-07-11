@@ -1,7 +1,9 @@
-from aa_uv.converter import parse_args, run
-from aa_uv.utils import get_resource_path
-from aa_uv.io import read_uvx
 import os
+
+from aa_uv.converter import parse_args, run
+from aa_uv.io import read_uvx
+from aa_uv.utils import get_resource_path
+
 
 def test_converter():
     for fmt in('uvfits', 'miriad', 'mir', 'ms', 'uvh5', 'sdp'):

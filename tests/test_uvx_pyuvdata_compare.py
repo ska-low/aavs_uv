@@ -1,9 +1,10 @@
-from aa_uv.io import read_uvx, hdf5_to_uvx
-from aa_uv.io.to_pyuvdata import hdf5_to_pyuvdata, uvx_to_pyuvdata
 import numpy as np
+from aa_uv.io import hdf5_to_uvx
+from aa_uv.io.to_pyuvdata import hdf5_to_pyuvdata, uvx_to_pyuvdata
+
 
 def test_compare_uv_paths():
-    """ Compare HDF5 -> UVX -> UVData against HDF5 -> UVData path """
+    """Compare HDF5 -> UVX -> UVData against HDF5 -> UVData path"""
     fn = './test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
 
     uvx = hdf5_to_uvx(fn, telescope_name='aavs2')

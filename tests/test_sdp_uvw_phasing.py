@@ -1,12 +1,17 @@
-from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uvx
-import numpy as np
 import h5py
-from ska_sdp_datamodels.visibility import Visibility, create_visibility, export_visibility_to_hdf5, create_visibility_from_ms, convert_hdf_to_visibility
-from pyuvdata import utils as uvutils
+import numpy as np
+from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis
 from astropy.constants import c
+from ska_sdp_datamodels.visibility import (
+    convert_hdf_to_visibility,
+    create_visibility_from_ms,
+    export_visibility_to_hdf5,
+)
+
 LIGHT_SPEED = c.value
 
 import os
+
 
 def test_phasing():
 

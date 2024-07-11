@@ -1,11 +1,7 @@
-""" Simple profile script for loading of uvdata"""
-import pyuvdata
-import numpy as np
-from astropy.io import fits as pf
-from astropy.time import Time
-import pylab as plt
-from aa_uv.io import hdf5_to_pyuvdata
+"""Simple profile script for loading of uvdata"""
 import os
+
+from aa_uv.io import hdf5_to_pyuvdata
 
 # use eith er pyinstrument or cprofile
 USE_PYINSTRUMENT = False

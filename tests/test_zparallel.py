@@ -1,5 +1,7 @@
-from aa_uv.parallelize import run_in_parallel, task
 import time
+
+from aa_uv.parallelize import run_in_parallel, task
+
 
 @task
 def my_task(x):

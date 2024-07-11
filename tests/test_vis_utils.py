@@ -1,11 +1,10 @@
-from aa_uv.utils import zipit
-from aa_uv.vis_utils import vis_arr_to_matrix, vis_arr_to_matrix_4pol
 import numpy as np
 import pytest
+from aa_uv.vis_utils import vis_arr_to_matrix, vis_arr_to_matrix_4pol
 
 
 def test_vis_arr_to_matrix():
-    """ Test vis_array_to_matrix """
+    """Test vis_array_to_matrix"""
     # Upper
     d = np.arange(32896)
     V0 = vis_arr_to_matrix(d, 256)

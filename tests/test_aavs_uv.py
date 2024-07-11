@@ -1,15 +1,17 @@
+import glob
+import os
+
+import numpy as np
+import pandas as pd
+from aa_uv.io import hdf5_to_pyuvdata, phase_to_sun
+from astropy.time import Time
+from colored import Fore, Style
 from pyuvdata import UVData
 from pyuvdata.parameter import UVParameter
-from aa_uv.io import hdf5_to_pyuvdata, phase_to_sun
-from aa_uv.utils import load_config
-import numpy as np
-from astropy.time import Time
-import glob, os
-import pandas as pd
-from colored import Fore, Style
+
 
 def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
-    """ Compare two UV datasets
+    """Compare two UV datasets
 
     Args:
         uv_orig (UVData): Original UVData object to compare against
@@ -120,22 +122,23 @@ def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
 
 
 def get_aavs2_correlator_filelist(filepath: str) -> list:
-    """ Return sorted filelist,
-    making sure two-digit channels are before three-digit channels """
+    """Return sorted filelist,
+    making sure two-digit channels are before three-digit channels
+    """
     fl = glob.glob(os.path.join(filepath, 'correlation_burst_*.hdf5'))
     idx = [int(os.path.basename(f).split('_')[2]) for f in fl]
     df = pd.DataFrame({'filename': fl, 'idx': idx}).sort_values('idx')
     return df['filename'].values
 
 def test0():
-    """ Test basic data loading using get_aavs2_correlator_filelist """
+    """Test basic data loading using get_aavs2_correlator_filelist"""
     filepath    = 'test-data/aavs2_1x1000ms/'
     yaml_config = '../src/aa_uv/config/aavs2/uv_config.yaml'
     filelist = get_aavs2_correlator_filelist(filepath)
     uv = hdf5_to_pyuvdata(filelist[0], yaml_config=yaml_config)
 
 def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=False) -> UVData:
-    """ Load datasets to use in tests
+    """Load datasets to use in tests
 
     Args:
         test_name (str): The name of the test (gets printed to screen)
@@ -185,12 +188,12 @@ def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=Fal
         return uv_phs
 
 def test_compare():
-    """ Compare aa_uv conversion to MIRIAD dataset """
+    """Compare aa_uv conversion to MIRIAD dataset"""
     uv_phs, uv_uvf, uv_mir = _setup_test('Compare to MIRIAD', load_comp=True)
     compare_uv_datasets(uv_phs, uv_mir)
 
 def test_write():
-    """ Test file write """
+    """Test file write"""
     try:
         uv_phs = _setup_test('Write to UVFITS')
         fn_out = 'pyuv_chan_204_20230823T055556.uvfits'
@@ -204,12 +207,12 @@ def test_write():
             os.remove(fn_out)
 
 def test_aavs2_2x500():
-    """ Test 2x integration data """
+    """Test 2x integration data"""
     uv_phs, uv_uvf = _setup_test('Reading 2x500ms data', load_2x500=True)
     compare_uv_datasets(uv_phs, uv_uvf)
 
 def test_max_int_start_int():
-    """ Test the max_int and start_int keywords """
+    """Test the max_int and start_int keywords"""
     fn_in = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
 
     uv = hdf5_to_pyuvdata(fn_in, telescope_name='aavs2', max_int=None)

@@ -1,7 +1,8 @@
-from aa_uv.utils import zipit, import_optional_dependency
-import numpy as np
+import os
+import shutil
+
 import pytest
-import os, shutil
+from aa_uv.utils import import_optional_dependency, zipit
 
 
 def test_zipit():

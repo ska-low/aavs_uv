@@ -1,13 +1,11 @@
 import h5py
 import numpy as np
 import pandas as pd
-
+from aa_uv.datamodel.uvx import create_antenna_data_array, create_visibility_array
+from aa_uv.io import hdf5_to_uvx, load_observation_metadata
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
 from astropy.units import Quantity
-
-from aa_uv.datamodel.uvx import create_antenna_data_array, create_visibility_array
-from aa_uv.io import hdf5_to_uvx, load_observation_metadata
 
 FN_DATA = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
 FN_CONFIG = '../src/aa_uv/config/aavs3/uv_config.yaml'

@@ -1,5 +1,5 @@
-import pytest
 import pylab as plt
+import pytest
 from aa_uv.io import hdf5_to_uvx
 from aa_uv.postx import ApertureArray
 

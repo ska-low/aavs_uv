@@ -1,14 +1,11 @@
-import pylab as plt
 import numpy as np
-from astropy.coordinates import get_sun
-
+import pylab as plt
 from aa_uv.io import hdf5_to_uvx
 from aa_uv.postx import ApertureArray
 from aa_uv.postx.aa_viewer import AllSkyViewer
-from aa_uv.postx.sky_model import generate_skycat
 from aa_uv.postx.simulation.simple_sim import simulate_visibilities_pointsrc
-from aa_uv.postx.simulation.gsm_sim import simulate_visibilities_gsm
-
+from aa_uv.postx.sky_model import generate_skycat
+from astropy.coordinates import get_sun
 
 FN_RAW   = 'test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
 YAML_RAW = '../src/aa_uv/config/aavs2/uv_config.yaml'

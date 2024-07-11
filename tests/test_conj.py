@@ -1,15 +1,15 @@
 import os
-import numpy as np
-from pyuvdata import UVData
 
-from aa_uv.io import hdf5_to_uvx, hdf5_to_pyuvdata, hdf5_to_sdp_vis
-from aa_uv.converter import parse_args, run
+import numpy as np
+from aa_uv.converter import run
+from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uvx
+from pyuvdata import UVData
 
 FN_RAW   = 'test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
 YAML_RAW = '../src/aa_uv/config/aavs2/uv_config.yaml'
 
 def test_conj():
-    """ Test data conjugation is working """
+    """Test data conjugation is working"""
     print("Testing conjgation: aavs UV")
     vis  = hdf5_to_uvx(FN_RAW, telescope_name='aavs2')
     visc = hdf5_to_uvx(FN_RAW, yaml_config=YAML_RAW, conj=True)

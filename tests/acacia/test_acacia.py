@@ -1,8 +1,7 @@
-import numpy as np
 import pylab as plt
-
 from aa_uv.acacia import AcaciaStorage
 from aa_uv.postx import ApertureArray
+
 
 def test_acacia():
     acacia = AcaciaStorage()
