@@ -1,9 +1,11 @@
+"""test_aavs_uv: Compare UV datasets to stored UVFITS files."""
 import glob
 import os
 
 import numpy as np
 import pandas as pd
 from aa_uv.io import hdf5_to_pyuvdata, phase_to_sun
+from aa_uv.utils import get_aa_config, get_test_data
 from astropy.time import Time
 from colored import Fore, Style
 from pyuvdata import UVData
@@ -11,7 +13,7 @@ from pyuvdata.parameter import UVParameter
 
 
 def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
-    """Compare two UV datasets
+    """Compare two UV datasets.
 
     Args:
         uv_orig (UVData): Original UVData object to compare against
@@ -40,7 +42,7 @@ def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
                 elif isinstance(param.value, (float, np.float32, np.float64)):
                     try:
                         same_type = True
-                        assert type(param.value) == type(param_comp.value)
+                        assert type(param.value) is type(param_comp.value)
                     except AssertionError:
                         if param_comp.value is None:
                             print(f"{Fore.orange_1} WARNING: {key} missing in comparison {Style.reset}")
@@ -122,27 +124,27 @@ def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
 
 
 def get_aavs2_correlator_filelist(filepath: str) -> list:
-    """Return sorted filelist,
-    making sure two-digit channels are before three-digit channels
-    """
+    """Return sorted filelist making sure two-digit channels are before three-digit channels."""
     fl = glob.glob(os.path.join(filepath, 'correlation_burst_*.hdf5'))
     idx = [int(os.path.basename(f).split('_')[2]) for f in fl]
     df = pd.DataFrame({'filename': fl, 'idx': idx}).sort_values('idx')
     return df['filename'].values
 
 def test0():
-    """Test basic data loading using get_aavs2_correlator_filelist"""
-    filepath    = 'test-data/aavs2_1x1000ms/'
-    yaml_config = '../src/aa_uv/config/aavs2/uv_config.yaml'
+    """Test basic data loading using get_aavs2_correlator_filelist."""
+    filepath    = get_test_data('aavs2_1x1000ms/')
+    yaml_config = get_aa_config('aavs2')
+
     filelist = get_aavs2_correlator_filelist(filepath)
     uv = hdf5_to_pyuvdata(filelist[0], yaml_config=yaml_config)
 
 def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=False) -> UVData:
-    """Load datasets to use in tests
+    """Load datasets to use in tests.
 
     Args:
         test_name (str): The name of the test (gets printed to screen)
         load_comp (bool): Load comparative datasets as well (default False)
+        load_2x500 (bool): Load 2x500ms dataset (default False)
 
     Returns:
         uv_phs (UVData): single UVData object, or a tuple of three
@@ -156,15 +158,16 @@ def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=Fal
         uv_uvf: Loaded from a UVFITS file - chan_204_20230823T055556.uvfits
         uv_mir: Loaded from a MIRIAD file - chan_204_20230823T055556.uv
     """
-    yaml_raw = '../src/aa_uv/config/aavs2/uv_config.yaml'
-    fn_raw = 'test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
-    fn_uvf = 'test-data/aavs2_1x1000ms/chan_204_20230823T055556.uvfits'
-    fn_mir = 'test-data/aavs2_1x1000ms/chan_204_20230823T055556.uv'
+    yaml_raw = get_aa_config('aavs2')
+    fn_raw = get_test_data('aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5')
+    fn_uvf = get_test_data('aavs2_1x1000ms/chan_204_20230823T055556.uvfits')
+    fn_mir = get_test_data('aavs2_1x1000ms/chan_204_20230823T055556.uv')
 
-    fn_2x500_raw = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
-    fn_2x500_uvf = 'test-data/aavs2_2x500ms/chan_204_20230927T094734.uvfits'
+    fn_2x500_raw = get_test_data('aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5')
+    fn_2x500_uvf = get_test_data('aavs2_2x500ms/chan_204_20230927T094734.uvfits')
 
     def _load_and_phase_hdf5():
+        """Load data and phase to sun."""
         uv_raw = hdf5_to_pyuvdata(fn_raw, yaml_config=yaml_raw)
         t0 = Time(uv_raw.time_array[0], format='jd')
         uv_phs = phase_to_sun(uv_raw, t0)
@@ -188,12 +191,12 @@ def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=Fal
         return uv_phs
 
 def test_compare():
-    """Compare aa_uv conversion to MIRIAD dataset"""
-    uv_phs, uv_uvf, uv_mir = _setup_test('Compare to MIRIAD', load_comp=True)
+    """Compare aa_uv conversion to MIRIAD dataset."""
+    uv_phs, _uv_uvf, uv_mir = _setup_test('Compare to MIRIAD', load_comp=True)
     compare_uv_datasets(uv_phs, uv_mir)
 
 def test_write():
-    """Test file write"""
+    """Test file write."""
     try:
         uv_phs = _setup_test('Write to UVFITS')
         fn_out = 'pyuv_chan_204_20230823T055556.uvfits'
@@ -207,13 +210,13 @@ def test_write():
             os.remove(fn_out)
 
 def test_aavs2_2x500():
-    """Test 2x integration data"""
+    """Test 2x integration data."""
     uv_phs, uv_uvf = _setup_test('Reading 2x500ms data', load_2x500=True)
     compare_uv_datasets(uv_phs, uv_uvf)
 
 def test_max_int_start_int():
-    """Test the max_int and start_int keywords"""
-    fn_in = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
+    """Test the max_int and start_int keywords."""
+    fn_in = get_test_data('aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5')
 
     uv = hdf5_to_pyuvdata(fn_in, telescope_name='aavs2', max_int=None)
     uv0 = hdf5_to_pyuvdata(fn_in, telescope_name='aavs2', max_int=1, start_int=0)

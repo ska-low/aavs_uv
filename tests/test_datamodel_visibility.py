@@ -1,16 +1,19 @@
+"""test_datamodel_visibility: tests for uvx datamodel."""
 import h5py
 import numpy as np
 import pandas as pd
 from aa_uv.datamodel.uvx import create_antenna_data_array, create_visibility_array
 from aa_uv.io import hdf5_to_uvx, load_observation_metadata
+from aa_uv.utils import get_aa_config, get_test_data
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
 from astropy.units import Quantity
 
-FN_DATA = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
-FN_CONFIG = '../src/aa_uv/config/aavs3/uv_config.yaml'
+FN_DATA = get_test_data('aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5')
+FN_CONFIG = get_aa_config('aavs3')
 
 def test_create_arrays():
+    """Test visibility array creation."""
     md             = load_observation_metadata(FN_DATA, FN_CONFIG)
 
     xyz = np.array(list(md[f'telescope_ECEF_{q}'] for q in ('X', 'Y', 'Z')))
@@ -30,6 +33,7 @@ def test_create_arrays():
     print(data)
 
 def test_create_uv():
+    """Test hdf5_to_uvx creation."""
     aavs = hdf5_to_uvx(FN_DATA, yaml_config=FN_CONFIG)
     print(aavs)
 

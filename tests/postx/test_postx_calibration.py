@@ -1,3 +1,4 @@
+"""test_postx_calibration: test routines in postx.calibration."""
 import numpy as np
 import pylab as plt
 from aa_uv.io import hdf5_to_uvx
@@ -5,12 +6,18 @@ from aa_uv.postx import ApertureArray
 from aa_uv.postx.aa_viewer import AllSkyViewer
 from aa_uv.postx.simulation.simple_sim import simulate_visibilities_pointsrc
 from aa_uv.postx.sky_model import generate_skycat
+from aa_uv.utils import get_aa_config, get_test_data
 from astropy.coordinates import get_sun
 
-FN_RAW   = 'test-data/aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
-YAML_RAW = '../src/aa_uv/config/aavs2/uv_config.yaml'
+FN_RAW   = get_test_data('aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5')
+YAML_RAW = get_aa_config('aavs2')
+
 
 def test_calibration():
+    """Test calibration.
+
+    TODO: Get stefcal working.
+    """
     vis = hdf5_to_uvx(FN_RAW, yaml_config=YAML_RAW)
 
     aa = ApertureArray(vis, conjugate_data=False)
@@ -41,6 +48,7 @@ def test_calibration():
     #asv.orthview(np.log(img_c), overlay_srcs=True, subplot_id=(1,3,2),  title='cal', colorbar=True)
     asv.orthview(np.log(img_model), overlay_srcs=True, subplot_id=(1,3,3), title='model', colorbar=True)
     plt.show()
+
 
 if __name__ == "__main__":
     test_calibration()

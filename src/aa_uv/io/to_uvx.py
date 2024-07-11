@@ -13,7 +13,7 @@ from aa_uv.datamodel.uvx import (
     create_visibility_array,
 )
 from aa_uv.io.mccs_yaml import station_location_from_platform_yaml
-from aa_uv.utils import get_config_path, get_software_versions, load_yaml
+from aa_uv.utils import get_aa_config, get_software_versions, load_yaml
 from astropy.coordinates import AltAz, Angle, EarthLocation, SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
@@ -37,7 +37,7 @@ def load_observation_metadata(filename: str, yaml_config: str=None, load_config:
 
     if yaml_config is None:
         logger.info(f'Using internal config {load_config}')
-        yaml_config = get_config_path(load_config)
+        yaml_config = get_aa_config(load_config)
 
     md_yaml = load_yaml(yaml_config)
     md.update(md_yaml)

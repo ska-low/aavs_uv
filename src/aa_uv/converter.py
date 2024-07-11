@@ -8,7 +8,7 @@ import warnings
 
 from aa_uv import __version__
 from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_uvx, phase_to_sun, write_uvx
-from aa_uv.utils import get_config_path, load_yaml
+from aa_uv.utils import get_aa_config, load_yaml
 from astropy.time import Time, TimeDelta
 from loguru import logger
 
@@ -274,7 +274,7 @@ def run(args=None):
 
     if args.telescope_name:
         logger.info(f"Telescope name: {args.telescope_name}")
-        array_config = get_config_path(args.telescope_name)
+        array_config = get_aa_config(args.telescope_name)
 
     if array_config is None:
         logger.error("No telescope name or array config file passed. Please re-run with -n or -c flag set")

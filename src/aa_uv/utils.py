@@ -54,7 +54,7 @@ def load_yaml(filename: str) -> dict:
 
 def load_config(telescope_name: str) -> dict:
     """Load internal array configuration by telescope name."""
-    yaml_path = get_config_path(telescope_name)
+    yaml_path = get_aa_config(telescope_name)
     d = load_yaml(yaml_path)
     return d
 
@@ -74,10 +74,10 @@ def get_resource_path(relative_path: str) -> str:
     if not os.path.exists(abs_path):
         logger.warning(f"File not found: {abs_path}")
 
-    return abs_path
+    return os.path.abspath(abs_path)
 
 
-def get_config_path(name: str) -> str:
+def get_aa_config(name: str) -> str:
     """Get path to internal array configuration by telescope name.
 
     Args:
@@ -153,3 +153,19 @@ def import_optional_dependency(name: str,
             logger.warning(msg)
         return None
     return module
+
+
+def get_test_data(filename: str) -> str:
+    """Returns the absolute path to test data.
+
+    Notes:
+        test data resides in /tests/test-data
+
+    Args:
+        filename (str): Filename of test data to find path of.
+
+    Returns:
+        fpath (str): Absolute path to test data.
+    """
+    fpath = get_resource_path(f'../../tests/test-data/{filename}')
+    return fpath

@@ -47,6 +47,7 @@ optional = true
 pytest = ">=7.4"
 pytest-cov = ">=3.0"
 colored = ">=2.2"
+nbmake = ">=1.5"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = ">=7.2"
@@ -74,3 +75,7 @@ convention = "google"
 [build-system]
 requires = ["poetry-core>=1.2.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = "--cov=aa_uv --cov-report html --nbmake"
+testpaths = ["tests"]
