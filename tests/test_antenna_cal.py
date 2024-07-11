@@ -1,3 +1,4 @@
+"""test_antenna_cal: Testing antenna calibration tools."""
 import numpy as np
 from aa_uv.datamodel.cal import (
     create_antenna_cal,
@@ -8,6 +9,7 @@ from astropy.units import Quantity
 
 
 def test_antenna_cal():
+    """Test antenna calibration array creation."""
     N_ant = 256
     N_freq = 1
     N_pol = 4
@@ -21,6 +23,9 @@ def test_antenna_cal():
 
     antenna_cal = create_antenna_cal(cal, f, a, p)
     antenna_flags = create_antenna_flags(cal, f, a, p)
+
+    print(antenna_cal)
+    print(antenna_flags)
 
     cal = create_uvx_antenna_cal('AAVS3', 'manual', cal, flags, f, a, p, {'history':  'yo'})
 

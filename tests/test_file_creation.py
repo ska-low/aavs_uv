@@ -1,4 +1,4 @@
-"""test_file_creation: test output data formats """
+"""test_file_creation: test output data formats."""
 import os
 
 from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, phase_to_sun

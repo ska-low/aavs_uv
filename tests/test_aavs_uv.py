@@ -60,7 +60,7 @@ def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
                             raise
 
                 elif isinstance(param.value, np.ndarray):
-                    if type(param.value) != type(param_comp.value):
+                    if type(param.value) is not type(param_comp.value):
                         print(f"{Fore.red} ERROR: Type mismatch:{type(param.value)} {type(param_comp.value)} {Style.reset}")
                         param_comp.value = np.array(param_comp.value)
                     try:
@@ -71,18 +71,18 @@ def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
                         assert np.allclose(param.value, param_comp.value, atol=tol)
                     except AssertionError:
                         print(f" --- {key} --- \n Original: \t {param.value[:4]} \n Comparison: \t {param_comp.value[:4]}")
-                    except:
+                    except:  # noqa: E722
                         print(f"{Fore.red} ERROR: {key} {Style.reset}")
 
                 elif isinstance(param.value, (list, tuple)):
-                    if type(param.value) != type(param_comp.value):
+                    if type(param.value) is not type(param_comp.value):
                         print(f"{Fore.red} ERROR: Type mismatch:{type(param.value)} {type(param_comp.value)} {Style.reset}")
                         param_comp.value = np.array(param_comp.value)
                     try:
                         assert np.allclose(param.value, param_comp.value)
                     except AssertionError:
                         print(f" --- {key} --- \n Original: \t {param.value[:4]} \n Comparison: \t {param_comp.value[:4]}")
-                    except:
+                    except:  # noqa: E722
                         print(f"{Fore.red} ERROR: {key} {Style.reset}")
 
                 elif isinstance(param.value, dict):
@@ -93,7 +93,7 @@ def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
                         print(f"{Fore.red} ERROR: type mismatch {type(param.value)} {type(param_comp.value)} {Style.reset}")
                         not_exact_match = True
 
-                    for dk, dv in param.value.items():
+                    for dk, _dv in param.value.items():
                         try:
                             assert dk in param_comp.value.keys()
                         except AssertionError:
@@ -137,6 +137,7 @@ def test0():
 
     filelist = get_aavs2_correlator_filelist(filepath)
     uv = hdf5_to_pyuvdata(filelist[0], yaml_config=yaml_config)
+    print(uv)
 
 def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=False) -> UVData:
     """Load datasets to use in tests.

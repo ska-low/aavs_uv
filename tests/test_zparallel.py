@@ -1,14 +1,24 @@
+"""test_zparallel: Test running in parallel."""
 import time
 
 from aa_uv.parallelize import run_in_parallel, task
 
 
 @task
-def my_task(x):
+def my_task(x: float) -> int:
+    """Simple task to sleep 0.1s.
+
+    Args:
+        x (float): Dummy argument
+
+    Returns:
+        ret (int): Returns 0
+    """
     time.sleep(0.1)
     return 0
 
 def test_run_in_parallel():
+    """Test running in parallel."""
     task_list = []
     for x in range(40):
         task_list.append(my_task(x))

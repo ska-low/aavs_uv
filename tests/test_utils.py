@@ -1,3 +1,4 @@
+"""test_utils: Tests for utils.py."""
 import os
 import shutil
 
@@ -6,6 +7,7 @@ from aa_uv.utils import import_optional_dependency, zipit
 
 
 def test_zipit():
+     """Test zipping functionality."""
      def create_dummy_dir():
           os.mkdir('test-zip')
           os.system('touch test-zip/hello.txt')
@@ -25,6 +27,7 @@ def test_zipit():
 
 
 def test_import_optional_dependency():
+     """Test optional importing util."""
      import_optional_dependency('numpy')
      import_optional_dependency('numpy.linalg')
      with pytest.raises(ImportError):
