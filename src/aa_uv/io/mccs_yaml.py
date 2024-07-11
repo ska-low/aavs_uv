@@ -16,6 +16,8 @@ def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tupl
 
     Returns:
         (earth_loc, ant_enu): astropy EarthLocation and antenna ENU locations in m
+        ant_enu (pd.DataFrame): columns are 'name', 'E', 'N', 'U', 'flagged', 'rotation',
+                                 where E,N,U are offsets in m, rotation is in degrees.
     """
     d = load_yaml(fn_yaml)
     d_station = d['platform']['array']['stations'][station_name]
@@ -32,9 +34,12 @@ def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tupl
     ant_enu = pd.DataFrame(ant_enu, columns=('name', 'E', 'N', 'U', 'flagged'))
 
     # Generate array central reference position
-    # NOTE: Currently using WGS84 instead of GDA2020
+    # NOTE: Currently using WGS84, ignoring epoch
     loc = d_station['reference']
     earth_loc = EarthLocation.from_geodetic(loc['longitude'], loc['latitude'], loc['ellipsoidal_height'])
+
+    # Add station rotation info
+    ant_enu['rotation'] = d_station['rotation']
 
     return  earth_loc, ant_enu
 

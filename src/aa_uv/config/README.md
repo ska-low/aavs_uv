@@ -47,6 +47,7 @@ telescope_ECEF_Z: -2849056.77357178   # Geocentric (ECEF) position in meters, Z
 channel_width: 925926.0               # Hz TODO: CHECK THIS! 781250.0 spacing after oversample?
 channel_spacing: 781250.0             # Hz - oversampled so spacing is smaller than width
 polarization_type: stokes             # Polarization in file: stokes, linear, or circular
+receptor_angle: 44.2                  # clockwise rotation angle in degrees away from N-E
 vis_units: uncalib                    # Visibility units: uncalib, Jy, or K str
 ```
 

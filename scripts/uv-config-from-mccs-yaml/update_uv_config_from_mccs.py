@@ -40,6 +40,7 @@ def generate_uv_config(name: str):
     antenna_locations_file: antenna_locations.txt
     baseline_order_file: baseline_order.txt
     polarization_type: linear_crossed  # stokes, circular, linear (XX, YY, XY, YX) or linear_crossed (XX, XY, YX, YY)
+    receptor_angle: {antennas['rotation'].values[0]}            # clockwise rotation angle in degrees away from N-E
     vis_units: uncalib"""
 
     # Write to file
@@ -48,7 +49,7 @@ def generate_uv_config(name: str):
             fh.write(line.strip() + '\n')
 
     # Write antenna csv
-    antennas.to_csv(os.path.join(name, 'antenna_locations.txt'), sep=' ', header=('name', 'E', 'N', 'U', 'flagged'), index_label='idx')
+    antennas.to_csv(os.path.join(name, 'antenna_locations.txt'), sep=' ', header=('name', 'E', 'N', 'U', 'flagged', 'rotation'), index_label='idx')
 
     # Copy over baseline order
     os.system(f"cp config/baseline_order.txt {name}/")
