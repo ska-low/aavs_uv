@@ -31,7 +31,7 @@ def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str='upper', V: np.array=N
         try:
             assert V.shape == (n_ant, n_ant)
         except AssertionError:
-            raise RuntimeError("Correlation matrix shape mismatch")
+            raise RuntimeError("Correlation matrix shape mismatch") from None
 
     V[ix, iy] = d[:]
     V[iy, ix] = np.conj(d[:])
@@ -71,7 +71,7 @@ def vis_arr_to_matrix_4pol(d: np.ndarray, n_ant: int, tri: str='upper', V: np.ar
         try:
             assert V.shape == (n_ant, n_ant, 4)
         except AssertionError:
-            raise RuntimeError("Correlation matrix shape mismatch")
+            raise RuntimeError("Correlation matrix shape mismatch") from None
 
     V[ix, iy] = d[:]
     V[iy, ix] = np.conj(d[:])

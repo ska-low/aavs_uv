@@ -23,7 +23,7 @@ def simulate_visibilities_pointsrc(ant_arr: ApertureArray, sky_model: dict):
         model_vis_matrix (np.array): Model visibilities that should be expected given the known applied delays, (Nchan, Nant, Nant)
     """
     phsmat = None
-    for srcname, src in sky_model.items():
+    for _srcname, src in sky_model.items():
         phs = ant_arr.coords.generate_phase_vector(src, conj=True).squeeze()
         if hasattr(src, "mag"):
             phs *= src.mag / np.sqrt(2)

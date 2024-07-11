@@ -54,16 +54,19 @@ sphinx-rtd-theme = ">=1.3"
 myst-parser = ">3.0.0"
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+# Setup linting
+# E: pycodestyle
+# F: Pyflakes
+# I: isort
+# B: flake8-bugbear
+# D: pydocstyle
+select = ["E", "F", "I", "B"]
+extend-select = ["D"]
 ignore = ["E221", "E501", "E741", "D102"]
 # E501 - line too long
 # E221 - lining up equals signs
 # E741 - ambiguous variable names (using l,m,n)
 # D102 - missing docstring in public method; ignore due to docstring inheriting approach
-
-extend-select = [
-  "D",   # pydocstyle
-]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
