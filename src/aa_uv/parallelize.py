@@ -1,9 +1,10 @@
 """parallelize: tools to help parallelize tasks with dask/joblib."""
-import tqdm
 import joblib
-from joblib import Parallel
-from joblib import delayed
+import tqdm
+from joblib import Parallel, delayed
+
 from .utils import reset_logger
+
 
 def task(*args, **kwargs):
     """Renames ``delayed`` to ``task``, and sets up logger.

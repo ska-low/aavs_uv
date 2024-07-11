@@ -3,13 +3,12 @@ import os
 from configparser import ConfigParser
 from pathlib import Path
 
+import h5py
+from aa_uv.io import read_uvx
+from loguru import logger
 from rclone_python import rclone
 from rclone_python.remote_types import RemoteTypes
 
-import h5py
-from loguru import logger
-
-from aa_uv.io import read_uvx
 
 class AcaciaStorage(object):
     """rclone wrapper for acacia access."""

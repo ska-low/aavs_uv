@@ -1,9 +1,9 @@
 """uvw_utils: Utilities for UVW coordinates."""
 import numpy as np
-from pyuvdata import utils as uvutils
-
 from aa_uv.datamodel import UVX
 from astropy.constants import c
+from pyuvdata import utils as uvutils
+
 LIGHT_SPEED = c.value
 
 def calc_zenith_apparent_coords(uv: UVX) -> tuple[np.ndarray, np.ndarray, np.ndarray]:

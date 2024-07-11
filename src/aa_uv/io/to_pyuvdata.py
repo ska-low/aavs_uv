@@ -1,25 +1,25 @@
 """to_pyuvdata: Convert data into pyuvdata standards."""
 # Basic imports
 import warnings
-from loguru import logger
 from datetime import datetime
 
 # Basic science stuff
 import h5py
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pyuvdata
+import pyuvdata.utils as uvutils
+from aa_uv import __version__
+from aa_uv.datamodel import UVX
+from aa_uv.io.to_uvx import load_observation_metadata
+from aa_uv.utils import get_resource_path, load_yaml
+from astropy.coordinates import AltAz, Angle, EarthLocation, SkyCoord, get_sun
 
 # Astropy + pyuvdata
 from astropy.time import Time
-from astropy.coordinates import EarthLocation, AltAz, Angle, SkyCoord, get_sun
-import pyuvdata
+from loguru import logger
 from pyuvdata import UVData
-import pyuvdata.utils as uvutils
 
-from aa_uv.io.to_uvx import load_observation_metadata
-from aa_uv.datamodel import UVX
-from aa_uv.utils import get_resource_path, load_yaml
-from aa_uv import __version__
 
 def phase_to_sun(uv: UVData, t0: Time) -> UVData:
     """Phase UVData to sun, based on timestamp.

@@ -1,19 +1,20 @@
 """from_pyuvdata: Read data using pyuvdata."""
-from loguru import logger
-import pandas as pd
 import numpy as np
-
+import pandas as pd
+import pyuvdata.utils as uvutils
+from aa_uv.datamodel.uvx import (
+    UVX,
+    create_antenna_data_array,
+    create_empty_context_dict,
+    create_empty_provenance_dict,
+    create_visibility_array,
+)
+from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
-from astropy.coordinates import SkyCoord, EarthLocation
-
-from aa_uv.datamodel.uvx import (
-    UVX, create_antenna_data_array, create_visibility_array,
-    create_empty_context_dict, create_empty_provenance_dict
-)
-
+from loguru import logger
 from pyuvdata import UVData
-import pyuvdata.utils as uvutils
+
 
 def convert_data_to_uvx_convention(uv: UVData, check: bool=False) -> np.array:
     """Convert the uv.data_array to UVX data convention.

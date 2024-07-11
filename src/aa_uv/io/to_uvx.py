@@ -1,19 +1,23 @@
 """to_uvx: I/O for writing UVX data into HDF5 schema."""
 import os
+
 import h5py
 import numpy as np
 import pandas as pd
-from loguru import logger
-
+from aa_uv import __version__ as aa_uv_version
+from aa_uv.datamodel.uvx import (
+    UVX,
+    create_antenna_data_array,
+    create_empty_context_dict,
+    create_empty_provenance_dict,
+    create_visibility_array,
+)
+from aa_uv.io.mccs_yaml import station_location_from_platform_yaml
+from aa_uv.utils import get_config_path, get_software_versions, load_yaml
+from astropy.coordinates import AltAz, Angle, EarthLocation, SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
-from astropy.coordinates import SkyCoord, AltAz, EarthLocation, Angle
-
-from aa_uv.io.mccs_yaml import station_location_from_platform_yaml
-from aa_uv.datamodel.uvx import UVX, create_antenna_data_array, create_visibility_array, create_empty_context_dict, create_empty_provenance_dict
-from aa_uv.utils import get_config_path, get_software_versions, load_yaml
-
-from aa_uv import __version__ as aa_uv_version
+from loguru import logger
 
 
 def load_observation_metadata(filename: str, yaml_config: str=None, load_config: str=None) -> dict:

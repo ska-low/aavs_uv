@@ -1,16 +1,15 @@
 """uvx: Data models for interferometer data (UVX)."""
-import numpy as np
-import xarray as xp
-import pandas as pd
 from dataclasses import dataclass
-from loguru import logger
 
+import numpy as np
+import pandas as pd
+import pyuvdata.utils as uvutils
+import xarray as xp
+from aa_uv.utils import get_resource_path, get_software_versions, load_yaml
 from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
-import pyuvdata.utils as uvutils
-
-from aa_uv.utils import get_resource_path, load_yaml, get_software_versions
+from loguru import logger
 
 
 # Define the data class for UV data

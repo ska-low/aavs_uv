@@ -1,19 +1,17 @@
 """aperture_array: Basic antenna array geometry class."""
 import numpy as np
-from pygdsm import init_observer
-
+from aa_uv.datamodel import UVX, UVXAntennaCal
+from aa_uv.vis_utils import vis_arr_to_matrix_4pol
 from astropy.units import Quantity
 from loguru import logger
+from pygdsm import init_observer
 
-from aa_uv.vis_utils import  vis_arr_to_matrix_4pol
-from aa_uv.datamodel import UVX, UVXAntennaCal
 from .aa_plotting import AaPlotter
-
 from .aa_viewer import AllSkyViewer
-from .simulation.aa_simulation import AaSimulator
-from .imaging.aa_imaging import AaImager
-from .coords.aa_coords import AaCoords
 from .calibration.aa_calibration import AaCalibrator
+from .coords.aa_coords import AaCoords
+from .imaging.aa_imaging import AaImager
+from .simulation.aa_simulation import AaSimulator
 
 
 class ApertureArray(object):

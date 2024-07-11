@@ -1,13 +1,15 @@
 """aa_plotting: ApertureArray plotting tools submodule."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from ..postx.aperture_array import ApertureArray
 
-from .aa_module import AaBaseModule
-
-import pylab as plt
 import numpy as np
+import pylab as plt
+
+from .aa_module import AaBaseModule
 
 
 def plot_corr_matrix(aa: ApertureArray, vis: str='data', t_idx: int=0, f_idx: int=0, p_idx: int=0,

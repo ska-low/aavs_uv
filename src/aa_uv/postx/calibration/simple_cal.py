@@ -1,10 +1,13 @@
 """simple_cal: tools to apply simple stefcal."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 
 import numpy as np
+
 from ..simulation.simple_sim import simulate_visibilities_pointsrc
 from .stefcal import stefcal
 

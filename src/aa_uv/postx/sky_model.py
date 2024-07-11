@@ -1,11 +1,13 @@
 """sky_model: Simple sky model class and tools."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from .aperture_array import ApertureArray
 import numpy as np
-
 from astropy.coordinates import SkyCoord, get_body, get_sun
+
 
 class RadioSource(SkyCoord):
     """A SkyCoordinate with a magnitude."""

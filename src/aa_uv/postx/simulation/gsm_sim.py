@@ -1,15 +1,18 @@
 """gsm_sim: Simulation tools using pygdsm diffuse sky model."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
-import numpy as np
 import healpy as hp
+import numpy as np
 import xarray as xr
+from matvis import simulate_vis
+from pyuvsim.analyticbeam import AnalyticBeam
 
 from ..coords.coord_utils import hpix2sky
-from pyuvsim.analyticbeam import AnalyticBeam
-from matvis import simulate_vis
+
 
 def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None, n_side: int=32) -> xr.DataArray:  # noqa: F821
     """Use pygdsm + matvis to simulate visibilites, add in Sun."""

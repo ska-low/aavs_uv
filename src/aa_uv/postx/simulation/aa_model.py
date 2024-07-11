@@ -1,7 +1,9 @@
 """aa_model: Simple dataclass for visibilities / sky models."""
 from dataclasses import dataclass
+
 import xarray as xr
 from pygdsm import GlobalSkyModel
+
 
 @dataclass
 class Model:

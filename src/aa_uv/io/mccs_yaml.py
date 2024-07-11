@@ -1,10 +1,11 @@
 """mccs_yaml: tools for reading MCCS YAML files."""
 from operator import itemgetter
 
-from aa_uv.utils import load_yaml
-import pandas as pd
 import numpy as np
+import pandas as pd
+from aa_uv.utils import load_yaml
 from astropy.coordinates import EarthLocation
+
 
 def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tuple[EarthLocation, pd.DataFrame]:
     """Load station location from AAVS3 MCCS yaml config.

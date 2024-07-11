@@ -1,21 +1,22 @@
 """aa_viewer: All-sky viewing utility for low-frequency compact radio interferometers."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from .aperture_array import ApertureArray
 
-import numpy as np
-from matplotlib import pyplot as plt
-from astropy.time import Time
-from astropy.coordinates import SkyCoord
-from astropy.wcs import WCS
-from astropy.io import fits
 import healpy as hp
+import numpy as np
+from astropy.coordinates import SkyCoord
+from astropy.io import fits
+from astropy.time import Time
+from astropy.wcs import WCS
+from matplotlib import pyplot as plt
 
-from .sky_model import generate_skycat_solarsys, generate_skycat
-from .coords.coord_utils import sky2hpix
 from .aa_module import AaBaseModule
-
+from .coords.coord_utils import sky2hpix
+from .sky_model import generate_skycat, generate_skycat_solarsys
 
 ###################
 # ALL-SKY VIEWER

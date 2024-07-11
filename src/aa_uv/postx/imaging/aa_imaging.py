@@ -1,15 +1,24 @@
 """aa_imaging: ApertureArray image tools submodule."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 
-import numpy as np
 import healpy as hp
-from ..coords.coord_utils import phase_vector, skycoord_to_lmn, generate_lmn_grid, sky2hpix, hpix2sky
-from ..aa_module import AaBaseModule
-
+import numpy as np
 from astropy.constants import c
+
+from ..aa_module import AaBaseModule
+from ..coords.coord_utils import (
+    generate_lmn_grid,
+    hpix2sky,
+    phase_vector,
+    sky2hpix,
+    skycoord_to_lmn,
+)
+
 SPEED_OF_LIGHT = c.value
 
 def generate_weight_grid(aa, n_pix: int, abs_max: int=1, nan_below_horizon: bool=True):

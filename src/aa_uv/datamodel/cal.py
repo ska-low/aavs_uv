@@ -1,11 +1,10 @@
 """cal: Data models for calibration data."""
-import numpy as np
-import xarray as xp
 from dataclasses import dataclass
 
+import numpy as np
+import xarray as xp
+from aa_uv.utils import get_resource_path, get_software_versions, load_yaml
 from astropy.units import Quantity
-
-from aa_uv.utils import get_resource_path, load_yaml, get_software_versions
 
 
 @dataclass

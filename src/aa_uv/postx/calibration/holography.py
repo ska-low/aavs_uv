@@ -4,27 +4,25 @@ Implementation based on J. Thekkeppattu et al. (2024)
 https://ui.adsabs.harvard.edu/abs/2024RaSc...5907847T/abstract
 """
 from __future__ import annotations
+
 import typing
 
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 
-from loguru import logger
 import warnings
-import numpy as np
-import matplotlib as mpl
-import pylab as plt
 
+import matplotlib as mpl
+import numpy as np
+import pylab as plt
+from aa_uv.datamodel.cal import UVXAntennaCal, create_uvx_antenna_cal
 from astropy.constants import c
 from astropy.coordinates import SkyCoord
+from loguru import logger
 
-
+from ..aa_module import AaBaseModule
 from ..coords.coord_utils import gaincal_vec_to_matrix
 from ..imaging.aa_imaging import generate_weight_grid
-from ..aa_module import AaBaseModule
-
-from aa_uv.datamodel.cal import UVXAntennaCal, create_uvx_antenna_cal
-
 
 LIGHT_SPEED = c.value
 

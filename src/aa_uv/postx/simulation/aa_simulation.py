@@ -1,14 +1,15 @@
 """aa_simulation: ApertureArray simulation tools submodule."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 
-from .simple_sim import simulate_visibilities_pointsrc
-from .gsm_sim import simulate_visibilities_gsm
-from .aa_model import Model
-
 from ..aa_module import AaBaseModule
+from .aa_model import Model
+from .gsm_sim import simulate_visibilities_gsm
+from .simple_sim import simulate_visibilities_pointsrc
 
 
 class AaSimulator(AaBaseModule):

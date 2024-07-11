@@ -1,26 +1,24 @@
 """converter: Command-line utility for file conversion."""
 import argparse
-import sys
-import os
-import time
 import glob
-
+import os
+import sys
+import time
 import warnings
+
+from aa_uv import __version__
+from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_uvx, phase_to_sun, write_uvx
+from aa_uv.utils import get_config_path, load_yaml
+from astropy.time import Time, TimeDelta
 from loguru import logger
 
-from .parallelize import task, run_in_parallel
-from .utils import reset_logger, zipit, import_optional_dependency
-
-from astropy.time import Time, TimeDelta
-from aa_uv import __version__
-from aa_uv.utils import get_config_path
-from aa_uv.io import hdf5_to_pyuvdata,  hdf5_to_uvx, phase_to_sun, write_uvx
-from aa_uv.utils import load_yaml
+from .parallelize import run_in_parallel, task
+from .utils import import_optional_dependency, reset_logger, zipit
 
 try:
     import_optional_dependency('ska_sdp_datamodels')
-    from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
     from aa_uv.io import hdf5_to_sdp_vis
+    from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 except ImportError:
     pass
 

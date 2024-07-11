@@ -1,12 +1,17 @@
 """peel: Basic source peeling routines."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
-    from ..aperture_array import ApertureArray
     from astropy.coordinates import SkyCoord
 
+    from ..aperture_array import ApertureArray
+
 import numpy as np
+
 from ..sky_model import RadioSource
+
 
 def peel(aa: ApertureArray, src: SkyCoord):
     """Basic source peeling routine."""

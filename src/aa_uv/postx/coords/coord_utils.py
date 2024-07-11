@@ -1,12 +1,11 @@
 """coord_utils: Coordinate utilities."""
-import numpy as np
-import healpy as hp
-
-from astropy.constants import c
-from astropy.coordinates import SkyCoord, EarthLocation
-
-import pyuvdata.utils as uvutils
 import warnings
+
+import healpy as hp
+import numpy as np
+import pyuvdata.utils as uvutils
+from astropy.constants import c
+from astropy.coordinates import EarthLocation, SkyCoord
 
 #SHORTHAND
 sin, cos = np.sin, np.cos

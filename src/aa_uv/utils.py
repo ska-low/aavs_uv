@@ -1,14 +1,16 @@
 """utils: Utilities used in aa_uv package."""
+import importlib
 import os
-import aa_uv
-from loguru import logger
-import sys
-from tqdm import tqdm
 import shutil
-import yaml
+import sys
 import types
 import typing
-import importlib
+
+import aa_uv
+import yaml
+from loguru import logger
+from tqdm import tqdm
+
 
 def reset_logger(use_tqdm: bool=False, disable: bool=False, level: str="INFO") -> logger:
     """Reset loguru logger and setup output format.
@@ -94,12 +96,12 @@ def get_software_versions() -> dict:
     """Return version of main software packages."""
     from aa_uv import __version__ as aa_uv_version
     from astropy import __version__ as astropy_version
+    from erfa import __version__ as erfa_version
+    from h5py import __version__ as h5py_version
     from numpy import __version__ as numpy_version
+    from pandas import __version__ as pandas_version
     from pyuvdata import __version__ as pyuvdata_version
     from xarray import __version__ as xarray_version
-    from pandas import __version__ as pandas_version
-    from h5py import __version__ as h5py_version
-    from erfa import __version__ as erfa_version
 
     software = {
         'aa_uv': aa_uv_version,

@@ -1,11 +1,13 @@
 """simple_sim: Simple point-source simulation tools."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 import numpy as np
-from astropy.constants import c
 import xarray as xr
+from astropy.constants import c
 
 LIGHT_SPEED = c.to('m/s').value
 cos, sin = np.cos, np.sin

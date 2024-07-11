@@ -1,14 +1,13 @@
 """aa_calibartion: ApertureArray calibration submodule."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 
 from ..aa_module import AaBaseModule
-
-from . import holography
-from . import stefcal
-
+from . import holography, stefcal
 
 ######################
 ## AA_CALIBRATOR CLASS
