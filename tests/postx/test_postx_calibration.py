@@ -1,6 +1,7 @@
 """test_postx_calibration: test routines in postx.calibration."""
+import matplotlib.pyplot as plt
 import numpy as np
-import pylab as plt
+import pytest
 from aa_uv.io import hdf5_to_uvx
 from aa_uv.postx import ApertureArray
 from aa_uv.postx.aa_viewer import AllSkyViewer
@@ -12,7 +13,7 @@ from astropy.coordinates import get_sun
 FN_RAW   = get_test_data('aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5')
 YAML_RAW = get_aa_config('aavs2')
 
-
+@pytest.mark.mpl_image_compare
 def test_calibration():
     """Test calibration.
 
@@ -43,11 +44,11 @@ def test_calibration():
     #plt.plot(g)
     #plt.show()
 
-    plt.figure(figsize=(10, 4))
+    fig = plt.figure(figsize=(10, 4))
     asv.orthview(np.log(img_raw), overlay_srcs=True, subplot_id=(1,3,1), title='data',  colorbar=True)
     #asv.orthview(np.log(img_c), overlay_srcs=True, subplot_id=(1,3,2),  title='cal', colorbar=True)
     asv.orthview(np.log(img_model), overlay_srcs=True, subplot_id=(1,3,3), title='model', colorbar=True)
-    plt.show()
+    return fig
 
 
 if __name__ == "__main__":

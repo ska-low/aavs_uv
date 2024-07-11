@@ -1,4 +1,8 @@
-"""test_zparallel: Test running in parallel."""
+"""test_parallel: Test running in parallel.
+
+NOTE: This script seems to break pytest, if it runs before ipynb tests.
+Hence it being in a folder starting with a z_, so it runs last.
+"""
 import time
 
 from aa_uv.parallelize import run_in_parallel, task
@@ -16,6 +20,7 @@ def my_task(x: float) -> int:
     """
     time.sleep(0.1)
     return 0
+
 
 def test_run_in_parallel():
     """Test running in parallel."""
