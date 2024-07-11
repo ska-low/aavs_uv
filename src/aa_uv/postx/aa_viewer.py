@@ -1,3 +1,4 @@
+"""aa_viewer: All-sky viewing utility for low-frequency compact radio interferometers."""
 from __future__ import annotations
 import typing
 if typing.TYPE_CHECKING:
@@ -32,7 +33,19 @@ class AllSkyViewer(AaBaseModule):
         orthview_gsm() - orthview plot observed Global diffuse sky model using pygdsm
         mollview_gsm() - mollview plot observed Global diffuse sky model using pygdsm
     """
-    def __init__(self, observer: ApertureArray=None, skycat: dict=None, ts: Time=None, f_mhz: float=None, n_pix: int=128):
+    def __init__(self, observer: ApertureArray=None, skycat: dict=None, ts: Time=None,
+                 f_mhz: float=None, n_pix: int=128):
+        """Create a new AllSkyViewer.
+
+        Args:
+            observer (ApertureArray): Default ApertureArray object to use
+            skycat (dict): A dictionary of SkyCoord / RadioSource objects.
+                           These sources can be overlaid on images.
+            ts (Time): Astropy Time of observation, used for coordinate calcs.
+            f_mhz (float): Frequency in MHz of observation.
+            n_pix (int): Number of pixels in image. Default 128. This should update
+                         automatically if larger images are passed for viewing.
+        """
         self.observer = observer
         self.skycat = skycat if skycat is not None else generate_skycat(observer)
         self.name = observer.name if hasattr(observer, 'name') else 'allsky'

@@ -10,6 +10,15 @@ from astropy.coordinates import SkyCoord, get_body, get_sun
 class RadioSource(SkyCoord):
     """A SkyCoordinate with a magnitude."""
     def __init__(self, *args, mag: float=1.0, unit: str=None, **kwargs):
+        """Create a RadioSource (A SkyCoord with magnitude).
+
+        Args:
+            mag (float): Magnitude to attach, default 1.0
+            unit (str): Unit for astropy SkyCoord defaults to
+                        ('hourangle', 'degree')
+            *args: Arguments to pass to SkyCoord
+            **kwargs (dict): Keyword args to pass to SkyCoord
+        """
         if unit is None:
             unit=('hourangle', 'degree')
         super().__init__(*args, unit=unit, **kwargs)

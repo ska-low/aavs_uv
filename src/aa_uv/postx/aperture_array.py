@@ -72,6 +72,7 @@ class ApertureArray(object):
         self.set_gsm(gsm)
 
     def __repr__(self):
+        """Display representation of ApertureArray object."""
         eloc = self.earthloc.to_geodetic()
         s = f"<ApertureArray: {self.name} (lat {eloc.lat.value:.2f}, lon {eloc.lon.value:.2f})>"
         return s
