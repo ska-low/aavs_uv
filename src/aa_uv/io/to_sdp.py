@@ -1,32 +1,24 @@
-
+"""to_sdp: Convert data into SDP Visibility format."""
 import numpy as np
 import pandas as pd
-import h5py
-
+from aa_uv.io.to_uvx import hdf5_to_uvx
+from aa_uv.uvw_utils import calc_uvw, calc_zenith_tracking_phase_corr
 from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
-
 from pyuvdata import UVData
-
-from aa_uv.utils import import_optional_dependency
-
-import_optional_dependency('ska_sdp_datamodels')
-from ska_sdp_datamodels.visibility import Visibility
 from ska_sdp_datamodels.configuration import Configuration
-from ska_sdp_datamodels.science_data_model import ReceptorFrame, PolarisationFrame
-
-from aa_uv.io.to_uvx import hdf5_to_uvx
-from aa_uv.uvw_utils import calc_uvw, calc_zenith_tracking_phase_corr, calc_zenith_apparent_coords
+from ska_sdp_datamodels.science_data_model import PolarisationFrame, ReceptorFrame
+from ska_sdp_datamodels.visibility import Visibility
 
 
 def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None, conj: bool=True,
                     scan_id: int=0, scan_intent: str="", execblock_id: str="", flip_uvw=True,
                     apply_phasing: bool=True) -> Visibility:
-    """ Generate a SDP Visibility object from a AAVS2 HDF5 file
+    """Generate a SDP Visibility object from a AAVS2 HDF5 file.
 
     Args:
         fn_raw (str): Filename of raw HDF5 data to load.
-        yaml_raw (str): YAML config data with telescope information.
+        yaml_config (str): YAML config data with telescope information.
         telescope_name (str=None): If set, aa_uv will try and use internal config file
                                    for telescope_name, e.g. 'aavs2' or 'aavs3'
         conj (bool): Conjugate visibility data (default True).
@@ -55,7 +47,6 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None
     rec_frame = ReceptorFrame('linear')
     pol_frame = PolarisationFrame('linear')
 
-    antpos_ENU  = uv.antennas.enu.values
     antpos_ECEF = uv.antennas.ecef.values
     telescope_earthloc = uv.origin
 
@@ -120,16 +111,24 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None
 
 
 def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock_id: str="",
-                      conj: bool=False, flip_uvw=True) -> Visibility:
-    """ Convert pyuvdata object to SDP Visibility
+                      conj: bool=False, flip_uvw: bool=True) -> Visibility:
+    """Convert pyuvdata object to SDP Visibility.
+
+    Notes:
+        Visibility data conjugation and UVW convention need to match. Default for
+        HDF5 data from SKA-Low is to flip UVW (ant1 - ant2) and NOT conjugate.
 
     Args:
         uv (UVData): pyuvdata UVData object
+        scan_id (int): Scan ID number
+        scan_intent (str): Contexual information about why scan was done
+        execblock_id (str): Execution Block ID (optional)
+        conj (bool): Conjugate visibility data (default False)
+        flip_uvw (bool): Flip UVW coordinates (multiply by -1, default True)
 
     Returns:
         v (Visibility): SDP Visibility object
     """
-
     # Create Configuration and Frames
     # TODO: Derive from UVData
     config    = Configuration()
@@ -153,8 +152,6 @@ def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock
 
     # Setup time -- note time_array is Nbls*Nt long, we assume it is ordered
     t = Time(uv.time_array[::uv.Nbls], format='jd', location=telescope_earthloc)
-    t_lst= t.sidereal_time('apparent').to('rad').value
-    t0 = Time(np.round(t[0].mjd), format='mjd')
 
     # Setup frequency
     f_c  = uv.freq_array[0]   # TODO: handle multiple spectral windows
@@ -162,13 +159,6 @@ def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock
 
     if len(uv.freq_array) > 1:
         raise NotImplementedError("Only length-1 frequency arrays supported at present.")
-
-    # setup phase center
-    pc_id = sorted(uv.phase_center_catalog.keys())[0]
-    pcd = uv.phase_center_catalog[pc_id]
-    pc_name = pcd['cat_name']
-    pc_sc = SkyCoord(pcd['cat_lon'], pcd['cat_lat'], unit=('rad', 'rad'))
-    pc_hourangle = t.sidereal_time('apparent').to('rad').value - pc_sc.icrs.ra.to('hourangle').to('rad').value
 
     #integration_time (float, optional) – Only used in the specific case where times only has one element
     t_int = uv.integration_time[0] if uv.Ntimes == 1 else None
@@ -184,7 +174,6 @@ def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock
 
     # Reshape time array -- only need one entry per timestep
     t = Time(uv.time_array.reshape((uv.Ntimes, uv.Nbls))[:, 0], format='jd', location=telescope_earthloc)
-    t_lst= t.sidereal_time('apparent').to('rad').value
 
     # Reshape visibility array -- should be same layout so no worries here
     vis_data = uv.data_array.reshape((uv.Ntimes, uv.Nbls, 1, 4))

@@ -1,2 +1,2 @@
  #!/usr/bin/env bash
- pytest --cov=aa_uv . --cov-report html
+ pytest --nbmake --cov=aa_uv --cov-report html .

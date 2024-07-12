@@ -1,10 +1,14 @@
-from aa_uv.io import hdf5_to_uvx, hdf5_to_pyuvdata
-from aa_uv.uvw_utils import calc_uvw
+"""test_uvw: Test UVW calculations."""
 import numpy as np
+from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_uvx
+from aa_uv.utils import get_test_data
+from aa_uv.uvw_utils import calc_uvw
 from pyuvdata import utils as uvutils
 
+
 def test_uvw():
-    fn = './test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
+    """Test UVW calcs."""
+    fn = get_test_data('aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5')
     uv = hdf5_to_uvx(fn, telescope_name='aavs2')
 
     uvd = hdf5_to_pyuvdata(fn, telescope_name='aavs2')

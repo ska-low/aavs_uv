@@ -1,11 +1,11 @@
-from aa_uv.utils import zipit
-from aa_uv.vis_utils import vis_arr_to_matrix, vis_arr_to_matrix_4pol
+"""test_vis_utils: Test visibility utilities."""
 import numpy as np
 import pytest
+from aa_uv.vis_utils import vis_arr_to_matrix, vis_arr_to_matrix_4pol
 
 
 def test_vis_arr_to_matrix():
-    """ Test vis_array_to_matrix """
+    """Test vis_array_to_matrix."""
     # Upper
     d = np.arange(32896)
     V0 = vis_arr_to_matrix(d, 256)
@@ -41,6 +41,7 @@ def test_vis_arr_to_matrix():
          V = vis_arr_to_matrix(d, 256, 'upper', V=V)
 
 def test_vis_arr_to_matrix_4pol():
+     """Test vis_array_to_matrix, 4-pol version."""
      d = np.arange(32896 * 4).reshape((32896, 4))
      V = vis_arr_to_matrix_4pol(d, 256)
      assert V.shape == (256, 256, 4)

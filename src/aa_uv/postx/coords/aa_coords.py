@@ -1,28 +1,27 @@
-
+"""aa_coords: ApertureArray coordinate tools submodule."""
 from __future__ import annotations
+
 import typing
 
 import numpy as np
-
-from astropy.time import Time
-from astropy.coordinates import SkyCoord, AltAz, Angle
-from astropy.coordinates import get_sun as astropy_get_sun
-
 from aa_uv.postx.coords.coord_utils import phase_vector, skycoord_to_lmn
 from aa_uv.postx.imaging.aa_imaging import SPEED_OF_LIGHT
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import AltAz, Angle, SkyCoord
+from astropy.coordinates import get_sun as astropy_get_sun
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 
 from ..aa_module import AaBaseModule
 
 
-def generate_phase_vector(aa, src: SkyCoord, conj: bool=False, coplanar: bool=False, apply_cal: bool=True):
-    """ Generate a phase vector for a given source
+def generate_phase_vector(aa, src: SkyCoord, conj: bool=False, coplanar: bool=False):
+    """Generate a phase vector for a given source.
 
     Args:
+        aa (ApertureArray): Aperture array 'parent' object to use
         src (astropy.SkyCoord or ephem.FixedBody): Source to compute delays toward
-        conj (bool); Conjugate data if True
+        conj (bool): Conjugate data if True
         coplanar (bool): Treat array as coplanar if True. Sets antenna z-pos to zero
 
     Returns:
@@ -39,7 +38,10 @@ def generate_phase_vector(aa, src: SkyCoord, conj: bool=False, coplanar: bool=Fa
 
 
 def get_zenith(aa) -> SkyCoord:
-    """ Return the sky coordinates at zenith
+    """Return the sky coordinates at zenith.
+
+    Args:
+        aa (ApertureArray): Aperture array objecy to use
 
     Returns:
         zenith (SkyCoord): Zenith SkyCoord object
@@ -51,9 +53,10 @@ def get_zenith(aa) -> SkyCoord:
 
 
 def get_alt_az(aa, sc: SkyCoord) -> SkyCoord:
-    """ Convert SkyCoord into alt/az coordinates
+    """Convert SkyCoord into alt/az coordinates.
 
     Args:
+        aa (ApertureArray): Aperture array object to use
         sc (SkyCoord): Input sky coordinate
 
     Returns:
@@ -65,7 +68,11 @@ def get_alt_az(aa, sc: SkyCoord) -> SkyCoord:
 
 
 def get_sun(aa) -> SkyCoord:
-    """ Return the sky coordinates of the Sun
+    """Return the sky coordinates of the Sun.
+
+    Args:
+        aa (ApertureArray): Aperture array object to use
+
     Returns:
         sun_sc (SkyCoord): sun SkyCoord object
     """
@@ -78,7 +85,7 @@ def get_sun(aa) -> SkyCoord:
 ####################
 
 class AaCoords(AaBaseModule):
-    """ Coordinate utils
+    """Coordinate utils.
 
     Provides the following:
         get_sun() - Get the position of the sun as a SkyCoord
@@ -88,7 +95,7 @@ class AaCoords(AaBaseModule):
 
     """
     def __init__(self, aa: ApertureArray):
-        """ Setup AaCoords
+        """Setup AaCoords.
 
         Args:
             aa (ApertureArray): Aperture array 'parent' object to use

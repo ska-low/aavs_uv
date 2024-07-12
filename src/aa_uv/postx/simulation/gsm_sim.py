@@ -1,25 +1,24 @@
-
+"""gsm_sim: Simulation tools using pygdsm diffuse sky model."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
-import numpy as np
 import healpy as hp
+import numpy as np
 import xarray as xr
-
-from ..coords.coord_utils import hpix2sky, sky2hpix
-from pyuvsim.analyticbeam import AnalyticBeam
 from matvis import simulate_vis
+from pyuvsim.analyticbeam import AnalyticBeam
 
-def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None) -> xr.DataArray:
-    """ Use pygdsm + matvis to simulate visibilites, add in Sun """
+from ..coords.coord_utils import hpix2sky
 
+
+def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None, n_side: int=32) -> xr.DataArray:  # noqa: F821
+    """Use pygdsm + matvis to simulate visibilites, add in Sun."""
     f_mhz    = aa.uvx.data.frequency[0] / 1e6
     lsts_rad = aa.uvx.data.lst.values / 24 * np.pi * 2
-    flags    = aa.uvx.antennas.flags
-    array_lat_rad = float(aa.gsm.lat)
-
-    n_side   = 32
+    array_lat_rad = float(aa.gsm.lata)
 
     aa.gsm.generate(f_mhz)
 

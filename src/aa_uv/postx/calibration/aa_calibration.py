@@ -1,20 +1,20 @@
+"""aa_calibartion: ApertureArray calibration submodule."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 
 from ..aa_module import AaBaseModule
-
-from . import holography
-from . import stefcal
-
+from . import holography, stefcal
 
 ######################
 ## AA_CALIBRATOR CLASS
 ######################
 
 class AaCalibrator(AaBaseModule):
-    """ ApertureArray Calibration module
+    """ApertureArray Calibration module.
 
     Provides the following sub-modules:
     holography - self-holography techniques
@@ -22,7 +22,7 @@ class AaCalibrator(AaBaseModule):
 
     """
     def __init__(self, aa: ApertureArray):
-        """ Setup AaCalibrator
+        """Setup AaCalibrator.
 
         Args:
             aa (ApertureArray): Aperture array 'parent' object to use

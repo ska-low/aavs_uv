@@ -1,12 +1,16 @@
+"""test_pyuvdata_to_uvx: tests for aa_uv.io.from_pyuvdata."""
+from aa_uv.io.from_pyuvdata import convert_data_to_uvx_convention, pyuvdata_to_uvx
+from aa_uv.utils import get_test_data
 from pyuvdata import UVData
-from aa_uv.io.from_pyuvdata import pyuvdata_to_uvx, convert_data_to_uvx_convention
+
 
 def test_pyuvdata_to_uvx():
-    fn='./test-data/aavs3/aavs3_chan204_20231115.uvfits'
+    """Test conversion from pyuvdata.UVData to UVX."""
+    fn = get_test_data('aavs3/aavs3_chan204_20231115.uvfits')
     uv = UVData().from_file(fn)
 
-    data_arr = convert_data_to_uvx_convention(uv, check=True)
-    data_arr = convert_data_to_uvx_convention(uv, check=False)
+    convert_data_to_uvx_convention(uv, check=True)
+    convert_data_to_uvx_convention(uv, check=False)
 
     uvx = pyuvdata_to_uvx(uv)
 

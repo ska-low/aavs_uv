@@ -1,16 +1,19 @@
+"""simple_sim: Simple point-source simulation tools."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 import numpy as np
-from astropy.constants import c
 import xarray as xr
+from astropy.constants import c
 
 LIGHT_SPEED = c.to('m/s').value
 cos, sin = np.cos, np.sin
 
 def simulate_visibilities_pointsrc(ant_arr: ApertureArray, sky_model: dict):
-    """ Simulate model visibilities for an antenna array
+    """Simulate model visibilities for an antenna array.
 
     Args:
         ant_arr (AntArray): Antenna array to use
@@ -20,7 +23,7 @@ def simulate_visibilities_pointsrc(ant_arr: ApertureArray, sky_model: dict):
         model_vis_matrix (np.array): Model visibilities that should be expected given the known applied delays, (Nchan, Nant, Nant)
     """
     phsmat = None
-    for srcname, src in sky_model.items():
+    for _srcname, src in sky_model.items():
         phs = ant_arr.coords.generate_phase_vector(src, conj=True).squeeze()
         if hasattr(src, "mag"):
             phs *= src.mag / np.sqrt(2)

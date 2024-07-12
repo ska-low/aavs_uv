@@ -1,21 +1,21 @@
-import os
-import h5py
-import numpy as np
-import xarray as xp
-import pandas as pd
+"""uvx: Data models for interferometer data (UVX)."""
 from dataclasses import dataclass
-from loguru import logger
 
-from astropy.coordinates import EarthLocation, SkyCoord, AltAz, Angle
+import numpy as np
+import pandas as pd
+import pyuvdata.utils as uvutils
+import xarray as xp
+from aa_uv.utils import get_resource_path, get_software_versions, load_yaml
+from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
-import pyuvdata.utils as uvutils
+from loguru import logger
 
-from aa_uv.utils import get_resource_path, load_yaml
 
 # Define the data class for UV data
 @dataclass
 class UVX:
+    """Dataclass for storing UVX interferometer data."""
     name: str               # Antenna array name, e.g. AAVS3
     context: dict           # Contextual information (observation intent, notes, observer name)
     antennas: xp.Dataset    # An xarray dataset (generated with create_antenna_data_array)
@@ -27,6 +27,7 @@ class UVX:
 
 
 def create_empty_context_dict():
+    """Create an empty context dictionary with default keys."""
     context = {
         'intent': '',
         'date': '',
@@ -38,8 +39,9 @@ def create_empty_context_dict():
 
 
 def create_empty_provenance_dict():
+    """Create a provenance dict with default keys."""
     provenance = {
-        'aa_uv_config': {},
+        'aa_uv_config': get_software_versions(),
         'input_files': {},
         'input_metadata': {}
     }
@@ -47,7 +49,7 @@ def create_empty_provenance_dict():
 
 
 def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.Dataset:
-    """ Create an xarray Dataset for antenna locations
+    """Create an xarray Dataset for antenna locations.
 
     Args:
         antpos (pd.Dataframe): Pandas dataframe with antenna positions. Should have
@@ -70,7 +72,7 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
                     enu      (antenna, spatial) float64 East-North-Up coordinates relative to eloc
                     ecef     (antenna, spatial) float64 ECEF XYZ coordinates (XYZ - eloc.XYZ0)
 
-                Attributes:
+    Attributes:
                     identifier:               Antenna names / identifiers
                     flags:                    Flags if antenna is bad
                     array_origin_geocentric:  Array origin (ECEF)
@@ -138,13 +140,15 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
 
 def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthLocation,
                             conj: bool=True, N_ant: int=256) -> xp.DataArray:
-    """ Create visibility array out of data array + metadata
+    """Create visibility array out of data array + metadata.
 
     Takes a data array, frequency and time axes, and an EarthLocation.
     Currently assumes XX/XY/YX/YY polarization and upper triangle baseline coordinates.
 
     Args:
         data (np.array): Numpy array or duck-type similar data (e.g. h5py.dataset)
+        t (Time): Astropy time array corresponding to timestamps
+        f (Quantity): Astropy quantity array of frequency for channel centers
         md (dict): Dictionary of metadata, as found in raw HDF5 file.
         eloc (EarthLocation): Astropy EarthLocation for array center
         conj (bool): Conjugate visibility data (default True).
@@ -152,8 +156,6 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
 
 
     Returns:
-        t (Time): Astropy time array corresponding to timestamps
-        f (Quantity): Astropy quantity array of frequency for channel centers
         vis (xp.DataArray): xarray DataArray object, see notes below
 
     Notes:

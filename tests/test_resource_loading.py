@@ -1,13 +1,18 @@
-from aa_uv.utils import get_resource_path, get_config_path
+"""Test_resource_loading: Test file path resolution tools."""
+from aa_uv.utils import get_aa_config, get_resource_path
+
 
 def test_resource_loading():
+    """Test get_resource_path."""
     print(get_resource_path('catch/me/if/you/can'))
     print(get_resource_path('config/aavs3/uv_config.yaml'))
 
 
 def test_get_config():
-    print(get_config_path('aavs2'))
-    print(get_config_path('aavs3'))
+    """Test get_aa_config."""
+    print(get_aa_config('aavs2'))
+    print(get_aa_config('aavs3'))
+
 
 if __name__ == "__main__":
     test_resource_loading()

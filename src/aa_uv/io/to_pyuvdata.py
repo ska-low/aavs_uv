@@ -1,32 +1,28 @@
+"""to_pyuvdata: Convert data into pyuvdata standards."""
 # Basic imports
-import glob
-import os
 import warnings
-from loguru import logger
-from pprint import pprint
 from datetime import datetime
 
 # Basic science stuff
 import h5py
-import pylab as plt
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pyuvdata
+import pyuvdata.utils as uvutils
+from aa_uv import __version__
+from aa_uv.datamodel import UVX
+from aa_uv.io.to_uvx import load_observation_metadata
+from aa_uv.utils import get_resource_path, load_yaml
+from astropy.coordinates import AltAz, Angle, EarthLocation, SkyCoord, get_sun
 
 # Astropy + pyuvdata
-from astropy.io import fits as pf
-from astropy.time import Time, TimeDelta
-from astropy.coordinates import EarthLocation, AltAz, Angle, SkyCoord, get_sun
-import pyuvdata
+from astropy.time import Time
+from loguru import logger
 from pyuvdata import UVData
-import pyuvdata.utils as uvutils
 
-from aa_uv.io.to_uvx import load_observation_metadata
-from aa_uv.datamodel import UVX
-from aa_uv.utils import get_resource_path, load_yaml
-from aa_uv import __version__
 
 def phase_to_sun(uv: UVData, t0: Time) -> UVData:
-    """ Phase UVData to sun, based on timestamp
+    """Phase UVData to sun, based on timestamp.
 
     Computes the sun's RA/DEC in GCRS for the given time, then applies phasing.
     This will then recompute UVW and apply phase corrections to data.
@@ -57,10 +53,10 @@ def phase_to_sun(uv: UVData, t0: Time) -> UVData:
 
 def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
                      start_int: int=0, max_int: int=None) -> pyuvdata.UVData:
-    """ Convert AAVS2/3 HDF5 correlator output to UVData object
+    """Convert UVX visibility format into UVData object.
 
     Args:
-        filename (str):     Name of file to open
+        uvx (UVX):          UVX object to convert
         phase_to_t0 (bool): Instead of phasing to Zenith, phase all timestamps to
                             the RA/DEC position of zenith at the first timestamp (t0).
                             This is needed if writing UVFITS files, but not if you
@@ -72,7 +68,6 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
         uv (pyuvdata.UVData): A UVData object that can be used to create
                               UVFITS/MIRIAD/UVH5/etc files
     """
-
     # Create empty UVData object
     uv = pyuvdata.UVData()
 
@@ -125,10 +120,8 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
     # Also instantiate an EarthLocation observer for LST / Zenith calcs
     xyz = np.array((uvx.origin.x.value, uvx.origin.y.value, uvx.origin.z.value))
     uv.telescope_location = xyz
-    telescope_earthloc = uvx.origin
 
-    # Load baselines and antenna locations (ENU)
-    antpos_ENU  = uvx.antennas.enu.values
+    # Load baselines and antenna locations (ECEF)
     antpos_ECEF = uvx.antennas.ecef.values
 
     # Now fill in antenna info fields
@@ -142,7 +135,6 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
     uv.baseline_array    = uvutils.antnums_to_baseline(uv.ant_1_array, uv.ant_2_array, md['n_antennas'])
 
     # Frequency axis
-    f0 = uvx.data.frequency.values[0]
     uv.freq_array = uvx.data.frequency.values
 
     # Polarization axis
@@ -246,12 +238,14 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
 
 def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=None, phase_to_t0: bool=True,
                      start_int: int=0, max_int: int=None, conj: bool=True) -> pyuvdata.UVData:
-    """ Convert AAVS2/3 HDF5 correlator output to UVData object
+    """Convert MCCS HDF5 correlator output to UVData object.
 
     Args:
         filename (str):     Name of file to open
         yaml_config (str):  YAML configuration file with basic telescope info.
-                            See README for more information
+                            See README for more information.
+        telescope_name (str): Name of telescope/station. If set, will attempt to use
+                              internal antenna location files.
         phase_to_t0 (bool): Instead of phasing to Zenith, phase all timestamps to
                             the RA/DEC position of zenith at the first timestamp (t0).
                             This is needed if writing UVFITS files, but not if you
@@ -264,7 +258,6 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
         uv (pyuvdata.UVData): A UVData object that can be used to create
                               UVFITS/MIRIAD/UVH5/etc files
     """
-
     # Load metadata
     md = load_observation_metadata(filename, yaml_config, load_config=telescope_name)
 

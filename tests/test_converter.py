@@ -1,9 +1,13 @@
-from aa_uv.converter import parse_args, run
-from aa_uv.utils import get_resource_path
-from aa_uv.io import read_uvx
+"""test_converter: test data conversion utils."""
 import os
 
+from aa_uv.converter import parse_args, run
+from aa_uv.io import read_uvx
+from aa_uv.utils import get_resource_path, get_test_data
+
+
 def test_converter():
+    """Test conversion into different file formats."""
     for fmt in('uvfits', 'miriad', 'mir', 'ms', 'uvh5', 'sdp'):
         try:
             # Delete temp file if it exists
@@ -16,177 +20,196 @@ def test_converter():
             # Create command-line args
             cmd = ["-n", "aavs2",
                 "-o", fmt,
-                "./test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
-                f"test.{fmt}"]
+                "tests/test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
+                f"tests/test.{fmt}"]
 
             # Run the script
             args = parse_args(cmd)
+            print(args)
+
             run(cmd)
         finally:
             # clean up temp files
-            if os.path.exists(f"test.{fmt}"):
+            if os.path.exists(f"tests/test.{fmt}"):
                 if fmt in ('miriad', 'mir', 'ms'):
-                    os.system(f"rm -rf test.{fmt}")
+                    os.system(f"rm -rf tests/test.{fmt}")
                 else:
-                    os.remove(f"test.{fmt}")
+                    os.remove(f"tests/test.{fmt}")
+
 
 def test_custom_config():
+    """Test use of a custom configuration."""
     try:
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
         "-o", "sdp",
-        "./test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
-        "test.sdp"]
+        get_test_data("aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5"),
+        "tests/test.sdp"]
         run(cmd)
     finally:
-        if os.path.exists("test.sdp"):
-            os.remove("test.sdp")
+        if os.path.exists("tests/test.sdp"):
+            os.remove("tests/test.sdp")
+
 
 def test_phase_to_sun():
+    """Test with sun phasing applied."""
     try:
         cmd = [
         "-o", "uvfits", "-s", "-n", "aavs3",
-        "./test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
-        "test.uvfits"]
+        get_test_data("aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5"),
+        "tests/test.uvfits"]
         run(cmd)
     finally:
-        if os.path.exists("test.uvfits"):
-            os.remove("test.uvfits")
+        if os.path.exists("tests/test.uvfits"):
+            os.remove("tests/test.uvfits")
+
 
 def test_errors():
-        # Create command-line args
-        cmd = ["-c", "carmen/santiago",
-            "-o", "svg",
-            "input.hdf5",
-            "output.sdp"]
-        # Run the script
-        args = parse_args(cmd)
-        run(cmd)
+    """Test errors are thrown and caught."""
+    # Create command-line args
+    cmd = ["-c", "carmen/santiago",
+        "-o", "svg",
+        "input.hdf5",
+        "output.sdp"]
+    # Run the script
+    parse_args(cmd)
+    run(cmd)
+
 
 def test_batch():
+    """Test batch modes of conversion util."""
     try:
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
                "-b",
                "-o", "uvx",
-               "./test-data/aavs2_2x500ms",
-               "test-batch-data"]
+               get_test_data("aavs2_2x500ms"),
+               "tests/test-batch-data"]
         run(cmd)
 
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
                "-B",
                "-o", "uvx",
-               "test-data/", # Note -B MEGABATCH test
-               "test-batch-data"]
+               get_test_data("."), # Note -B MEGABATCH test
+               "tests/test-batch-data"]
         run(cmd)
     finally:
-        if os.path.exists('test-batch-data'):
-            os.system('rm -rf test-batch-data')
+        if os.path.exists('tests/test-batch-data'):
+            os.system('rm -rf tests/test-batch-data')
+
 
 def test_batch_zip():
+    """Test batch mode, applying zip."""
     try:
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
                "-b",
                "-z",
                "-o", "ms",
-               "./test-data/aavs2_2x500ms",
-               "test-batch-data"]
+               get_test_data("aavs2_2x500ms"),
+               "tests/test-batch-data"]
         run(cmd)
 
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
                "-B",
                "-z",
                "-o", "miriad",
-               "test-data/", # Note -B MEGABATCH test
-               "test-batch-data2"]
+               get_test_data("."), # Note -B MEGABATCH test
+               "tests/test-batch-data2"]
         run(cmd)
 
     finally:
-        if os.path.exists('test-batch-data.zip'):
-            os.system('rm -rf test-batch-data.zip')
-        if os.path.exists('test-batch-data2'):
-            os.system('rm -rf test-batch-data2')
+        if os.path.exists('tests/test-batch-data.zip'):
+            os.system('rm -rf tests/test-batch-data.zip')
+        if os.path.exists('tests/test-batch-data'):
+            os.system('rm -rf tests/test-batch-data')
+        if os.path.exists('tests/test-batch-data2'):
+            os.system('rm -rf tests/test-batch-data2')
         pass
 
+
 def test_batch_multi():
+    """Test with multiple file output types."""
     try:
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
                "-b",
                "-z",
                "-o", "ms,miriad,uvx",
-               "./test-data/aavs2_2x500ms",
-               "test-batch-data"]
+               get_test_data("aavs2_2x500ms"),
+               "tests/test-batch-data"]
         run(cmd)
 
     finally:
-        pass
-        #if os.path.exists('test-batch-data.zip'):
-        #    os.system('rm -rf test-batch-data.zip')
+        if os.path.exists('tests/test-batch-data'):
+            os.system('rm -rf tests/test-batch-data')
 
 
 def test_context():
+    """Test that context info is saved into files."""
     try:
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
-               "-i", "test-data/context.yml",
+               "-i", get_test_data("context.yml"),
                "-o", "uvx",
-               "./test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
-               "test.uvx5"]
+               get_test_data("aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5"),
+               "tests/test.uvx5"]
         run(cmd)
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
-               "-i", "test-data/context.yml",
+               "-i", get_test_data("context.yml"),
                "-o", "sdp",
-               "./test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
-               "test.sdp"]
+               get_test_data("aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5"),
+               "tests/test.sdp"]
         run(cmd)
-        uv = read_uvx("test.uvx5")
+        uv = read_uvx("tests/test.uvx5")
         print(uv.context)
         assert(uv.context['intent'] == "Test routine for aa_uv package")
     finally:
-        if os.path.exists("test.sdp"):
-            os.remove("test.sdp")
-        if os.path.exists("test.uvx5"):
-            os.remove("test.uvx5")
+        if os.path.exists("tests/test.sdp"):
+            os.remove("tests/test.sdp")
+        if os.path.exists("tests/test.uvx5"):
+            os.remove("tests/test.uvx5")
+
 
 def test_parallel():
+    """Test parallel file conversion using joblib/dask."""
     try:
         # One worker
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
-               "-i", "test-data/context.yml",
+               "-i", get_test_data("context.yml"),
                "-o", "sdp",
                "-w", "2",
-               "./test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
-               "test.sdp"]
+               get_test_data("aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5"),
+               "tests/test.sdp"]
         run(cmd)
         # Change number of workers
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
-               "-i", "test-data/context.yml",
+               "-i", get_test_data("context.yml"),
                "-o", "sdp",
                "-w", "8",
-               "./test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
-               "test.sdp"]
+               get_test_data("aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5"),
+               "tests/test.sdp"]
         run(cmd)
         # Use dask instead
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
-               "-i", "test-data/context.yml",
+               "-i", get_test_data("context.yml"),
                "-o", "sdp",
                "-w", "8",
                "-p", "dask",
-               "./test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
-               "test.sdp"]
+               get_test_data("aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5"),
+               "tests/test.sdp"]
         run(cmd)
         # Verbose
         cmd = ["-c", get_resource_path('config/aavs3/uv_config.yaml'),
-               "-i", "test-data/context.yml",
+               "-i", get_test_data("context.yml"),
                "-o", "sdp",
                "-w", "1",
                "-v",
-               "./test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5",
-               "test.sdp"]
+               get_test_data("aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5"),
+               "tests/test.sdp"]
         run(cmd)
 
     finally:
-        if os.path.exists("test.sdp"):
-            os.remove("test.sdp")
-        if os.path.exists("test.uvx5"):
-            os.remove("test.uvx5")
+        if os.path.exists("tests/test.sdp"):
+            os.remove("tests/test.sdp")
+        if os.path.exists("tests/test.uvx5"):
+            os.remove("tests/test.uvx5")
+
 
 if __name__ == "__main__":
     test_context()

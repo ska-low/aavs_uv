@@ -1,11 +1,13 @@
-import tqdm
+"""parallelize: tools to help parallelize tasks with dask/joblib."""
 import joblib
-from joblib import Parallel
-from joblib import delayed
+import tqdm
+from joblib import Parallel, delayed
+
 from .utils import reset_logger
 
+
 def task(*args, **kwargs):
-    """ Renames ``delayed`` to ``task``, and sets up logger
+    """Renames ``delayed`` to ``task``, and sets up logger.
 
     Provides a decorator to mark a function as a task to run in parallel::
 
@@ -19,13 +21,14 @@ def task(*args, **kwargs):
     return delayed(*args, **kwargs)
 
 def run_in_parallel(task_list: list, n_workers: int=-1, show_progressbar=True, backend: str='loky', verbose: bool=False):
-    """ Run a list of tasks in parallel, using joblib + tqdm
+    """Run a list of tasks in parallel, using joblib + tqdm.
 
     Args:
         task_list (list): A list of tasks (using @parallelize.task 'delayed' lazy loading)
         n_workers (int): Number of workers to use. Defaults to -1, i.e. use all cores.
         show_progressbar (bool): Show tqdm progress bar (default True)
         backend (str): Parallel processing backend, one of 'loky' (default) or 'dask'
+        verbose (bool): Set to verbose mode (INFO instead of WARNING, default False)
 
     Example usage:
         ::

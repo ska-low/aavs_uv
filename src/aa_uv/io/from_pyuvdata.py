@@ -1,21 +1,23 @@
-from loguru import logger
-import pandas as pd
+"""from_pyuvdata: Read data using pyuvdata."""
 import numpy as np
-
+import pandas as pd
+import pyuvdata.utils as uvutils
+from aa_uv.datamodel.uvx import (
+    UVX,
+    create_antenna_data_array,
+    create_empty_context_dict,
+    create_empty_provenance_dict,
+    create_visibility_array,
+)
+from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
-from astropy.coordinates import SkyCoord, EarthLocation
-
-from aa_uv.datamodel.uvx import (
-    UVX, create_antenna_data_array, create_visibility_array,
-    create_empty_context_dict, create_empty_provenance_dict
-)
-
+from loguru import logger
 from pyuvdata import UVData
-import pyuvdata.utils as uvutils
+
 
 def convert_data_to_uvx_convention(uv: UVData, check: bool=False) -> np.array:
-    """ Convert the uv.data_array to UVX data convention
+    """Convert the uv.data_array to UVX data convention.
 
     Notes:
         * Assumes the data are in triangular format with baselines sorted and contiguous.
@@ -26,7 +28,7 @@ def convert_data_to_uvx_convention(uv: UVData, check: bool=False) -> np.array:
 
     Args:
         uv (UVData): UV data object with uv.data_array to convert
-        check (bool): Basic sanity checks on incoming data arrangement
+        check (bool): Run basic sanity checks on incoming data arrangement
 
     Returns:
         data (np.array): Numpy array of data after remapping to UVX convention
@@ -50,7 +52,7 @@ def convert_data_to_uvx_convention(uv: UVData, check: bool=False) -> np.array:
     return data
 
 def pyuvdata_to_uvx(uv: UVData, check: bool=False) -> UVX:
-    """ Convert pyuvdata UVData object to UVX
+    """Convert pyuvdata UVData object to UVX.
 
     Notes:
         This is experimental, and will only work under certain
@@ -62,6 +64,7 @@ def pyuvdata_to_uvx(uv: UVData, check: bool=False) -> UVX:
 
     Args:
         uv (UVData): Pyuvdata input object
+        check (bool): Run basic sanity checks on incoming data arrangement
 
     Returns:
         uvx (UVX): Converted UVX object

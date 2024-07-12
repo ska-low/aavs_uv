@@ -1,18 +1,28 @@
+"""aa_imaging: ApertureArray image tools submodule."""
 from __future__ import annotations
+
 import typing
+
 if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 
-import numpy as np
 import healpy as hp
-from ..coords.coord_utils import phase_vector, skycoord_to_lmn, generate_lmn_grid, sky2hpix, hpix2sky
-from ..aa_module import AaBaseModule
-
+import numpy as np
 from astropy.constants import c
+
+from ..aa_module import AaBaseModule
+from ..coords.coord_utils import (
+    generate_lmn_grid,
+    hpix2sky,
+    phase_vector,
+    sky2hpix,
+    skycoord_to_lmn,
+)
+
 SPEED_OF_LIGHT = c.value
 
 def generate_weight_grid(aa, n_pix: int, abs_max: int=1, nan_below_horizon: bool=True):
-    """ Generate a grid of direction cosine pointing weights
+    """Generate a grid of direction cosine pointing weights.
 
     Generates a square lmn grid across l=(-abs_max, abs_max), m=(-abs_max, abs_max).
 
@@ -20,6 +30,7 @@ def generate_weight_grid(aa, n_pix: int, abs_max: int=1, nan_below_horizon: bool
         For unit pointing vector, l^2 + m^2 + n^2 = 1
 
     Args:
+        aa (ApertureArray): Aperture array 'parent' object to use
         n_pix (int): Number of pixels in image
         abs_max (int): Maximum absolute values for l and m (default 1).
         nan_below_horizon (bool): If True, n is NaN below horizon.
@@ -60,9 +71,10 @@ def generate_weight_grid(aa, n_pix: int, abs_max: int=1, nan_below_horizon: bool
 
 
 def make_image(aa: ApertureArray, n_pix: int=128, update: bool=True, vis: str='data') -> np.array:
-    """ Make an image out of a beam grid
+    """Make an image out of a beam grid.
 
     Args:
+        aa (ApertureArray): Aperture array 'parent' object to use
         n_pix (int): Image size in pixels (N_pix x N_pix)
         update (bool): Rerun the grid generation (needed when image size changes).
         vis (str): Select visibilities to be either real data or model visibilities ('data' or 'model')
@@ -88,9 +100,10 @@ def make_image(aa: ApertureArray, n_pix: int=128, update: bool=True, vis: str='d
 
 def make_healpix(aa, n_side: int=128, fov: float=np.pi/2, update: bool=True, apply_mask: bool=True,
                     vis: str='data') -> np.array:
-    """ Generate a grid of beams on healpix coordinates
+    """Generate a grid of beams on healpix coordinates.
 
     Args:
+        aa (ApertureArray): Aperture array 'parent' object to use
         n_side (int): Healpix NSIDE array size
         fov (float): Field of view in radians, within which to generate healpix beams. Defaults to pi/2.
         apply_mask (bool): Apply mask for pixels that are below the horizon (default True)
@@ -172,7 +185,7 @@ def make_healpix(aa, n_side: int=128, fov: float=np.pi/2, update: bool=True, app
 ####################
 
 class AaImager(AaBaseModule):
-    """ ApertureArray Imaging module
+    """ApertureArray Imaging module.
 
     Provides the following functions:
     make_image()   - Make a 2D all-sky image (orthographic)
@@ -180,7 +193,7 @@ class AaImager(AaBaseModule):
 
     """
     def __init__(self, aa: ApertureArray):
-        """ Setup AaImager
+        """Setup AaImager.
 
         Args:
             aa (ApertureArray): Aperture array 'parent' object to use

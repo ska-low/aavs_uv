@@ -1,3 +1,4 @@
+"""conf: Sphinx configuration file."""
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -61,4 +62,5 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 def setup(app):
+    """Add CSS hack."""
     app.add_css_file('extra.css')

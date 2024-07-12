@@ -1,26 +1,24 @@
+"""converter: Command-line utility for file conversion."""
 import argparse
-import sys
-import os
-import time
 import glob
-
+import os
+import sys
+import time
 import warnings
-from loguru import logger
-import pprint
 
-from .parallelize import task, run_in_parallel
-from .utils import reset_logger, zipit, import_optional_dependency
-
-from astropy.time import Time, TimeDelta
 from aa_uv import __version__
-from aa_uv.utils import get_config_path
-from aa_uv.io import hdf5_to_pyuvdata,  hdf5_to_uvx, phase_to_sun, write_uvx
-from aa_uv.utils import load_yaml
+from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_uvx, phase_to_sun, write_uvx
+from aa_uv.utils import get_aa_config, load_yaml
+from astropy.time import Time, TimeDelta
+from loguru import logger
+
+from .parallelize import run_in_parallel, task
+from .utils import import_optional_dependency, reset_logger, zipit
 
 try:
     import_optional_dependency('ska_sdp_datamodels')
-    from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
     from aa_uv.io import hdf5_to_sdp_vis
+    from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 except ImportError:
     pass
 
@@ -37,7 +35,7 @@ EXT_LUT = {
 PYUVDATA_FORMATS = ('uvfits', 'miriad', 'mir', 'ms', 'uvh5')
 
 def parse_args(args):
-    """ Parse command-line arguments """
+    """Parse command-line arguments."""
     p = argparse.ArgumentParser(description="AAVS UV file conversion utility")
     p.add_argument("infile", help="Input filename")
     p.add_argument("outfile", help="Output filename")
@@ -125,9 +123,19 @@ def parse_args(args):
     return args
 
 
-def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context):
-    """ Convert a file """
+def convert_file(args: argparse.Namespace, fn_in: str, fn_out: str, array_config: str,
+                 output_format: str, conj: bool, context: dict):
+    """Convert a file.
 
+    Args:
+        args (argparse.Namespace): Namespace (output of argparse's parse_args() )
+        fn_in (str): Input filename
+        fn_out (str): Output filename
+        array_config (str): Path to array config directory
+        output_format (str): Output format, one of uvfits, miriad, mir, ms, uvh5, sdp, uvx
+        conj (bool): Apply conjugation to visibility data. Useful for matching UVW convention.
+        context (dict): Dictionary of additional metadata. Only supported by SDP and UVX formats.
+    """
     # Create subdirectories as needed
     if args.batch or args.megabatch:
         subdir = os.path.dirname(fn_out)
@@ -161,7 +169,7 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
             uv = hdf5_to_pyuvdata(fn_in, yaml_config=array_config, conj=conj, max_int=args.n_int_per_file, start_int=start_int)
 
             if args.phase_to_sun:
-                logger.info(f"Phasing to sun")
+                logger.info("Phasing to sun")
                 ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0]/2, format='sec')
                 uv = phase_to_sun(uv, ts0)
             tr = time.time() - tr0
@@ -200,6 +208,8 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
             del uv
 
     elif output_format == 'sdp':
+        import_optional_dependency('ska_sdp_datamodels', 'raise')
+
         tr0 = time.time()
         if context is not None:
             vis = hdf5_to_sdp_vis(fn_in, yaml_config=array_config, scan_intent=context['intent'], execblock_id=context['execution_block'])
@@ -226,7 +236,20 @@ def convert_file(args, fn_in, fn_out, array_config, output_format, conj, context
     return (fn_in, tr, tw)
 
 @task
-def convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, context, verbose):
+def convert_file_task(args: argparse.Namespace, fn_in: str, fn_out: str, array_config: str,
+                      output_format: str, conj: bool, context: dict, verbose: bool):
+    """Parallelizable task for file conversion.
+
+    Args:
+        args (argparse.Namespace): Namespace (output of argparse's parse_args() )
+        fn_in (str): Input filename
+        fn_out (str): Output filename
+        array_config (str): Path to array config directory
+        output_format (str): Output format, one of uvfits, miriad, mir, ms, uvh5, sdp, uvx
+        conj (bool): Apply conjugation to visibility data. Useful for matching UVW convention.
+        context (dict): Dictionary of additional metadata. Only supported by SDP and UVX formats.
+        verbose (bool): Turn on verbose mode
+    """
     if not verbose:
         # Silence warnings from other packages (e.g. pyuvdata)
         warnings.simplefilter("ignore")
@@ -234,7 +257,11 @@ def convert_file_task(args, fn_in, fn_out, array_config, output_format, conj, co
     convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
 
 def run(args=None):
-    """ Command-line utility for file conversion """
+    """Command-line utility for file conversion.
+
+    Args:
+        args (list): List of command line arguments to pass to convert_file().
+    """
     args = parse_args(args)
     config_error_found = False
 
@@ -247,10 +274,10 @@ def run(args=None):
 
     if args.telescope_name:
         logger.info(f"Telescope name: {args.telescope_name}")
-        array_config = get_config_path(args.telescope_name)
+        array_config = get_aa_config(args.telescope_name)
 
     if array_config is None:
-        logger.error(f"No telescope name or array config file passed. Please re-run with -n or -c flag set")
+        logger.error("No telescope name or array config file passed. Please re-run with -n or -c flag set")
         config_error_found = True
     else:
         if not os.path.exists(array_config):
@@ -331,7 +358,7 @@ def run(args=None):
 
         ######
         # Start inner main conversion loop -- (run on each file)
-        with warnings.catch_warnings() as wc:
+        with warnings.catch_warnings():
             if not args.verbose:
                 warnings.simplefilter("ignore")
                 logger.remove()

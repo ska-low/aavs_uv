@@ -1,20 +1,16 @@
-""" Simple profile script for loading of uvdata"""
-import pyuvdata
-import numpy as np
-from astropy.io import fits as pf
-from astropy.time import Time
-import pylab as plt
-from aa_uv.io import hdf5_to_pyuvdata
+"""Simple profile script for loading of uvdata."""
 import os
+
+from aa_uv.io import hdf5_to_pyuvdata
+from aa_uv.utils import get_aa_config, get_test_data
 
 # use eith er pyinstrument or cprofile
 USE_PYINSTRUMENT = False
 USE_CPROFILE     = True
 
 
-fn_h5 = 'test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
-fn_conf = '../src/aa_uv/config/aavs3/uv_config.yaml'
-
+fn_h5 = get_test_data('aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5')
+fn_conf = get_aa_config('aavs3')
 
 if __name__ == "__main__":
     import sys
@@ -38,16 +34,16 @@ if __name__ == "__main__":
 
             profiler.stop()
             profiler.print(show_all=False)
-            profiler.write_html('profiles/profile_read.html')
+            profiler.write_html('tests/profiles/profile_read.html')
 
             profiler.reset()
 
             print("---UVDATA to MS ---\n")
             profiler.start()
-            uv2.write_ms('test.ms')
+            uv2.write_ms('tests/test.ms')
             profiler.stop()
             profiler.print(show_all=False)
-            profiler.write_html('profiles/profile_write.html')
+            profiler.write_html('tests/profiles/profile_write.html')
 
         elif USE_CPROFILE:
             import cProfile
@@ -60,12 +56,14 @@ if __name__ == "__main__":
 
             print("--- UVDATA to MS ---\n")
             with cProfile.Profile() as profile:
-                uv2.write_miriad('test.miriad')
+                uv2.write_miriad('tests/test.miriad')
                 stats = pstats.Stats(profile).sort_stats('tottime')
                 stats.print_stats(100)
 
     except:
         raise
     finally:
-        if os.path.exists('test.ms'):
-            os.system('rm -rf test.ms')
+        if os.path.exists('tests/test.ms'):
+            os.system('rm -rf tests/test.ms')
+        if os.path.exists('tests/test.miriad'):
+            os.system('rm -rf tests/test.miriad')

@@ -1,19 +1,18 @@
+"""uvx: I/O tools for UVX data."""
+import aa_uv
 import h5py
-from loguru import logger
-import xarray as xp
-import pandas as pd
 import numpy as np
-
-from astropy.time import Time
-from astropy.coordinates import SkyCoord, EarthLocation
-
+import pandas as pd
+import xarray as xp
 from aa_uv.datamodel.uvx import UVX
 from aa_uv.utils import get_resource_path, load_yaml
-import aa_uv
+from astropy.coordinates import EarthLocation, SkyCoord
+from astropy.time import Time
+from loguru import logger
 
 
 def write_uvx(uv: UVX, filename: str):
-    """ Write a aavs UV object to a HDF5 file
+    """Write a aavs UV object to a HDF5 file.
 
     Args:
         uv (UVX): aa_uv.datamodel.UV object
@@ -52,10 +51,8 @@ def write_uvx(uv: UVX, filename: str):
         ####################
         g_vis = h.create_group('visibilities')
         g_vis_c = g_vis.create_group('coords')
-        g_vis_a = g_vis.create_group('attrs')
 
         _create_dset(g_vis, 'data', uv.data)
-        dims = ('time', 'frequency', 'baseline', 'polarization')
 
         # Time
         g_vis_time = g_vis['coords'].create_group('time')
@@ -144,7 +141,7 @@ def write_uvx(uv: UVX, filename: str):
 
 
 def read_uvx(filename: str) -> UVX:
-    """ Load aa_uv UVX object from uvx (HDF5) file
+    """Load aa_uv UVX object from uvx (HDF5) file.
 
     Args:
         filename (str): path to uvx file, or h5py.File
