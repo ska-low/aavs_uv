@@ -48,17 +48,32 @@ def run_in_parallel(task_list: list, n_workers: int=-1, show_progressbar=True, b
     """
     if backend == 'dask':
         from dask.distributed import LocalCluster
-        cluster = LocalCluster(n_workers=n_workers, threads_per_worker=1)
-        client = cluster.get_client()
+        with LocalCluster(n_workers=n_workers, threads_per_worker=1) as cluster, cluster.get_client() as client:
+            # Print dashboard details
+            logger = reset_logger(use_tqdm=True, level="INFO")
+            logger.info(f"Using dask LocalCluster(n_workers={n_workers}) backend")
+            logger.info(f"Dashboard running at {client.dashboard_link}")
 
-        # Print dashboard details
-        logger = reset_logger(use_tqdm=True, level="INFO")
-        logger.info(f"Using dask LocalCluster(n_workers={n_workers}) backend")
-        logger.info(f"Dashboard running at {client.dashboard_link}")
+            with joblib.parallel_backend(backend):
+                # Now switch back to silent / verbose mode
+                level = "INFO" if verbose else "WARNING"
+                logger = reset_logger(use_tqdm=True, level=level)
+                return Parallel(n_jobs=n_workers)(tqdm.tqdm(task_list))
 
-    with joblib.parallel_backend(backend):
+    elif backend == 'loky':
+        from joblib.externals.loky import get_reusable_executor
+        with joblib.parallel_backend(backend):
+            # Now switch back to silent / verbose mode
+            level = "INFO" if verbose else "WARNING"
+            logger = reset_logger(use_tqdm=True, level=level)
+            retval = Parallel(n_jobs=n_workers)(tqdm.tqdm(task_list))
 
-        # Now switch back to silent / verbose mode
-        level = "INFO" if verbose else "WARNING"
-        logger = reset_logger(use_tqdm=True, level=level)
-        return Parallel(n_jobs=n_workers)(tqdm.tqdm(task_list))
+        # Loky backend does not clean up jobs (on purpose)
+        # https://github.com/joblib/joblib/issues/945
+        # This causes issues with pytest.
+        # The line below manually kills workers for clean exit
+        get_reusable_executor().shutdown(wait=True)
+        return retval
+
+    else:
+        raise RuntimeError("Need to choose 'dask' or 'loky' as backend.")
