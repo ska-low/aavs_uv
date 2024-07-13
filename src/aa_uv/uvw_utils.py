@@ -24,20 +24,18 @@ def calc_zenith_apparent_coords(uv: UVX) -> tuple[np.ndarray, np.ndarray, np.nda
         seen by a perfect equatorial with its polar axis aligned to
         the Earth's axis of rotation.
     """
-    app_ras, app_decs = uvutils.transform_icrs_to_app(
-        uv.timestamps,
-        uv.phase_center.ra.to('rad').value,
-        uv.phase_center.dec.to('rad').value,
+    app_ras, app_decs = uvutils.phasing.transform_icrs_to_app(
+        time_array=uv.timestamps,
+        ra=uv.phase_center.ra.to('rad').value,
+        dec=uv.phase_center.dec.to('rad').value,
         telescope_loc=uv.origin,
-        epoch=2000.0,
-        pm_ra=None,
-        pm_dec=None,
-        vrad=None,
-        dist=None,
+        telescope_frame='itrs',
+        ellipsoid='SPHERE',
         astrometry_library=None,
     )
 
-    frame_pos_angle = uvutils.calc_frame_pos_angle(uv.timestamps.jd,
+    frame_pos_angle = uvutils.phasing.calc_frame_pos_angle(
+                                 time_array=uv.timestamps.jd,
                                  app_ra=app_ras,
                                  app_dec=app_decs,
                                  ref_frame='icrs',
@@ -62,8 +60,8 @@ def calc_uvw(uv: UVX) -> np.ndarray:
         location.
 
         The code uses methods from pyuvdata.utils, and does the following:
-            * Computes apparent RA and DEC values for phase center (uvutils.transform_icrs_to_app)
-            * Computes corresponding position angle for frame (uvutils.transform_icrs_to_app)
+            * Computes apparent RA and DEC values for phase center (uvutils.phasing.transform_icrs_to_app)
+            * Computes corresponding position angle for frame (uvutils.phasing.calc_frame_pos_angle)
             * Computes UVW coordinates (uvutils.calc_uvw)
 
     """
@@ -77,7 +75,7 @@ def calc_uvw(uv: UVX) -> np.ndarray:
     app_ras, app_decs, frame_pos_angle = calc_zenith_apparent_coords(uv)
 
     # And now we can compute UVWs
-    uvw = uvutils.calc_uvw(
+    uvw = uvutils.phasing.calc_uvw(
         app_ra=np.repeat(app_ras, n_bl),
         app_dec=np.repeat(app_decs, n_bl),
         lst_array=np.repeat(lst_rad, n_bl),
@@ -119,11 +117,12 @@ def calc_zenith_tracking_phase_corr(uv: UVX) -> np.ndarray:
 
     # Calculate tracked UVW (i.e. standard)
     tracking_uvw = calc_uvw(uv)
+    app_ras, app_decs, frame_pos_angle = calc_zenith_apparent_coords(uv)
 
     # Calculate non-tracked UVW
     # This differs from tracked as it uses non-apparent position (i.e. J2000)
     # for the phase center and a frame position angle = 0
-    non_tracking_uvw = uvutils.calc_uvw(
+    non_tracking_uvw = uvutils.phasing.calc_uvw(
         app_ra=np.repeat(uv.phase_center.ra.to('rad').value, n_bl * n_ts),
         app_dec=np.repeat(uv.phase_center.dec.to('rad').value, n_bl * n_ts),
         lst_array=np.repeat(lst_rad, n_bl),

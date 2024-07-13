@@ -82,10 +82,8 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
         'tsamp':          uvx.data.time.attrs['resolution'],
         'channel_width': uvx.data.frequency.attrs['channel_bandwidth'],
         'channel_spacing': uvx.data.frequency.attrs['channel_spacing'],
-        'flex_spw': False,
         'Nspws': 1,
         'Nphase': 1,
-        'future_array_shapes': False,
         'polarization_type': 'linear_crossed', # [XX, XY, YX, YY]
         'history': f"Generated with {__version__} at {Time(datetime.now()).iso}",
     }
@@ -106,9 +104,6 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
     uv.Nspws           = md['Nspws']
     uv.Nphase          = md['Nphase']
     uv.Ntimes          = md['n_integrations']
-    uv.channel_width   = md['channel_width']
-    uv.flex_spw        = md['flex_spw']
-    uv.future_array_shapes = md['future_array_shapes']
 
     uv.history         = md['history']
     uv.instrument      = md['instrument']
@@ -132,10 +127,16 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
     uv.ant_2_array       = np.tile(uvx.data.baseline.ant2, md['n_integrations'])
 
     # Create baseline array - note: overwrites baseline ordering file with pyuvdata standard.
-    uv.baseline_array    = uvutils.antnums_to_baseline(uv.ant_1_array, uv.ant_2_array, md['n_antennas'])
+    uv.baseline_array    = uvutils.antnums_to_baseline(uv.ant_1_array, uv.ant_2_array, Nants_telescope=md['n_antennas'])
 
     # Frequency axis
     uv.freq_array = uvx.data.frequency.values
+    # NOTE: channel_spacing is used for frequency delta. channel_width exists in metadata too as oversampled PFB
+    uv.channel_width   = np.repeat(md['channel_spacing'], uv.Nfreqs)
+
+    # Spectral window axis
+    uv.spw_array = np.array([0], dtype='int')
+    uv.flex_spw_id_array = np.repeat(0, uv.Nfreqs)
 
     # Polarization axis
     _pol_types = {
@@ -145,10 +146,6 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
         'circular': np.array([-1, -2, -3, -4])
     }
     uv.polarization_array = _pol_types['linear_crossed']
-
-    # Spectral window axis
-    uv.spw_array = np.array([0])
-    uv.flex_spw_id_array = np.array([0])
 
     # Time axis
     t = uvx.timestamps
@@ -181,7 +178,6 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
 
     # Compute zenith phase center
     zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'), obstime=t0, location=uvx.origin)
-    zen_sc = SkyCoord(zen_aa)
 
     phs_id = uv._add_phase_center(
         cat_name=f"zenith_at_jd{t0.jd}",
@@ -195,10 +191,24 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
         cat_id=0,
     )
 
+    # Apparent RA and DEC
+    app_ra  = lst_rad
+    app_dec = np.zeros_like(app_ra) + uvx.origin.geodetic.lat.to('rad').value
+    frame_pa = uvutils.phasing.calc_frame_pos_angle(
+                           time_array=t.jd,
+                           app_ra=app_ra,
+                           app_dec=app_dec,
+                           telescope_loc=uvx.origin,
+                           ref_frame='icrs',
+                           ref_epoch='J2000',
+                           telescope_frame='itrs',
+                           ellipsoid='SPHERE',
+                           )
+
     uv.phase_center_id_array  = np.zeros(uv.Nblts, dtype='int32') + phs_id
-    uv.phase_center_app_ra    = np.zeros(uv.Nblts, dtype='float64') + zen_sc.icrs.ra.rad
-    uv.phase_center_app_dec   = np.zeros(uv.Nblts, dtype='float64') + zen_sc.icrs.dec.rad
-    uv.phase_center_frame_pa  = np.zeros(uv.Nblts, dtype='float64')
+    uv.phase_center_app_ra    = np.zeros(uv.Nblts, dtype='float64') + app_ra
+    uv.phase_center_app_dec   = np.zeros(uv.Nblts, dtype='float64') + app_dec
+    uv.phase_center_frame_pa  = np.zeros(uv.Nblts, dtype='float64') + frame_pa
 
     # Next, load up data
     # Data have shape (time, freq, baseline, pol)
@@ -206,7 +216,7 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
     n_int = md['n_integrations']
     uv.data_array = uvx.data[start_int:(start_int + n_int)].values
     uv.data_array = np.transpose(uv.data_array, (0, 2, 1, 3)) # tfbp -> tbfp
-    uv.data_array = uv.data_array.reshape((uv.Nblts, uv.Nspws, uv.Nfreqs, uv.Npols))
+    uv.data_array = uv.data_array.reshape((uv.Nblts, uv.Nfreqs, uv.Npols))
 
     # HDF5 data are written as XX, XY, YX, YY (AIPS codes -5, -7, -8, -6)
     if md['polarization_type'].lower() == 'linear_crossed':
@@ -283,10 +293,6 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
     uv.Nspws           = md['Nspws']
     uv.Nphase          = md['Nphase']
     uv.Ntimes          = md['n_integrations']
-    uv.channel_width   = md['channel_spacing']  # NOTE: channel_spacing is used for frequency delta
-                                                # 'channel_width' exists in metadata, but not used here
-    uv.flex_spw        = md['flex_spw']
-    uv.future_array_shapes = md['future_array_shapes']
 
     uv.history         = md['history']
     uv.instrument      = md['instrument']
@@ -307,7 +313,7 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
     # Convert ENU locations to 'local' ECEF
     # Following https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/mwa_corr_fits.py#L1456
     antpos_ENU  = np.column_stack((df_ant['E'], df_ant['N'], df_ant['U']))
-    antpos_ECEF = uvutils.ECEF_from_ENU(antpos_ENU, *uv.telescope_location_lat_lon_alt) - uv.telescope_location
+    antpos_ECEF = uvutils.ECEF_from_ENU(antpos_ENU, telescope_earthloc) - uv.telescope_location
 
     # Now fill in antenna info fields
     uv.antenna_positions = antpos_ECEF
@@ -316,12 +322,18 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
     uv.ant_1_array       = np.tile(df_bl['ant1'].values, md['n_integrations'])
     uv.ant_2_array       = np.tile(df_bl['ant2'].values, md['n_integrations'])
     # Create baseline array - note: overwrites baseline ordering file with pyuvdata standard.
-    uv.baseline_array    = uvutils.antnums_to_baseline(uv.ant_1_array, uv.ant_2_array, md['n_antennas'])
+    uv.baseline_array    = uvutils.antnums_to_baseline(uv.ant_1_array, uv.ant_2_array, Nants_telescope=md['n_antennas'])
     #uv.baseline_array    = np.repeat(df_bl['baseline'].values, md['n_integrations'])
 
     # Frequency axis
     f0 = md['channel_spacing'] * md['channel_id']
-    uv.freq_array = np.array([[f0]])
+    uv.freq_array = np.array([f0])
+    # NOTE: channel_spacing is used for frequency delta. channel_width exists in metadata too as oversampled PFB
+    uv.channel_width   = np.repeat(md['channel_spacing'], uv.Nfreqs)
+
+    # Spectral window axis
+    uv.spw_array = np.array([0], dtype='int')
+    uv.flex_spw_id_array = np.repeat(0, uv.Nfreqs)
 
     # Polarization axis
     _pol_types = {
@@ -331,10 +343,6 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
         'circular': np.array([-1, -2, -3, -4])
     }
     uv.polarization_array = _pol_types[md['polarization_type'].lower()]
-
-    # Spectral window axis
-    uv.spw_array = np.array([0])
-    uv.flex_spw_id_array = np.array([0])
 
     # Time axis
     # Compute JD from unix time and LST - we can do this as we set an EarthLocation on t0 Time
@@ -368,8 +376,8 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
     uv.timesys = "UTC"
 
     # Compute zenith phase center
-    zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'), obstime=t0, location=t0.location)
-    zen_sc = SkyCoord(zen_aa)
+    zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'),
+                   obstime=t0, location=telescope_earthloc)
 
     phs_id = uv._add_phase_center(
         cat_name=f"zenith_at_jd{t0.jd}",
@@ -383,19 +391,33 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
         cat_id=0,
     )
 
+    # Apparent RA and DEC
+    app_ra  = uv.lst_array
+    app_dec = np.zeros_like(app_ra) + telescope_earthloc.geodetic.lat.to('rad').value
+    frame_pa = uvutils.phasing.calc_frame_pos_angle(
+                           time_array=t,
+                           app_ra=app_ra,
+                           app_dec=app_dec,
+                           telescope_loc=telescope_earthloc,
+                           ref_frame='icrs',
+                           ref_epoch='J2000',
+                           telescope_frame='itrs',
+                           ellipsoid='SPHERE',
+                           )
+
     uv.phase_center_id_array  = np.zeros(uv.Nblts, dtype='int32') + phs_id
-    uv.phase_center_app_ra    = np.zeros(uv.Nblts, dtype='float64') + zen_sc.icrs.ra.rad
-    uv.phase_center_app_dec   = np.zeros(uv.Nblts, dtype='float64') + zen_sc.icrs.dec.rad
-    uv.phase_center_frame_pa  = np.zeros(uv.Nblts, dtype='float64')
+    uv.phase_center_app_ra    = np.zeros(uv.Nblts, dtype='float64') + app_ra
+    uv.phase_center_app_dec   = np.zeros(uv.Nblts, dtype='float64') + app_dec
+    uv.phase_center_frame_pa  = np.zeros(uv.Nblts, dtype='float64') + frame_pa
 
     # Next, load up data
     with h5py.File(filename, mode='r') as datafile:
-        # Data have shape (nint, nbaseline, nspw, npol)
-        # Need to flatten to (nbaseline * nint (Nblts), nspw, nchan, npol)
+        # Data have shape (nint, nbaseline, nchan, npol)
+        # Need to flatten to (nbaseline * nint (Nblts), nchan, npol)
         n_int = md['n_integrations']
         data = datafile['correlation_matrix']['data'][start_int:(start_int + n_int)]
         #uv.data_array = np.transpose(data, (0, 2, 1, 3))
-        uv.data_array = data.reshape((uv.Nblts, uv.Nspws, uv.Nfreqs, uv.Npols))
+        uv.data_array = data.reshape((uv.Nblts, uv.Nfreqs, uv.Npols))
 
         # HDF5 data are written as XX, XY, YX, YY (AIPS codes -5, -7, -8, -6)
         if md['polarization_type'].lower() == 'linear_crossed':

@@ -22,28 +22,26 @@ def test_uvw():
     lst_rad = (uv.data.time.lst / 12 * np.pi).values
 
     # Compute apparent RA and DECs
-    app_ras, app_decs = uvutils.transform_icrs_to_app(
-        uv.timestamps,
-        uv.phase_center.ra.to('rad').value,
-        uv.phase_center.dec.to('rad').value,
+    app_ras, app_decs = uvutils.phasing.transform_icrs_to_app(
+        time_array=uv.timestamps,
+        ra=uv.phase_center.ra.to('rad').value,
+        dec=uv.phase_center.dec.to('rad').value,
         telescope_loc=uv.origin,
-        epoch=2000.0,
-        pm_ra=None,
-        pm_dec=None,
-        vrad=None,
-        dist=None,
+        telescope_frame='itrs',
+        ellipsoid='SPHERE',
         astrometry_library=None,
     )
 
     # Now compute position angle
-    frame_pos_angle = uvutils.calc_frame_pos_angle(uv.timestamps.jd,
+    frame_pos_angle = uvutils.phasing.calc_frame_pos_angle(
+                                 time_array=uv.timestamps.jd,
                                  app_ra=app_ras,
                                  app_dec=app_decs,
                                  ref_frame='icrs',
                                  telescope_loc=uv.origin)
 
     # And now we can compute UVWs
-    uvw = uvutils.calc_uvw(
+    uvw = uvutils.phasing.calc_uvw(
         app_ra=np.repeat(app_ras, n_bl),
         app_dec=np.repeat(app_decs, n_bl),
         lst_array=np.repeat(lst_rad, n_bl),

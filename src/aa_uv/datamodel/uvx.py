@@ -80,12 +80,10 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
     """
     uvx_schema = load_yaml(get_resource_path('datamodel/uvx.yaml'))
 
-    lat_rad = eloc.lat.to('rad').value
-    lon_rad = eloc.lon.to('rad').value
     x0, y0, z0 = [_.to('m').value for _ in eloc.to_geocentric()]
 
     antpos_enu   = np.column_stack((antpos['E'], antpos['N'], antpos['U']))
-    antpos_ecef  = uvutils.ECEF_from_ENU(antpos_enu, lat_rad, lon_rad, eloc.height)  - (x0, y0, z0)
+    antpos_ecef  = uvutils.ECEF_from_ENU(antpos_enu, eloc)  - (x0, y0, z0)
 
     # Check if flags in antpos, otherwise add column
     if 'flagged' not in antpos.columns:
