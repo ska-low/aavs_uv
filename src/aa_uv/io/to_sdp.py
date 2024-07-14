@@ -2,7 +2,8 @@
 import numpy as np
 import pandas as pd
 from aa_uv.io.to_uvx import hdf5_to_uvx
-from aa_uv.uvw_utils import calc_uvw, calc_zenith_tracking_phase_corr
+from aa_uv.uvw_utils import calc_uvw
+from astropy.constants import c
 from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 from pyuvdata import UVData
@@ -10,6 +11,7 @@ from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model import PolarisationFrame, ReceptorFrame
 from ska_sdp_datamodels.visibility import Visibility
 
+LIGHT_SPEED = c.value
 
 def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None, conj: bool=True,
                     scan_id: int=0, scan_intent: str="", execblock_id: str="", flip_uvw=True,
@@ -81,7 +83,12 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None
 
     # Load data from file
     vis_data = uv.data.transpose('time', 'baseline', 'frequency', 'polarization').values
-    phs_corr = calc_zenith_tracking_phase_corr(uv)
+
+    # Apply phasing correction
+    w = uvw[..., 2]
+    Δt = w * (1 / LIGHT_SPEED)
+    pol_dummy_axis = np.ones(vis_data.shape[-1])
+    phs_corr = np.exp(1j * 2 * np.pi * np.einsum('tb,f,p->tbfp', Δt, fc, pol_dummy_axis))
 
     if apply_phasing:
         vis_data *= phs_corr

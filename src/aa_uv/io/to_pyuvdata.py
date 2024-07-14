@@ -235,13 +235,13 @@ def uvx_to_pyuvdata(uvx: UVX, phase_to_t0: bool=True,
     uv.uvw_array = np.zeros((uv.Nblts, 3), dtype='float64')
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        uv.set_uvws_from_antenna_positions(update_vis=False)
-
-    # We have phased to Zenith, but pyuvdata's UVFITS writer needs data to be phased
-    # to the zenith of the first timestamp. So, we do this by default
-    if phase_to_t0:
-        phase_time = Time(uv.time_array[0], format="jd")
-        uv.phase_to_time(phase_time)
+        # Pyuvdata's UVFITS writer needs data to be phased
+        # to the zenith of the first timestamp. So, we do this by default
+        if phase_to_t0:
+            phase_time = Time(uv.time_array[0], format="jd")
+            uv.phase_to_time(phase_time, use_ant_pos=True)
+        else:
+            uv.set_uvws_from_antenna_positions(update_vis=False)
 
     return uv
 
@@ -440,12 +440,12 @@ def hdf5_to_pyuvdata(filename: str, yaml_config: str=None, telescope_name: str=N
     uv.uvw_array = np.zeros((uv.Nblts, 3), dtype='float64')
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        uv.set_uvws_from_antenna_positions(update_vis=False)
-
-        # We have phased to Zenith, but pyuvdata's UVFITS writer needs data to be phased
+        # Pyuvdata's UVFITS writer needs data to be phased
         # to the zenith of the first timestamp. So, we do this by default
         if phase_to_t0:
             phase_time = Time(uv.time_array[0], format="jd")
             uv.phase_to_time(phase_time, use_ant_pos=True)
+        else:
+            uv.set_uvws_from_antenna_positions(update_vis=False)
 
     return uv
