@@ -154,7 +154,7 @@ def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock
     t = Time(uv.time_array[::uv.Nbls], format='jd', location=telescope_earthloc)
 
     # Setup frequency
-    f_c  = uv.freq_array[0]   # TODO: handle multiple spectral windows
+    f_c  = uv.freq_array
     f_bw = np.ones_like(f_c) * uv.channel_width
 
     if len(uv.freq_array) > 1:
