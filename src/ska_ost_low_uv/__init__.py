@@ -1,5 +1,4 @@
-"""Top-level package for ska-ost-low-uv."""
+"""Root __init__ for package."""
+import importlib.metadata
 
-__author__ = """Daniel Price"""
-__email__ = "daniel.price@skao.int"
-__version__ = "0.0.0"
+__version__= importlib.metadata.version("ska_ost_low_uv")
