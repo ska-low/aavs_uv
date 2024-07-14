@@ -25,9 +25,8 @@ def test_uvdata_to_sdp_vis():
 
     v2 = hdf5_to_sdp_vis(FN_RAW, yaml_config=YAML_RAW, apply_phasing=True)
 
-    # Check that data are complex conjugate of each other
     print("---")
-    print(v.vis.values[0,1])
+    print(v.vis.values[0, 1])
     print("---")
     print(v2.vis.values[0, 1])
     print("---")

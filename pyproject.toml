@@ -11,6 +11,10 @@ include = [
   { path = "datamodel"}
 ]
 
+[build-system]
+requires = ["poetry-core>=1.2.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry.dependencies]
 python = ">=3.10"
 astropy = ">=5.3"
@@ -76,12 +80,8 @@ convention = "google"
 [tool.ruff.format]
 quote-style = "double"
 
-[build-system]
-requires = ["poetry-core>=1.2.0"]
-build-backend = "poetry.core.masonry.api"
-
 [tool.pytest.ini_options]
 addopts = "--cov=aa_uv --cov-report html --nbmake"
 # To regenerate test images, add this argument:
 # --mpl-generate-path=tests/baseline
-testpaths = ["tests"]
+testpaths = ["tests", "notebooks"]

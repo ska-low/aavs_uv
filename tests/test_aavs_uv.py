@@ -223,9 +223,9 @@ def test_max_int_start_int():
     uv0 = hdf5_to_pyuvdata(fn_in, telescope_name='aavs2', max_int=1, start_int=0)
     uv1 = hdf5_to_pyuvdata(fn_in, telescope_name='aavs2', max_int=1, start_int=1)
 
-    assert uv.data_array.shape  == (32896*2, 1, 1, 4)
-    assert uv0.data_array.shape == (32896, 1, 1, 4)
-    assert uv1.data_array.shape == (32896, 1, 1, 4)
+    assert uv.data_array.shape  == (32896*2, 1, 4)
+    assert uv0.data_array.shape == (32896, 1, 4)
+    assert uv1.data_array.shape == (32896, 1, 4)
 
     assert np.allclose(uv0.data_array[0], uv.data_array[0])
     assert np.allclose(uv1.data_array[0], uv.data_array[32896])
