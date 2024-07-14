@@ -1,9 +1,9 @@
 """test_converter: test data conversion utils."""
 import os
 
-from aa_uv.converter import parse_args, run
-from aa_uv.io import read_uvx
-from aa_uv.utils import get_resource_path, get_test_data
+from ska_ost_low_uv.converter import parse_args, run
+from ska_ost_low_uv.io import read_uvx
+from ska_ost_low_uv.utils import get_resource_path, get_test_data
 
 
 def test_converter():
@@ -158,7 +158,7 @@ def test_context():
         run(cmd)
         uv = read_uvx("tests/test.uvx5")
         print(uv.context)
-        assert(uv.context['intent'] == "Test routine for aa_uv package")
+        assert(uv.context['intent'] == "Test routine for ska_ost_low_uv package")
     finally:
         if os.path.exists("tests/test.sdp"):
             os.remove("tests/test.sdp")

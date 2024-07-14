@@ -4,8 +4,8 @@ from __future__ import annotations
 import typing
 
 import numpy as np
-from aa_uv.postx.coords.coord_utils import phase_vector, skycoord_to_lmn
-from aa_uv.postx.imaging.aa_imaging import SPEED_OF_LIGHT
+from ska_ost_low_uv.postx.coords.coord_utils import phase_vector, skycoord_to_lmn
+from ska_ost_low_uv.postx.imaging.aa_imaging import SPEED_OF_LIGHT
 from astropy.coordinates import AltAz, Angle, SkyCoord
 from astropy.coordinates import get_sun as astropy_get_sun
 

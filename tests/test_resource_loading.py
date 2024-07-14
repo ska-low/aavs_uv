@@ -1,5 +1,5 @@
 """Test_resource_loading: Test file path resolution tools."""
-from aa_uv.utils import get_aa_config, get_resource_path
+from ska_ost_low_uv.utils import get_aa_config, get_resource_path
 
 
 def test_resource_loading():

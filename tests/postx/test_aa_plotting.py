@@ -1,9 +1,9 @@
 """Test aa_plotter plotting routines."""
 import pylab as plt
 import pytest
-from aa_uv.io import hdf5_to_uvx
-from aa_uv.postx import ApertureArray
-from aa_uv.utils import get_test_data
+from ska_ost_low_uv.io import hdf5_to_uvx
+from ska_ost_low_uv.postx import ApertureArray
+from ska_ost_low_uv.utils import get_test_data
 
 uvx = hdf5_to_uvx(get_test_data('aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'), telescope_name='aavs2')
 aa = ApertureArray(uvx)

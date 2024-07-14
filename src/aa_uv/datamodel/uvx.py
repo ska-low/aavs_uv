@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pyuvdata.utils as uvutils
 import xarray as xp
-from aa_uv.utils import get_resource_path, get_software_versions, load_yaml
+from ska_ost_low_uv.utils import get_resource_path, get_software_versions, load_yaml
 from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
@@ -41,7 +41,7 @@ def create_empty_context_dict():
 def create_empty_provenance_dict():
     """Create a provenance dict with default keys."""
     provenance = {
-        'aa_uv_config': get_software_versions(),
+        'ska_ost_low_uv_config': get_software_versions(),
         'input_files': {},
         'input_metadata': {}
     }

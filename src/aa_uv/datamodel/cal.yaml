@@ -49,6 +49,6 @@ cal/coords/antenna:
 cal/provenance:
   description: History and data provenance information.
   hdf5_type: group
-cal/provenance/aa_uv_config:
+cal/provenance/ska_ost_low_uv_config:
   description: Software versions used in file generation.
   hdf5_type: group

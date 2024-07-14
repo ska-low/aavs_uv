@@ -1,7 +1,7 @@
-"""test_sdp: test aa_uv.io SDP read/write."""
+"""test_sdp: test ska_ost_low_uv.io SDP read/write."""
 import numpy as np
-from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, uvdata_to_sdp_vis
-from aa_uv.utils import get_aa_config, get_test_data
+from ska_ost_low_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, uvdata_to_sdp_vis
+from ska_ost_low_uv.utils import get_aa_config, get_test_data
 
 YAML_RAW = get_aa_config('aavs2')
 FN_RAW   = get_test_data('aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5')

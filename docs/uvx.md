@@ -91,7 +91,7 @@ Antenna locations are stored as an xarray `Dataset`, relative to the `UVX.origin
 
 ### HDF5 specification
 
-UVX can be stored in HDF5 using the `aa_uv.io.write_uvx` method, and retrieved using `aa_uv.io.read_uvx`. So that the data are self-documenting (that is, within the HDF5 abstract data model), descriptions for each dataset and group are written, based on the schema in `aa_uv/datamodel/uvx.yaml`:
+UVX can be stored in HDF5 using the `ska_ost_low_uv.io.write_uvx` method, and retrieved using `ska_ost_low_uv.io.read_uvx`. So that the data are self-documenting (that is, within the HDF5 abstract data model), descriptions for each dataset and group are written, based on the schema in `ska_ost_low_uv/datamodel/uvx.yaml`:
 
 ```yaml
 uvx:
@@ -242,7 +242,7 @@ uvx/phase_center/dec:
 uvx/provenance:
   description: History and data provenance information.
   hdf5_type: group
-uvx/provenance/aa_uv_config:
+uvx/provenance/ska_ost_low_uv_config:
   description: Software versions used in file generation.
   hdf5_type: group
 uvx/provenance/input_files:

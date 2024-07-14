@@ -4,16 +4,16 @@ import os
 import h5py
 import numpy as np
 import pandas as pd
-from aa_uv import __version__ as aa_uv_version
-from aa_uv.datamodel.uvx import (
+from ska_ost_low_uv import __version__ as ska_ost_low_uv_version
+from ska_ost_low_uv.datamodel.uvx import (
     UVX,
     create_antenna_data_array,
     create_empty_context_dict,
     create_empty_provenance_dict,
     create_visibility_array,
 )
-from aa_uv.io.mccs_yaml import station_location_from_platform_yaml
-from aa_uv.utils import get_aa_config, get_software_versions, load_yaml
+from ska_ost_low_uv.io.mccs_yaml import station_location_from_platform_yaml
+from ska_ost_low_uv.utils import get_aa_config, get_software_versions, load_yaml
 from astropy.coordinates import AltAz, Angle, EarthLocation, SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
@@ -26,7 +26,7 @@ def load_observation_metadata(filename: str, yaml_config: str=None, load_config:
     Args:
         filename (str): Path to HDF5 file
         yaml_config (str): Path to YAML station configuration file
-        load_config (str): Name of config to load from aa_uv package
+        load_config (str): Name of config to load from ska_ost_low_uv package
 
     Notes:
         One of either `yaml_config` or `load_config` should be set. If `yaml_config`
@@ -42,7 +42,7 @@ def load_observation_metadata(filename: str, yaml_config: str=None, load_config:
     md_yaml = load_yaml(yaml_config)
     md.update(md_yaml)
 
-    md['history'] = f'Created with aa_uv {aa_uv_version}'
+    md['history'] = f'Created with ska_ost_low_uv {ska_ost_low_uv_version}'
 
     # Update path to antenna location files to use absolute path
     config_abspath = os.path.dirname(os.path.abspath(yaml_config))
@@ -87,7 +87,7 @@ def hdf5_to_uvx(fn_data: str, telescope_name: str=None,
         from_platform_yaml (bool=False): If true, uv_config.yaml setting 'antenna_locations'
                                          points to a mccs_platform.yaml file. Otherwise, a
                                          simple CSV text file is used.
-        telescope_name (str=None): If set, aa_uv will try and use internal config file
+        telescope_name (str=None): If set, ska_ost_low_uv will try and use internal config file
                                    for telescope_name, e.g. 'aavs2' or 'aavs3'
         conj (bool): Conjugate visibility data (default True).
         context (dict): Dictionary with observation context information
@@ -167,7 +167,7 @@ def hdf5_to_uvx(fn_data: str, telescope_name: str=None,
                             'data_filename': os.path.abspath(fn_data),
                             'config_filename': md['station_config_file'],
                             },
-                    'aa_uv_config': get_software_versions(),
+                    'ska_ost_low_uv_config': get_software_versions(),
                     'input_metadata': md})
 
         # Include observation_info attributes, which includes firmware and software versions

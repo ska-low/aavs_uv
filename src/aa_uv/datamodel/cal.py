@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import xarray as xp
-from aa_uv.utils import get_resource_path, get_software_versions, load_yaml
+from ska_ost_low_uv.utils import get_resource_path, get_software_versions, load_yaml
 from astropy.units import Quantity
 
 
@@ -38,7 +38,7 @@ class UVXAntennaCal:
 def create_provenance_dict():
     """Create a provenance dict, fill in software versions."""
     provenance = {
-        'aa_uv_config': get_software_versions()
+        'ska_ost_low_uv_config': get_software_versions()
     }
     return provenance
 
@@ -161,7 +161,7 @@ def create_uvx_antenna_cal(telescope: str, method: str,
 
     # Create empty provenance dictionary if not passed, then fill with creation info
     provenance = create_provenance_dict() if provenance is None else provenance
-    provenance.update({'aa_uv_config': get_software_versions()})
+    provenance.update({'ska_ost_low_uv_config': get_software_versions()})
 
     uvx_cal = UVXAntennaCal(telescope=telescope,
                             method=method,

@@ -6,9 +6,9 @@ import sys
 import time
 import warnings
 
-from aa_uv import __version__
-from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_uvx, phase_to_sun, write_uvx
-from aa_uv.utils import get_aa_config, load_yaml
+from ska_ost_low_uv import __version__
+from ska_ost_low_uv.io import hdf5_to_pyuvdata, hdf5_to_uvx, phase_to_sun, write_uvx
+from ska_ost_low_uv.utils import get_aa_config, load_yaml
 from astropy.time import Time, TimeDelta
 from loguru import logger
 
@@ -17,7 +17,7 @@ from .utils import import_optional_dependency, reset_logger, zipit
 
 try:
     import_optional_dependency('ska_sdp_datamodels')
-    from aa_uv.io import hdf5_to_sdp_vis
+    from ska_ost_low_uv.io import hdf5_to_sdp_vis
     from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 except ImportError:
     pass
@@ -45,11 +45,11 @@ def parse_args(args):
                    required=True)
     p.add_argument("-c",
                    "--array_config",
-                   help="Array configuration YAML file. If supplied, will override aa_uv internal array configs.",
+                   help="Array configuration YAML file. If supplied, will override ska_ost_low_uv internal array configs.",
                    required=False)
     p.add_argument("-n",
                    "--telescope_name",
-                   help="Telescope name, e.g. 'aavs3'. If supplied, will attempt to use aa_uv internal array config.",
+                   help="Telescope name, e.g. 'aavs3'. If supplied, will attempt to use ska_ost_low_uv internal array config.",
                    required=False)
     p.add_argument("-s",
                    "--phase-to-sun",
@@ -267,7 +267,7 @@ def run(args=None):
 
     # Reset logger
     reset_logger()
-    logger.info(f"aa_uv {__version__}")
+    logger.info(f"ska_ost_low_uv {__version__}")
 
     # Load array configuration
     array_config = args.array_config

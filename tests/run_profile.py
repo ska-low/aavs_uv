@@ -1,8 +1,8 @@
 """Simple profile script for loading of uvdata."""
 import os
 
-from aa_uv.io import hdf5_to_pyuvdata
-from aa_uv.utils import get_aa_config, get_test_data
+from ska_ost_low_uv.io import hdf5_to_pyuvdata
+from ska_ost_low_uv.utils import get_aa_config, get_test_data
 
 # use eith er pyinstrument or cprofile
 USE_PYINSTRUMENT = False

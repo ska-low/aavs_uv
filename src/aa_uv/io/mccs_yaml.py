@@ -3,7 +3,7 @@ from operator import itemgetter
 
 import numpy as np
 import pandas as pd
-from aa_uv.utils import load_yaml
+from ska_ost_low_uv.utils import load_yaml
 from astropy.coordinates import EarthLocation
 
 

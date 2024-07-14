@@ -2,11 +2,11 @@
 import os
 
 import pytest
-from aa_uv.io import hdf5_to_uvx
-from aa_uv.postx import ApertureArray
-from aa_uv.postx.aa_viewer import AllSkyViewer
-from aa_uv.postx.sky_model import generate_skycat, sun_model
-from aa_uv.utils import get_test_data
+from ska_ost_low_uv.io import hdf5_to_uvx
+from ska_ost_low_uv.postx import ApertureArray
+from ska_ost_low_uv.postx.aa_viewer import AllSkyViewer
+from ska_ost_low_uv.postx.sky_model import generate_skycat, sun_model
+from ska_ost_low_uv.utils import get_test_data
 from astropy.coordinates import SkyCoord
 
 

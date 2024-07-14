@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 import pyuvdata.utils as uvutils
-from aa_uv.datamodel.uvx import (
+from ska_ost_low_uv.datamodel.uvx import (
     UVX,
     create_antenna_data_array,
     create_empty_context_dict,

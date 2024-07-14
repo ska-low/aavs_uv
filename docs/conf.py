@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'aa_uv'
+project = 'ska_ost_low_uv'
 copyright = '2024, SKAO'
 author = 'Danny C. Price'
 

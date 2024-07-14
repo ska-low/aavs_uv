@@ -1,7 +1,7 @@
 """test_postx_coord_utils: test coordinate utilities in postx."""
 import healpy as hp
 import numpy as np
-from aa_uv.postx.coords.coord_utils import hpix2sky, sky2hpix
+from ska_ost_low_uv.postx.coords.coord_utils import hpix2sky, sky2hpix
 
 
 def test_pix2sky():

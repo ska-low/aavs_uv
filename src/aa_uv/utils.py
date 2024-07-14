@@ -1,4 +1,4 @@
-"""utils: Utilities used in aa_uv package."""
+"""utils: Utilities used in ska_ost_low_uv package."""
 import importlib
 import os
 import shutil
@@ -6,7 +6,7 @@ import sys
 import types
 import typing
 
-import aa_uv
+import ska_ost_low_uv
 import yaml
 from loguru import logger
 from tqdm import tqdm
@@ -68,7 +68,7 @@ def get_resource_path(relative_path: str) -> str:
     Returns:
         abs_path (str): Absolute path to the data file
     """
-    path_root = os.path.abspath(aa_uv.__path__[0])
+    path_root = os.path.abspath(ska_ost_low_uv.__path__[0])
     abs_path = os.path.join(path_root, relative_path)
 
     if not os.path.exists(abs_path):
@@ -94,7 +94,7 @@ def get_aa_config(name: str) -> str:
 
 def get_software_versions() -> dict:
     """Return version of main software packages."""
-    from aa_uv import __version__ as aa_uv_version
+    from ska_ost_low_uv import __version__ as ska_ost_low_uv_version
     from astropy import __version__ as astropy_version
     from erfa import __version__ as erfa_version
     from h5py import __version__ as h5py_version
@@ -104,7 +104,7 @@ def get_software_versions() -> dict:
     from xarray import __version__ as xarray_version
 
     software = {
-        'aa_uv': aa_uv_version,
+        'ska_ost_low_uv': ska_ost_low_uv_version,
         'astropy': astropy_version,
         'numpy': numpy_version,
         'pyuvdata': pyuvdata_version,

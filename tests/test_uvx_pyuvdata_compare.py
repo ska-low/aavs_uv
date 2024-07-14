@@ -1,8 +1,8 @@
 """test_uvx_pyuvdata_compare: roundtrip comparisons between UVX and UVData."""
 import numpy as np
-from aa_uv.io import hdf5_to_uvx
-from aa_uv.io.to_pyuvdata import hdf5_to_pyuvdata, uvx_to_pyuvdata
-from aa_uv.utils import get_test_data
+from ska_ost_low_uv.io import hdf5_to_uvx
+from ska_ost_low_uv.io.to_pyuvdata import hdf5_to_pyuvdata, uvx_to_pyuvdata
+from ska_ost_low_uv.utils import get_test_data
 
 
 def test_compare_uv_paths():

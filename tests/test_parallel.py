@@ -5,7 +5,7 @@ Hence it being in a folder starting with a z_, so it runs last.
 """
 import time
 
-from aa_uv.parallelize import run_in_parallel, task
+from ska_ost_low_uv.parallelize import run_in_parallel, task
 
 
 @task

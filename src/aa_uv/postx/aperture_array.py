@@ -1,7 +1,7 @@
 """aperture_array: Basic antenna array geometry class."""
 import numpy as np
-from aa_uv.datamodel import UVX, UVXAntennaCal
-from aa_uv.vis_utils import vis_arr_to_matrix_4pol
+from ska_ost_low_uv.datamodel import UVX, UVXAntennaCal
+from ska_ost_low_uv.vis_utils import vis_arr_to_matrix_4pol
 from astropy.units import Quantity
 from loguru import logger
 from pygdsm import init_observer

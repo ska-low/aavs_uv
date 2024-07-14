@@ -9,10 +9,10 @@ import numpy as np
 import pandas as pd
 import pyuvdata
 import pyuvdata.utils as uvutils
-from aa_uv import __version__
-from aa_uv.datamodel import UVX
-from aa_uv.io.to_uvx import load_observation_metadata
-from aa_uv.utils import get_resource_path, load_yaml
+from ska_ost_low_uv import __version__
+from ska_ost_low_uv.datamodel import UVX
+from ska_ost_low_uv.io.to_uvx import load_observation_metadata
+from ska_ost_low_uv.utils import get_resource_path, load_yaml
 from astropy.coordinates import AltAz, Angle, EarthLocation, SkyCoord, get_sun
 
 # Astropy + pyuvdata

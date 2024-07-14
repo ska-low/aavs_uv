@@ -3,8 +3,8 @@ import os
 
 import h5py
 import numpy as np
-from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis
-from aa_uv.utils import get_test_data
+from ska_ost_low_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis
+from ska_ost_low_uv.utils import get_test_data
 from astropy.constants import c
 from ska_sdp_datamodels.visibility import (
     convert_hdf_to_visibility,

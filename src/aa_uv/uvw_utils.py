@@ -1,6 +1,6 @@
 """uvw_utils: Utilities for UVW coordinates."""
 import numpy as np
-from aa_uv.datamodel import UVX
+from ska_ost_low_uv.datamodel import UVX
 from astropy.constants import c
 from pyuvdata import utils as uvutils
 
@@ -48,7 +48,7 @@ def calc_uvw(uv: UVX) -> np.ndarray:
     """Calculate the UVW coordinates for a UV array.
 
     Args:
-        uv (UVX): aa_uv UVX object
+        uv (UVX): ska_ost_low_uv UVX object
 
     Returns:
         uvw (np.ndarray): Numpy array of UVW coordinates, in meters.

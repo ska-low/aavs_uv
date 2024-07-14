@@ -8,7 +8,7 @@ of your choosing. Currently supported:
 * [UVFITS](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://library.nrao.edu/public/memos/aips/memos/AIPSM_117.pdf&ved=2ahUKEwiU8NDPzIyGAxVGcvUHHaCbDHYQFnoECBgQAQ&usg=AOvVaw20kSnIm25f6jj2-xvR-KWS)
 * [MIRIAD](https://www.atnf.csiro.au/computing/software/miriad/doc/userguide/userhtml.html)
 * CASA [MeasurementSet](https://casadocs.readthedocs.io/en/stable/notebooks/casa-fundamentals.html#MeasurementSet-v2)
-* The `aa_uv` [UVX](/uvx.html) format
+* The `ska_ost_low_uv` [UVX](/uvx.html) format
 * The [SDP Visibility format](https://developer.skao.int/projects/ska-sdp-datamodels/en/latest/api/ska_sdp_datamodels.visibility.Visibility.html#ska_sdp_datamodels.visibility.Visibility) (from `ska-sdp-datamodels`).
 
 
@@ -30,9 +30,9 @@ options:
                         Output file format (uvx, uvfits, miriad, ms, uvh5, sdp). Can be comma separated for multiple
                         formats.
   -c ARRAY_CONFIG, --array_config ARRAY_CONFIG
-                        Array configuration YAML file. If supplied, will override aa_uv internal array configs.
+                        Array configuration YAML file. If supplied, will override ska_ost_low_uv internal array configs.
   -n TELESCOPE_NAME, --telescope_name TELESCOPE_NAME
-                        Telescope name, e.g. 'aavs3'. If supplied, will attempt to use aa_uv internal array config.
+                        Telescope name, e.g. 'aavs3'. If supplied, will attempt to use ska_ost_low_uv internal array config.
   -s, --phase-to-sun    Re-phase to point toward Sun (the sun must be visible!). If flag not set, data will be phased
                         toward zenith.
   -j, --no_conj         Do not conjugate visibility data (note AAVS2 and AAVS3 require conjugation)

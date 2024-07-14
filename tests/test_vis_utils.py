@@ -1,7 +1,7 @@
 """test_vis_utils: Test visibility utilities."""
 import numpy as np
 import pytest
-from aa_uv.vis_utils import vis_arr_to_matrix, vis_arr_to_matrix_4pol
+from ska_ost_low_uv.vis_utils import vis_arr_to_matrix, vis_arr_to_matrix_4pol
 
 
 def test_vis_arr_to_matrix():

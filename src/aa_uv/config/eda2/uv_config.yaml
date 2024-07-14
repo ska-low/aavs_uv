@@ -1,7 +1,7 @@
 # UVData configuration for pyuvdata
 # This should only include values that aren't derived from data shape
 # https://pyuvdata.readthedocs.io/en/latest/uvdata.html#required
-history: Created from aa_uv config/eda2/uv_config.yaml
+history: Created from ska_ost_low_uv config/eda2/uv_config.yaml
 instrument: eda2
 telescope_name: eda2
 # From https://gitlab.com/ska-telescope/mccs/ska-low-mccs/-/blob/main/tmdata/instrument/mccs-configuration/station_export_w2.json?ref_type=heads

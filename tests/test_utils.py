@@ -3,7 +3,7 @@ import os
 import shutil
 
 import pytest
-from aa_uv.utils import import_optional_dependency, zipit
+from ska_ost_low_uv.utils import import_optional_dependency, zipit
 
 
 def test_zipit():

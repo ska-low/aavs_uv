@@ -5,7 +5,7 @@ in its basic HDF5 format to a more complete UV file format (e.g. UVFITS) using `
 
 Basic usage:
 ```python
-from aa_uv import hdf5_to_pyuvdata
+from ska_ost_low_uv import hdf5_to_pyuvdata
 
 # Use internal AAVS2 location
 uv = hdf5_to_pyuvdata('input_data.hdf5', telescope_name='aavs2')

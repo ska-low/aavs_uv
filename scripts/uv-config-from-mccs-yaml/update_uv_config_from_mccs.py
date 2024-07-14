@@ -1,13 +1,13 @@
 """Update UV config from MCCS YAML.
 
 * Retrieves the lasest ska-low-deployment git repository (where station YAML files are located)
-* Generates aa_uv's internally-used UV Configuration for a station
-* Copies these over to aa_uv/src/aa_uv/config
+* Generates ska_ost_low_uv's internally-used UV Configuration for a station
+* Copies these over to ska_ost_low_uv/src/ska_ost_low_uv/config
 """
 import os
 from datetime import datetime
 
-from aa_uv.io.mccs_yaml import station_location_from_platform_yaml
+from ska_ost_low_uv.io.mccs_yaml import station_location_from_platform_yaml
 from astropy.time import Time
 
 MCCS_CONFIG_PATH = 'ska-low-deployment/tmdata/instrument/mccs-configuration'
@@ -66,4 +66,4 @@ if __name__ == "__main__":
         if name.startswith('s'):
             print(f"Generating {name}")
             generate_uv_config(name)
-            os.system(f"mv {name} ../../src/aa_uv/config")
+            os.system(f"mv {name} ../../src/ska_ost_low_uv/config")

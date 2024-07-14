@@ -1,8 +1,8 @@
 """to_sdp: Convert data into SDP Visibility format."""
 import numpy as np
 import pandas as pd
-from aa_uv.io.to_uvx import hdf5_to_uvx
-from aa_uv.uvw_utils import calc_uvw
+from ska_ost_low_uv.io.to_uvx import hdf5_to_uvx
+from ska_ost_low_uv.uvw_utils import calc_uvw
 from astropy.constants import c
 from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
@@ -21,7 +21,7 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None
     Args:
         fn_raw (str): Filename of raw HDF5 data to load.
         yaml_config (str): YAML config data with telescope information.
-        telescope_name (str=None): If set, aa_uv will try and use internal config file
+        telescope_name (str=None): If set, ska_ost_low_uv will try and use internal config file
                                    for telescope_name, e.g. 'aavs2' or 'aavs3'
         conj (bool): Conjugate visibility data (default True).
         flip_uvw (bool): Negate UVW coordinates (``uvw *= -1``). Default True, as needed to match

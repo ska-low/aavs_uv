@@ -2,9 +2,9 @@
 import h5py
 import numpy as np
 import pandas as pd
-from aa_uv.datamodel.uvx import create_antenna_data_array, create_visibility_array
-from aa_uv.io import hdf5_to_uvx, load_observation_metadata
-from aa_uv.utils import get_aa_config, get_test_data
+from ska_ost_low_uv.datamodel.uvx import create_antenna_data_array, create_visibility_array
+from ska_ost_low_uv.io import hdf5_to_uvx, load_observation_metadata
+from ska_ost_low_uv.utils import get_aa_config, get_test_data
 from astropy.coordinates import EarthLocation
 from astropy.time import Time
 from astropy.units import Quantity

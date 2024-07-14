@@ -4,8 +4,8 @@ import os
 
 import numpy as np
 import pandas as pd
-from aa_uv.io import hdf5_to_pyuvdata, phase_to_sun
-from aa_uv.utils import get_aa_config, get_test_data
+from ska_ost_low_uv.io import hdf5_to_pyuvdata, phase_to_sun
+from ska_ost_low_uv.utils import get_aa_config, get_test_data
 from astropy.time import Time
 from colored import Fore, Style
 from pyuvdata import UVData
@@ -192,7 +192,7 @@ def _setup_test(test_name: str=None, load_comp: bool=False, load_2x500: bool=Fal
         return uv_phs
 
 def test_compare():
-    """Compare aa_uv conversion to MIRIAD dataset."""
+    """Compare ska_ost_low_uv conversion to MIRIAD dataset."""
     uv_phs, _uv_uvf, uv_mir = _setup_test('Compare to MIRIAD', load_comp=True)
     compare_uv_datasets(uv_phs, uv_mir)
 

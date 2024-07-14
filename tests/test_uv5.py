@@ -1,8 +1,8 @@
 """test_uv5: Test conversion to UVX."""
 import os
 
-from aa_uv.io import hdf5_to_uvx, read_uvx, write_uvx
-from aa_uv.utils import get_test_data
+from ska_ost_low_uv.io import hdf5_to_uvx, read_uvx, write_uvx
+from ska_ost_low_uv.utils import get_test_data
 
 
 def test_roundtrip():

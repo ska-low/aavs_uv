@@ -43,7 +43,7 @@ sdp   = ["ska-sdp-datamodels"]
 all   = ["python-casacore", "pyradiosky", "pyuvsim", "matvis", "ska-sdp-datamodels"]
 
 [tool.poetry.scripts]
-aa_uv = "aa_uv.converter:run"
+ska_ost_low_uv = "ska_ost_low_uv.converter:run"
 
 [tool.poetry.group.test]
 optional = true
@@ -84,7 +84,7 @@ convention = "google"
 quote-style = "double"
 
 [tool.pytest.ini_options]
-addopts = "--cov=aa_uv --cov-report html --nbmake"
+addopts = "--cov=ska_ost_low_uv --cov-report html --nbmake"
 # To regenerate test images, add this argument:
 # --mpl-generate-path=tests/baseline
 testpaths = ["tests", "notebooks"]

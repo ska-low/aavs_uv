@@ -1,11 +1,11 @@
 """uvx: I/O tools for UVX data."""
-import aa_uv
+import ska_ost_low_uv
 import h5py
 import numpy as np
 import pandas as pd
 import xarray as xp
-from aa_uv.datamodel.uvx import UVX
-from aa_uv.utils import get_resource_path, load_yaml
+from ska_ost_low_uv.datamodel.uvx import UVX
+from ska_ost_low_uv.utils import get_resource_path, load_yaml
 from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 from loguru import logger
@@ -15,7 +15,7 @@ def write_uvx(uv: UVX, filename: str):
     """Write a aavs UV object to a HDF5 file.
 
     Args:
-        uv (UVX): aa_uv.datamodel.UV object
+        uv (UVX): ska_ost_low_uv.datamodel.UV object
         filename (str): name of output file
     """
     # Load UVX schema from YAML. We can use this to load descriptions
@@ -42,8 +42,8 @@ def write_uvx(uv: UVX, filename: str):
 
     with h5py.File(filename, mode='w') as h:
         # Basic metadata
-        h.attrs['CLASS'] = 'aa_uv'
-        h.attrs['VERSION'] = aa_uv.__version__
+        h.attrs['CLASS'] = 'AA_UV'
+        h.attrs['VERSION'] = ska_ost_low_uv.__version__
         h.attrs['name'] = uv.name
 
         ####################
@@ -141,13 +141,13 @@ def write_uvx(uv: UVX, filename: str):
 
 
 def read_uvx(filename: str) -> UVX:
-    """Load aa_uv UVX object from uvx (HDF5) file.
+    """Load ska_ost_low_uv UVX object from uvx (HDF5) file.
 
     Args:
         filename (str): path to uvx file, or h5py.File
 
     Returns:
-        uv (aa_uv.datamodel.UV): UV object
+        uv (ska_ost_low_uv.datamodel.UV): UV object
     """
     def _to_list(lstr):
         return [x.strip("'").strip() for x in lstr.strip('()[]').split(', ')]

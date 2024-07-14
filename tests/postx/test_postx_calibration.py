@@ -2,12 +2,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from aa_uv.io import hdf5_to_uvx
-from aa_uv.postx import ApertureArray
-from aa_uv.postx.aa_viewer import AllSkyViewer
-from aa_uv.postx.simulation.simple_sim import simulate_visibilities_pointsrc
-from aa_uv.postx.sky_model import generate_skycat
-from aa_uv.utils import get_aa_config, get_test_data
+from ska_ost_low_uv.io import hdf5_to_uvx
+from ska_ost_low_uv.postx import ApertureArray
+from ska_ost_low_uv.postx.aa_viewer import AllSkyViewer
+from ska_ost_low_uv.postx.simulation.simple_sim import simulate_visibilities_pointsrc
+from ska_ost_low_uv.postx.sky_model import generate_skycat
+from ska_ost_low_uv.utils import get_aa_config, get_test_data
 from astropy.coordinates import get_sun
 
 FN_RAW   = get_test_data('aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5')

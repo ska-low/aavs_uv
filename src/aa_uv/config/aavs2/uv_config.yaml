@@ -1,7 +1,7 @@
 # UVData configuration for pyuvdata
 # This should only include values that aren't derived from data shape
 # https://pyuvdata.readthedocs.io/en/latest/uvdata.html#required
-history: Created from aa_uv config/aavs2/uv_config.yaml
+history: Created from ska_ost_low_uv config/aavs2/uv_config.yaml
 instrument: aavs2
 telescope_name: aavs2
 telescope_ECEF_X: -2559301.90974769

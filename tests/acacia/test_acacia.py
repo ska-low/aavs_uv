@@ -1,5 +1,5 @@
 """Test reading data from acacia."""
-from aa_uv.acacia import AcaciaStorage
+from ska_ost_low_uv.acacia import AcaciaStorage
 
 
 def test_acacia():
