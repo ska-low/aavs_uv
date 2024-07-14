@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "aa-uv"
-version = "2.1.0"
+name = "ska-ost-low-uv"
+version = "0.0.0"
 description = "SKA-low Single-station UV utilities."
 authors = ["Danny C. Price"]
 license = "BSD"
