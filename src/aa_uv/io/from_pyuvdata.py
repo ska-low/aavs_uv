@@ -74,7 +74,7 @@ def pyuvdata_to_uvx(uv: UVData, check: bool=False) -> UVX:
 
     # Create Antenna dataset
     antpos_ENU = uvutils.ENU_from_ECEF(uv.antenna_positions + uv.telescope_location,
-                                       *uv.telescope_location_lat_lon_alt)
+                                       center_loc=eloc)
     df = pd.DataFrame(antpos_ENU, columns=('E', 'N', 'U'))
     df['flagged'] = False
     df['name']    = uv.antenna_names
@@ -84,7 +84,7 @@ def pyuvdata_to_uvx(uv: UVData, check: bool=False) -> UVX:
     # Create frequency, time, and data
     if uv.Nspws != 1:
         logger.warning("Multiple SPWs not supported!")
-    f = Quantity(uv.freq_array[0], unit='Hz')
+    f = Quantity(uv.freq_array, unit='Hz')
     t = Time(uv.time_array[::uv.Nbls], format='jd', scale='utc', location=eloc)
     data_arr = convert_data_to_uvx_convention(uv, check=check)
     data  = create_visibility_array(data_arr, f, t, eloc, conj=False)
