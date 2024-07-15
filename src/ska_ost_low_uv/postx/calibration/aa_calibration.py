@@ -7,7 +7,7 @@ if typing.TYPE_CHECKING:
     from ..aperture_array import ApertureArray
 
 from ..aa_module import AaBaseModule
-from . import holography, stefcal
+from . import holography, simple_cal
 
 ######################
 ## AA_CALIBRATOR CLASS
@@ -29,7 +29,7 @@ class AaCalibrator(AaBaseModule):
         """
         self.aa = aa
         self.holography = holography.AaHolographer(aa)
-        self.stefcal = stefcal
+        self.stefcal = simple_cal.AaStefcal(aa)
 
         self.__setup_docstrings('calibration')
 

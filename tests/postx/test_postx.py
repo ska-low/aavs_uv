@@ -51,6 +51,9 @@ def test_postx():
     sc_north = SkyCoord('12:00', '80:00:00', unit=('hourangle', 'deg'))
     assert asv.get_pixel(sc_north) == (0, 0)
 
+    # Simulation
+    aa.simulation.sim_vis_gsm()
+
 
 
 def test_viewer():

@@ -18,7 +18,7 @@ def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None, n_sid
     """Use pygdsm + matvis to simulate visibilites, add in Sun."""
     f_mhz    = aa.uvx.data.frequency[0] / 1e6
     lsts_rad = aa.uvx.data.lst.values / 24 * np.pi * 2
-    array_lat_rad = float(aa.gsm.lata)
+    array_lat_rad = float(aa.gsm.lat)
 
     aa.gsm.generate(f_mhz)
 

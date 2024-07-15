@@ -270,7 +270,8 @@ def jishnu_phasecal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=No
         target_phs_std (float): Target phase STDEV (in deg) at which to stop iterating.
 
     Returns:
-        cc_dict (dict): Phase calibration solution and runtime info, in dictionary with keys:
+        cal (UVXAntennaCal): Calibration solutions, in UVXAntennaCal format.
+                        Phase calibration solution and runtime info, in provenance dict with keys:
                         'phs_cal': complex-valued np.array of phase corrections.
                                    Shape: (N_ant, N_pol=2), complex data.
                         'n_iter': Number of iterations before break point reached.
@@ -368,9 +369,10 @@ def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
     # First, compute phase calibration
     cal = jishnu_phasecal(aa, cal_src, min_baseline_len, n_iter_max, target_phs_std)
 
-    # Now we apply the phase calibration to the data
+    # Now we apply the phase calibration to the data temporarily and generate phase-cal visibilities
     aa.set_cal(cal)
-    V = aa.generate_vis_matrix()
+    V = aa.generate_vis_matrix(vis='cal')
+    aa.set_cal(None)
 
     # Compute the measured correlation between the source and each antenna
     pv_src = aa.coords.generate_phase_vector(cal_src, coplanar=True)
@@ -378,8 +380,18 @@ def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
 
     # Now, get gain coefficients and combine with phase corrs
     mag_cal = meas_corr_to_magcal(meas_corr_src, target_mag)
-    cal.cal = mag_cal * cal.cal
-    cal.flags = np.logical_or(mag_cal.mask, cal.flags)
+    cal_arr = mag_cal * cal.cal.values
+    flag_arr = np.logical_or(mag_cal.mask, cal.flags)
+
+    # Set any flagged antennas to zero
+    cal_arr[flag_arr] = 0
+
+    cal = create_uvx_antenna_cal(telescope=aa.name, method='jishnu_cal',
+                                antenna_cal_arr=cal_arr,
+                                antenna_flags_arr=flag_arr,
+                                f=aa.f, a=aa.ant_names, p=np.array(('X', 'Y')),
+                                provenance={'jishnu_cal': cal.provenance['jishnu_phasecal']}
+                                )
 
     return cal
 
@@ -388,60 +400,24 @@ def jishnu_cal(aa: ApertureArray, cal_src: dict, min_baseline_len: float=0,
 ## POST JISHNU-CAL ROUTINES
 ###########################
 
-def report_flagged_antennas(aa: ApertureArray, cal_dict: dict, cal_key: str='phs_cal') -> dict:
+def report_flagged_antennas(aa: ApertureArray, cal: UVXAntennaCal) -> dict:
     """Find antennas that have been flagged during phase calibration.
 
     Args:
         aa (ApertureArray): Array object to use
-        cal_dict (dict): Dictionary returned by calibration routine, e.g.
+        cal (UVXAntennaCal): UVXAntennaCal returned by calibration routine, e.g.
                          jishnu_phasecal
-        cal_key (str): Name of calibration kxey in dictionary
 
     Returns:
         bad_ants (dict): Dictionary of bad antenna identifiers and indexes.
                          Keys are 'x', 'y'
     """
-    ant_ids  = aa.uvx.antennas.identifier.values
-    ant_idxs = aa.uvx.antennas.antenna.values
-
-    bad_x = cal_dict[cal_key].mask[:, 0]
-    bad_y = cal_dict[cal_key].mask[:, 1]
-
-    d = {
-        'x': {'idx': ant_idxs[bad_x], 'name': ant_ids[bad_x]},
-        'y': {'idx': ant_idxs[bad_y], 'name': ant_ids[bad_y]},
-    }
-    return d
+    return cal.report_flagged_antennas()
 
 
 ####################
 ## PLOTTING ROUTINES
 ####################
-
-def ant_xyz_to_image_idx(xyz_enu: np.array, cal: dict, as_int: bool=True) -> tuple:
-    """Convert an ENU antenna location to a pixel location in image.
-
-    Args:
-        xyz_enu (np.array): Antenna positions, in meters, ENU
-        cal (dict): Calibration dictionary from jishnu_cal
-        as_int (bool): Round and returns indexes as integers (default True)
-
-    Returns:
-        an_x, an_y (np.array, np.array): Antenna locations in image. If as_int=True,
-                                         these are rounded to nearest integer.
-
-    Notes:
-        Not currently used in plotting, as setting plt.imshow(extent=) keyword
-        allows actual antenna positions in meters to be used.
-    """
-    NFFT = cal['aperture_img'].shape[0]
-    an_x = (NFFT/2) + (xyz_enu[:, 0])*NFFT/cal['aperture_size'] + 1
-    an_y = (NFFT/2) - (xyz_enu[:, 1])*NFFT/cal['aperture_size'] - 1
-    if as_int:
-        return np.round(an_x).astype('int32'), np.round(an_y).astype('int32')
-    else:
-        return an_x, an_y
-
 
 def plot_aperture(aa: ApertureArray, cal: dict, pol_idx: int=0, plot_type: str='mag',
                   vmin: float=-40, phs_range: tuple=None, annotate: bool=False, s: int=None):

@@ -24,11 +24,19 @@ def test_holography():
     aa = setup_test()
     aa.calibration.holography.run_phasecal()
     aa.calibration.holography.run_jishnucal()
+    aa.calibration.holography.report_bad_antennas()
+
 
 def test_holography_errs():
     """Test that errors are raised."""
     uvx = hdf5_to_uvx(FN_RAW, telescope_name='aavs2')
     aa = ApertureArray(uvx)
+
+    with pytest.raises(RuntimeError):
+        aa.calibration.holography.__check_cal_src_set()
+
+    with pytest.raises(RuntimeError):
+        aa.calibration.holography.plot_aperture()
 
     with pytest.raises(RuntimeError):
         aa.calibration.holography.plot_aperture()
@@ -42,6 +50,9 @@ def test_holography_errs():
     with pytest.raises(RuntimeError):
         aa.calibration.holography.plot_phasecal_iterations()
 
+    aa = setup_test()
+    with pytest.raises(RuntimeError):
+        aa.calibration.holography.plot_aperture(plot_type='nonsense')
 
 @pytest.mark.mpl_image_compare
 def test_holo_plot_aperture():
@@ -49,6 +60,14 @@ def test_holo_plot_aperture():
     aa = setup_test()
     fig = plt.figure()
     aa.calibration.holography.plot_aperture()
+    return fig
+
+@pytest.mark.mpl_image_compare
+def test_holo_plot_aperture_annotate():
+    """Test plotting."""
+    aa = setup_test()
+    fig = plt.figure()
+    aa.calibration.holography.plot_aperture(annotate=True)
     return fig
 
 

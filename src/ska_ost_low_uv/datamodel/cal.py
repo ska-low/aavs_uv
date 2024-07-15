@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 import numpy as np
 import xarray as xp
-from ska_ost_low_uv.utils import get_resource_path, get_software_versions, load_yaml
 from astropy.units import Quantity
+from ska_ost_low_uv.utils import get_resource_path, get_software_versions, load_yaml
 
 
 @dataclass
@@ -34,6 +34,19 @@ class UVXAntennaCal:
 
         return cal_mat
 
+    def report_flagged_antennas(self):
+        """Report bad (flagged) antennas.
+
+        Returns:
+            bad_ants (dict):
+        """
+        flags_x, flags_y = np.max(self.flags, axis=0).T
+        flags_idx = np.arange(len(flags_x))
+
+        flag_dict = {'x': {'idx': flags_idx[flags_x],'name': flags_x.antenna[flags_x].values},
+                     'y': {'idx': flags_idx[flags_y],'name': flags_y.antenna[flags_y].values}}
+
+        return flag_dict
 
 def create_provenance_dict():
     """Create a provenance dict, fill in software versions."""
