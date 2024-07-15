@@ -24,7 +24,7 @@ def test_holography():
     aa = setup_test()
     aa.calibration.holography.run_phasecal()
     aa.calibration.holography.run_jishnucal()
-    aa.calibration.holography.report_bad_antennas()
+    aa.calibration.holography.report_flagged_antennas()
 
 
 def test_holography_errs():
@@ -33,7 +33,7 @@ def test_holography_errs():
     aa = ApertureArray(uvx)
 
     with pytest.raises(RuntimeError):
-        aa.calibration.holography.__check_cal_src_set()
+        aa.calibration.holography.run_phasecal() # No cal set yet
 
     with pytest.raises(RuntimeError):
         aa.calibration.holography.plot_aperture()
