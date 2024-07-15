@@ -1,9 +1,9 @@
 """test_uvw: Test UVW calculations."""
 import numpy as np
+from pyuvdata import utils as uvutils
 from ska_ost_low_uv.io import hdf5_to_pyuvdata, hdf5_to_uvx
 from ska_ost_low_uv.utils import get_test_data
 from ska_ost_low_uv.uvw_utils import calc_uvw
-from pyuvdata import utils as uvutils
 
 
 def test_uvw():

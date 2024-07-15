@@ -4,12 +4,12 @@ import os
 
 import numpy as np
 import pandas as pd
-from ska_ost_low_uv.io import hdf5_to_pyuvdata, phase_to_sun
-from ska_ost_low_uv.utils import get_aa_config, get_test_data
 from astropy.time import Time
 from colored import Fore, Style
 from pyuvdata import UVData
 from pyuvdata.parameter import UVParameter
+from ska_ost_low_uv.io import hdf5_to_pyuvdata, phase_to_sun
+from ska_ost_low_uv.utils import get_aa_config, get_test_data
 
 
 def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):

@@ -1,11 +1,11 @@
 """test_antenna_cal: Testing antenna calibration tools."""
 import numpy as np
+from astropy.units import Quantity
 from ska_ost_low_uv.datamodel.cal import (
     create_antenna_cal,
     create_antenna_flags,
     create_uvx_antenna_cal,
 )
-from astropy.units import Quantity
 
 
 def test_antenna_cal():

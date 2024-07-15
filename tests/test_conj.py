@@ -2,10 +2,10 @@
 import os
 
 import numpy as np
+from pyuvdata import UVData
 from ska_ost_low_uv.converter import run
 from ska_ost_low_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, hdf5_to_uvx
 from ska_ost_low_uv.utils import get_aa_config, get_test_data
-from pyuvdata import UVData
 
 FN_RAW   = get_test_data('aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5')
 YAML_RAW = get_aa_config('aavs2')

@@ -4,10 +4,10 @@ from configparser import ConfigParser
 from pathlib import Path
 
 import h5py
-from ska_ost_low_uv.io import read_uvx
 from loguru import logger
 from rclone_python import rclone
 from rclone_python.remote_types import RemoteTypes
+from ska_ost_low_uv.io import read_uvx
 
 
 class AcaciaStorage(object):

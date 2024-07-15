@@ -15,10 +15,10 @@ import warnings
 import matplotlib as mpl
 import numpy as np
 import pylab as plt
-from ska_ost_low_uv.datamodel.cal import UVXAntennaCal, create_uvx_antenna_cal
 from astropy.constants import c
 from astropy.coordinates import SkyCoord
 from loguru import logger
+from ska_ost_low_uv.datamodel.cal import UVXAntennaCal, create_uvx_antenna_cal
 
 from ..aa_module import AaBaseModule
 from ..coords.coord_utils import gaincal_vec_to_matrix

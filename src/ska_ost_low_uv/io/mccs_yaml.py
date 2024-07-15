@@ -3,8 +3,8 @@ from operator import itemgetter
 
 import numpy as np
 import pandas as pd
-from ska_ost_low_uv.utils import load_yaml
 from astropy.coordinates import EarthLocation
+from ska_ost_low_uv.utils import load_yaml
 
 
 def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tuple[EarthLocation, pd.DataFrame]:

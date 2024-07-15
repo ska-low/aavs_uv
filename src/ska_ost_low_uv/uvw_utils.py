@@ -1,8 +1,8 @@
 """uvw_utils: Utilities for UVW coordinates."""
 import numpy as np
-from ska_ost_low_uv.datamodel import UVX
 from astropy.constants import c
 from pyuvdata import utils as uvutils
+from ska_ost_low_uv.datamodel import UVX
 
 LIGHT_SPEED = c.value
 

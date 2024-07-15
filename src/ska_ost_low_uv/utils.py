@@ -94,13 +94,13 @@ def get_aa_config(name: str) -> str:
 
 def get_software_versions() -> dict:
     """Return version of main software packages."""
-    from ska_ost_low_uv import __version__ as ska_ost_low_uv_version
     from astropy import __version__ as astropy_version
     from erfa import __version__ as erfa_version
     from h5py import __version__ as h5py_version
     from numpy import __version__ as numpy_version
     from pandas import __version__ as pandas_version
     from pyuvdata import __version__ as pyuvdata_version
+    from ska_ost_low_uv import __version__ as ska_ost_low_uv_version
     from xarray import __version__ as xarray_version
 
     software = {

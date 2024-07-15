@@ -1,9 +1,9 @@
 """test_file_creation: test output data formats."""
 import os
 
+from astropy.time import Time
 from ska_ost_low_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, phase_to_sun
 from ska_ost_low_uv.utils import get_aa_config, get_test_data
-from astropy.time import Time
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
 

@@ -3,7 +3,6 @@
 """Tests for `ska_ost_low_uv` package."""
 
 import pytest
-
 import ska_ost_low_uv
 
 
@@ -20,8 +19,7 @@ def version_fixture() -> str:
 
 # This is a sample pytest test function with the pytest fixture as an argument.
 def test_content(version: str) -> None:
-    """
-    Check that the package version is as expected.
+    """Check that the package version is as expected.
 
     :param version: the version fixture
     """

@@ -7,8 +7,8 @@
 import os
 from datetime import datetime
 
-from ska_ost_low_uv.io.mccs_yaml import station_location_from_platform_yaml
 from astropy.time import Time
+from ska_ost_low_uv.io.mccs_yaml import station_location_from_platform_yaml
 
 MCCS_CONFIG_PATH = 'ska-low-deployment/tmdata/instrument/mccs-configuration'
 

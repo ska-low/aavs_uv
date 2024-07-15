@@ -2,12 +2,12 @@
 import os
 
 import pytest
+from astropy.coordinates import SkyCoord
 from ska_ost_low_uv.io import hdf5_to_uvx
 from ska_ost_low_uv.postx import ApertureArray
 from ska_ost_low_uv.postx.aa_viewer import AllSkyViewer
 from ska_ost_low_uv.postx.sky_model import generate_skycat, sun_model
 from ska_ost_low_uv.utils import get_test_data
-from astropy.coordinates import SkyCoord
 
 
 def setup_test() -> ApertureArray:

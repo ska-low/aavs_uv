@@ -6,11 +6,11 @@ import sys
 import time
 import warnings
 
+from astropy.time import Time, TimeDelta
+from loguru import logger
 from ska_ost_low_uv import __version__
 from ska_ost_low_uv.io import hdf5_to_pyuvdata, hdf5_to_uvx, phase_to_sun, write_uvx
 from ska_ost_low_uv.utils import get_aa_config, load_yaml
-from astropy.time import Time, TimeDelta
-from loguru import logger
 
 from .parallelize import run_in_parallel, task
 from .utils import import_optional_dependency, reset_logger, zipit

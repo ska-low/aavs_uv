@@ -2,6 +2,11 @@
 import numpy as np
 import pandas as pd
 import pyuvdata.utils as uvutils
+from astropy.coordinates import EarthLocation, SkyCoord
+from astropy.time import Time
+from astropy.units import Quantity
+from loguru import logger
+from pyuvdata import UVData
 from ska_ost_low_uv.datamodel.uvx import (
     UVX,
     create_antenna_data_array,
@@ -9,11 +14,6 @@ from ska_ost_low_uv.datamodel.uvx import (
     create_empty_provenance_dict,
     create_visibility_array,
 )
-from astropy.coordinates import EarthLocation, SkyCoord
-from astropy.time import Time
-from astropy.units import Quantity
-from loguru import logger
-from pyuvdata import UVData
 
 
 def convert_data_to_uvx_convention(uv: UVData, check: bool=False) -> np.array:

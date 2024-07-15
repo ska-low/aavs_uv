@@ -4,6 +4,10 @@ import os
 import h5py
 import numpy as np
 import pandas as pd
+from astropy.coordinates import AltAz, Angle, EarthLocation, SkyCoord
+from astropy.time import Time
+from astropy.units import Quantity
+from loguru import logger
 from ska_ost_low_uv import __version__ as ska_ost_low_uv_version
 from ska_ost_low_uv.datamodel.uvx import (
     UVX,
@@ -14,10 +18,6 @@ from ska_ost_low_uv.datamodel.uvx import (
 )
 from ska_ost_low_uv.io.mccs_yaml import station_location_from_platform_yaml
 from ska_ost_low_uv.utils import get_aa_config, get_software_versions, load_yaml
-from astropy.coordinates import AltAz, Angle, EarthLocation, SkyCoord
-from astropy.time import Time
-from astropy.units import Quantity
-from loguru import logger
 
 
 def load_observation_metadata(filename: str, yaml_config: str=None, load_config: str=None) -> dict:

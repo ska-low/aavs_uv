@@ -5,11 +5,11 @@ import numpy as np
 import pandas as pd
 import pyuvdata.utils as uvutils
 import xarray as xp
-from ska_ost_low_uv.utils import get_resource_path, get_software_versions, load_yaml
 from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
 from loguru import logger
+from ska_ost_low_uv.utils import get_resource_path, get_software_versions, load_yaml
 
 
 # Define the data class for UV data

@@ -1,12 +1,12 @@
 """to_sdp: Convert data into SDP Visibility format."""
 import numpy as np
 import pandas as pd
-from ska_ost_low_uv.io.to_uvx import hdf5_to_uvx
-from ska_ost_low_uv.uvw_utils import calc_uvw
 from astropy.constants import c
 from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 from pyuvdata import UVData
+from ska_ost_low_uv.io.to_uvx import hdf5_to_uvx
+from ska_ost_low_uv.uvw_utils import calc_uvw
 from ska_sdp_datamodels.configuration import Configuration
 from ska_sdp_datamodels.science_data_model import PolarisationFrame, ReceptorFrame
 from ska_sdp_datamodels.visibility import Visibility
