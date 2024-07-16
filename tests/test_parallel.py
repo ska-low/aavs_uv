@@ -3,6 +3,7 @@
 NOTE: This script seems to break pytest, if it runs before ipynb tests.
 Hence it being in a folder starting with a z_, so it runs last.
 """
+
 import time
 
 from ska_ost_low_uv.parallelize import run_in_parallel, task
@@ -34,5 +35,6 @@ def test_run_in_parallel():
     run_in_parallel(task_list, n_workers=2, backend='loky')
     run_in_parallel(task_list, n_workers=2, backend='dask')
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     run_in_parallel()

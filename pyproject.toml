@@ -81,7 +81,7 @@ ignore = ["E221", "E501", "E741", "D102"]
 convention = "google"
 
 [tool.ruff.format]
-quote-style = "double"
+quote-style = "single"
 
 [tool.pytest.ini_options]
 addopts = "--cov=ska_ost_low_uv --cov-report html --nbmake"

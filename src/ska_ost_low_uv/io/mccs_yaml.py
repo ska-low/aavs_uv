@@ -1,4 +1,5 @@
 """mccs_yaml: tools for reading MCCS YAML files."""
+
 from operator import itemgetter
 
 import numpy as np
@@ -7,7 +8,9 @@ from astropy.coordinates import EarthLocation
 from ska_ost_low_uv.utils import load_yaml
 
 
-def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tuple[EarthLocation, pd.DataFrame]:
+def station_location_from_platform_yaml(
+    fn_yaml: str, station_name: str
+) -> tuple[EarthLocation, pd.DataFrame]:
     """Load station location from AAVS3 MCCS yaml config.
 
     Args:
@@ -25,10 +28,17 @@ def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tupl
     # Generate pandas dataframe of antenna positions
     d_ant = d_station['antennas']
 
-    location_getter = itemgetter("east", "north", "up")
+    location_getter = itemgetter('east', 'north', 'up')
     ant_enu = [
-        [f"{a['smartbox']}-{a['smartbox_port']}", *location_getter(a["location_offset"]), a.get("masked", False)]
-        for a in sorted(d_ant.values(), key=lambda x: (int(x["tpm"].strip("tpm")), x["tpm_y_channel"] // 2))
+        [
+            f"{a['smartbox']}-{a['smartbox_port']}",
+            *location_getter(a['location_offset']),
+            a.get('masked', False),
+        ]
+        for a in sorted(
+            d_ant.values(),
+            key=lambda x: (int(x['tpm'].strip('tpm')), x['tpm_y_channel'] // 2),
+        )
     ]
 
     ant_enu = pd.DataFrame(ant_enu, columns=('name', 'E', 'N', 'U', 'flagged'))
@@ -36,12 +46,15 @@ def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tupl
     # Generate array central reference position
     # NOTE: Currently using WGS84, ignoring epoch
     loc = d_station['reference']
-    earth_loc = EarthLocation.from_geodetic(loc['longitude'], loc['latitude'], loc['ellipsoidal_height'])
+    earth_loc = EarthLocation.from_geodetic(
+        loc['longitude'], loc['latitude'], loc['ellipsoidal_height']
+    )
 
     # Add station rotation info
     ant_enu['rotation'] = d_station.get('rotation', 0.0)
 
-    return  earth_loc, ant_enu
+    return earth_loc, ant_enu
+
 
 def read_flags_from_platform_yaml(fn_yaml: str) -> np.array:
     """Read antenna flags from AAVS MCCS yaml config.

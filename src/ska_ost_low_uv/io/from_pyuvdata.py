@@ -1,4 +1,5 @@
 """from_pyuvdata: Read data using pyuvdata."""
+
 import numpy as np
 import pandas as pd
 import pyuvdata.utils as uvutils
@@ -16,7 +17,7 @@ from ska_ost_low_uv.datamodel.uvx import (
 )
 
 
-def convert_data_to_uvx_convention(uv: UVData, check: bool=False) -> np.array:
+def convert_data_to_uvx_convention(uv: UVData, check: bool = False) -> np.array:
     """Convert the uv.data_array to UVX data convention.
 
     Notes:
@@ -40,18 +41,23 @@ def convert_data_to_uvx_convention(uv: UVData, check: bool=False) -> np.array:
         assert uv.Nbls == uv.Nants_data * (uv.Nants_data + 1) // 2
 
     # Create empty numpy array
-    data = np.zeros((uv.Ntimes, uv.Nfreqs, uv.Nbls, uv.Npols), dtype=uv.data_array.dtype)
+    data = np.zeros(
+        (uv.Ntimes, uv.Nfreqs, uv.Nbls, uv.Npols), dtype=uv.data_array.dtype
+    )
 
     # Generate indexes
+    # fmt: off
     idx_t  = np.repeat(np.arange(uv.Ntimes), uv.Nbls * uv.Nfreqs * uv.Npols)
     idx_f  = np.repeat(np.arange(uv.Nfreqs), uv.Nbls * uv.Ntimes * uv.Npols)
-    idx_bl = np.repeat(np.tile(np.arange(uv.Nbls),     uv.Nfreqs * uv.Ntimes), uv.Npols)
-    idx_p  = np.tile([0, 3, 1, 2],     uv.Nbls * uv.Nfreqs * uv.Ntimes)
+    idx_bl = np.repeat(np.tile(np.arange(uv.Nbls), uv.Nfreqs * uv.Ntimes), uv.Npols)
+    idx_p  = np.tile([0, 3, 1, 2], uv.Nbls * uv.Nfreqs * uv.Ntimes)
+    # fmt: on
 
     data[idx_t, idx_f, idx_bl, idx_p] = uv.data_array.flatten()
     return data
 
-def pyuvdata_to_uvx(uv: UVData, check: bool=False) -> UVX:
+
+def pyuvdata_to_uvx(uv: UVData, check: bool = False) -> UVX:
     """Convert pyuvdata UVData object to UVX.
 
     Notes:
@@ -73,38 +79,45 @@ def pyuvdata_to_uvx(uv: UVData, check: bool=False) -> UVX:
     eloc = EarthLocation(*uv.telescope_location, unit='m')
 
     # Create Antenna dataset
-    antpos_ENU = uvutils.ENU_from_ECEF(uv.antenna_positions + uv.telescope_location,
-                                       center_loc=eloc)
+    antpos_ENU = uvutils.ENU_from_ECEF(
+        uv.antenna_positions + uv.telescope_location, center_loc=eloc
+    )
     df = pd.DataFrame(antpos_ENU, columns=('E', 'N', 'U'))
     df['flagged'] = False
-    df['name']    = uv.antenna_names
+    df['name'] = uv.antenna_names
     df = df[['name', 'E', 'N', 'U', 'flagged']]
     antennas = create_antenna_data_array(df, eloc)
 
     # Create frequency, time, and data
     if uv.Nspws != 1:
-        logger.warning("Multiple SPWs not supported!")
+        logger.warning('Multiple SPWs not supported!')
     f = Quantity(uv.freq_array, unit='Hz')
-    t = Time(uv.time_array[::uv.Nbls], format='jd', scale='utc', location=eloc)
+    t = Time(uv.time_array[:: uv.Nbls], format='jd', scale='utc', location=eloc)
     data_arr = convert_data_to_uvx_convention(uv, check=check)
-    data  = create_visibility_array(data_arr, f, t, eloc, conj=False)
+    data = create_visibility_array(data_arr, f, t, eloc, conj=False)
 
     # Create phase center
-    pc_cat  = list(uv.phase_center_catalog.values())
+    pc_cat = list(uv.phase_center_catalog.values())
     if len(pc_cat) > 1:
-        logger.warning("Multiple phase centers detected. Failure likely.")
+        logger.warning('Multiple phase centers detected. Failure likely.')
     pc_dict = list(uv.phase_center_catalog.values())[0]
-    pc_sc = SkyCoord(pc_dict['cat_lon'], pc_dict['cat_lat'], frame=pc_dict['cat_frame'], unit=('rad', 'rad'))
+    pc_sc = SkyCoord(
+        pc_dict['cat_lon'],
+        pc_dict['cat_lat'],
+        frame=pc_dict['cat_frame'],
+        unit=('rad', 'rad'),
+    )
 
     # Create UV object
-    uvx = UVX(name=uv.telescope_name,
-            antennas=antennas,
-            context=create_empty_context_dict(),
-            data=data,
-            timestamps=t,
-            origin=eloc,
-            phase_center=pc_sc,
-            provenance=create_empty_provenance_dict()
-            )
+    uvx = UVX(
+        name=uv.telescope_name,
+        antennas=antennas,
+        context=create_empty_context_dict(),
+        data=data,
+        timestamps=t,
+        origin=eloc,
+        phase_center=pc_sc,
+        provenance=create_empty_provenance_dict(),
+    )
 
     return uvx

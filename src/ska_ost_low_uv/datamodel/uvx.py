@@ -1,4 +1,5 @@
 """uvx: Data models for interferometer data (UVX)."""
+
 from dataclasses import dataclass
 
 import numpy as np
@@ -16,6 +17,7 @@ from ska_ost_low_uv.utils import get_resource_path, get_software_versions, load_
 @dataclass
 class UVX:
     """Dataclass for storing UVX interferometer data."""
+    # fmt: off
     name: str               # Antenna array name, e.g. AAVS3
     context: dict           # Contextual information (observation intent, notes, observer name)
     antennas: xp.Dataset    # An xarray dataset (generated with create_antenna_data_array)
@@ -24,7 +26,7 @@ class UVX:
     origin: EarthLocation   # Astropy EarthLocation for array origin
     phase_center: SkyCoord  # Astropy SkyCoord corresponding to phase center
     provenance: dict        # Provenance/history information and other metadata
-
+    # fmt: on
 
 def create_empty_context_dict():
     """Create an empty context dictionary with default keys."""
@@ -43,7 +45,7 @@ def create_empty_provenance_dict():
     provenance = {
         'ska_ost_low_uv_config': get_software_versions(),
         'input_files': {},
-        'input_metadata': {}
+        'input_metadata': {},
     }
     return provenance
 
@@ -82,62 +84,95 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
 
     x0, y0, z0 = [_.to('m').value for _ in eloc.to_geocentric()]
 
-    antpos_enu   = np.column_stack((antpos['E'], antpos['N'], antpos['U']))
-    antpos_ecef  = uvutils.ECEF_from_ENU(antpos_enu, eloc)  - (x0, y0, z0)
+    antpos_enu = np.column_stack((antpos['E'], antpos['N'], antpos['U']))
+    antpos_ecef = uvutils.ECEF_from_ENU(antpos_enu, eloc) - (x0, y0, z0)
 
     # Check if flags in antpos, otherwise add column
     if 'flagged' not in antpos.columns:
         antpos['flagged'] = False
 
     data_vars = {
-        'enu': xp.DataArray(antpos_enu,
-               dims=uvx_schema['uvx/antennas/enu']['dims'],
-               attrs={'units': uvx_schema['uvx/antennas/enu']['units'],
-                     'description': uvx_schema['uvx/antennas/enu']['description']}),
-        'ecef': xp.DataArray(antpos_ecef,
-                dims=uvx_schema['uvx/antennas/ecef']['dims'],
-                attrs={'units': uvx_schema['uvx/antennas/ecef']['units'],
-                      'description': uvx_schema['uvx/antennas/ecef']['description']}),
+        'enu': xp.DataArray(
+            antpos_enu,
+            dims=uvx_schema['uvx/antennas/enu']['dims'],
+            attrs={
+                'units': uvx_schema['uvx/antennas/enu']['units'],
+                'description': uvx_schema['uvx/antennas/enu']['description'],
+            },
+        ),
+        'ecef': xp.DataArray(
+            antpos_ecef,
+            dims=uvx_schema['uvx/antennas/ecef']['dims'],
+            attrs={
+                'units': uvx_schema['uvx/antennas/ecef']['units'],
+                'description': uvx_schema['uvx/antennas/ecef']['description'],
+            },
+        ),
     }
 
     attrs = {
-        'identifier': xp.DataArray(antpos['name'],
-                                   dims=uvx_schema['uvx/antennas/attrs/identifier']['dims'],
-                                   attrs={'description':  uvx_schema['uvx/antennas/attrs/identifier']['description']}),
-        'flags': xp.DataArray(antpos['flagged'],
-                              dims=uvx_schema['uvx/antennas/attrs/flags']['dims'],
-                              attrs={'description':  uvx_schema['uvx/antennas/attrs/flags']['description']}),
+        'identifier': xp.DataArray(
+            antpos['name'],
+            dims=uvx_schema['uvx/antennas/attrs/identifier']['dims'],
+            attrs={
+                'description': uvx_schema['uvx/antennas/attrs/identifier'][
+                    'description'
+                ]
+            },
+        ),
+        'flags': xp.DataArray(
+            antpos['flagged'],
+            dims=uvx_schema['uvx/antennas/attrs/flags']['dims'],
+            attrs={
+                'description': uvx_schema['uvx/antennas/attrs/flags']['description']
+            },
+        ),
     }
 
-    coords = {
-        'antenna': np.arange(256),
-        'spatial': np.array(('x', 'y', 'z'))
-        }
+    coords = {'antenna': np.arange(256), 'spatial': np.array(('x', 'y', 'z'))}
 
     # Add array origin
     array_origin_m = (eloc['x'].value, eloc['y'].value, eloc['z'].value)
-    array_origin_ecef = xp.DataArray(np.array(array_origin_m),
-                                attrs={'units': 'm',
-                                      'description': uvx_schema['uvx/antennas/attrs/array_origin_geocentric']['description']},
-                                coords={'spatial': np.array(('x', 'y', 'z'))},
-                                dims=('spatial'))
+    array_origin_ecef = xp.DataArray(
+        np.array(array_origin_m),
+        attrs={
+            'units': 'm',
+            'description': uvx_schema['uvx/antennas/attrs/array_origin_geocentric'][
+                'description'
+            ],
+        },
+        coords={'spatial': np.array(('x', 'y', 'z'))},
+        dims=('spatial'),
+    )
 
-    array_origin_geodetic = xp.DataArray(np.array((eloc.lon.value, eloc.lat.value, eloc.height.value)),
-                                attrs={'units': np.array(('deg', 'deg', 'm')),
-                                      'description': uvx_schema['uvx/antennas/attrs/array_origin_geodetic']['description']},
-                                coords={'spatial': np.array(('longitude', 'latitude', 'height'))},
-                                dims=('spatial'))
+    array_origin_geodetic = xp.DataArray(
+        np.array((eloc.lon.value, eloc.lat.value, eloc.height.value)),
+        attrs={
+            'units': np.array(('deg', 'deg', 'm')),
+            'description': uvx_schema['uvx/antennas/attrs/array_origin_geodetic'][
+                'description'
+            ],
+        },
+        coords={'spatial': np.array(('longitude', 'latitude', 'height'))},
+        dims=('spatial'),
+    )
 
     attrs['array_origin_geocentric'] = array_origin_ecef
-    attrs['array_origin_geodetic']   = array_origin_geodetic
+    attrs['array_origin_geodetic'] = array_origin_geodetic
 
     dant = xp.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 
     return dant
 
 
-def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthLocation,
-                            conj: bool=True, N_ant: int=256) -> xp.DataArray:
+def create_visibility_array(
+    data: np.ndarray,
+    f: Quantity,
+    t: Time,
+    eloc: EarthLocation,
+    conj: bool = True,
+    N_ant: int = 256,
+) -> xp.DataArray:
     """Create visibility array out of data array + metadata.
 
     Takes a data array, frequency and time axes, and an EarthLocation.
@@ -181,7 +216,9 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
     # Coordinate - time
     t.location = eloc
     lst = t.sidereal_time('apparent').to('hourangle')
-    t_coord = pd.MultiIndex.from_arrays((t.mjd, lst.value, t.unix), names=('mjd', 'lst', 'unix'))
+    t_coord = pd.MultiIndex.from_arrays(
+        (t.mjd, lst.value, t.unix), names=('mjd', 'lst', 'unix')
+    )
 
     # Coordinate - baseline
     ix, iy = np.triu_indices(N_ant)
@@ -191,26 +228,30 @@ def create_visibility_array(data: np.ndarray, f: Quantity, t: Time, eloc: EarthL
     pol_coord = np.array(('XX', 'XY', 'YX', 'YY'))
 
     # Coordinate - frequency
-    f_center  = f.to('Hz').value
-    f_coord = xp.DataArray(f_center, dims=('frequency',),
-                           attrs={
-                               'units': uvx_schema['uvx/visibilities/coords/frequency']['units'],
-                               'description': uvx_schema['uvx/visibilities/coords/frequency']['description']
-                               })
+    f_center = f.to('Hz').value
+    f_coord = xp.DataArray(
+        f_center,
+        dims=('frequency',),
+        attrs={
+            'units': uvx_schema['uvx/visibilities/coords/frequency']['units'],
+            'description': uvx_schema['uvx/visibilities/coords/frequency'][
+                'description'
+            ],
+        },
+    )
 
-    coords={
+    coords = {
         'time': t_coord,
         'polarization': pol_coord,
         'baseline': bl_coord,
-        'frequency': f_coord
+        'frequency': f_coord,
     }
 
     if conj:
         logger.info('Conjugating data')
         data = np.conj(data)
 
-    vis = xp.DataArray(data,
-                      coords=coords,
-                      dims=('time', 'frequency', 'baseline', 'polarization')
-                     )
+    vis = xp.DataArray(
+        data, coords=coords, dims=('time', 'frequency', 'baseline', 'polarization')
+    )
     return vis

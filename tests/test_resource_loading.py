@@ -1,4 +1,5 @@
 """Test_resource_loading: Test file path resolution tools."""
+
 from ska_ost_low_uv.utils import get_aa_config, get_resource_path
 
 
@@ -14,5 +15,5 @@ def test_get_config():
     print(get_aa_config('aavs3'))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_resource_loading()

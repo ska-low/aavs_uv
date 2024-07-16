@@ -1,4 +1,5 @@
 """simple_sim: Simple point-source simulation tools."""
+
 from __future__ import annotations
 
 import typing
@@ -11,6 +12,7 @@ from astropy.constants import c
 
 LIGHT_SPEED = c.to('m/s').value
 cos, sin = np.cos, np.sin
+
 
 def simulate_visibilities_pointsrc(ant_arr: ApertureArray, sky_model: dict):
     """Simulate model visibilities for an antenna array.
@@ -25,7 +27,7 @@ def simulate_visibilities_pointsrc(ant_arr: ApertureArray, sky_model: dict):
     phsmat = None
     for _srcname, src in sky_model.items():
         phs = ant_arr.coords.generate_phase_vector(src, conj=True).squeeze()
-        if hasattr(src, "mag"):
+        if hasattr(src, 'mag'):
             phs *= src.mag / np.sqrt(2)
 
         if phsmat is None:

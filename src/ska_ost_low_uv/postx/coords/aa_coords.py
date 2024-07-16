@@ -1,4 +1,5 @@
 """aa_coords: ApertureArray coordinate tools submodule."""
+
 from __future__ import annotations
 
 import typing
@@ -15,7 +16,9 @@ if typing.TYPE_CHECKING:
 from ..aa_module import AaBaseModule
 
 
-def generate_phase_vector(aa, src: SkyCoord, conj: bool=False, coplanar: bool=False):
+def generate_phase_vector(
+    aa, src: SkyCoord, conj: bool = False, coplanar: bool = False
+):
     """Generate a phase vector for a given source.
 
     Args:
@@ -46,8 +49,12 @@ def get_zenith(aa) -> SkyCoord:
     Returns:
         zenith (SkyCoord): Zenith SkyCoord object
     """
-    zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'),
-                    obstime=aa._ws('t'), location=aa.earthloc)
+    zen_aa = AltAz(
+        alt=Angle(90, unit='degree'),
+        az=Angle(0, unit='degree'),
+        obstime=aa._ws('t'),
+        location=aa.earthloc,
+    )
     zen_sc = SkyCoord(zen_aa).icrs
     return zen_sc
 
@@ -84,6 +91,7 @@ def get_sun(aa) -> SkyCoord:
 ## AA_COORDS CLASS
 ####################
 
+
 class AaCoords(AaBaseModule):
     """Coordinate utils.
 
@@ -94,6 +102,7 @@ class AaCoords(AaBaseModule):
         generate_phase_vector() - Generate a phase vector toward a given SkyCoord
 
     """
+
     def __init__(self, aa: ApertureArray):
         """Setup AaCoords.
 
@@ -107,10 +116,10 @@ class AaCoords(AaBaseModule):
         self.__name__ = name
         self.name = name
         # Inherit docstrings
-        self.generate_phase_vector.__func__.__doc__  = generate_phase_vector.__doc__
-        self.get_sun.__func__.__doc__  = get_sun.__doc__
-        self.get_zenith.__func__.__doc__  = get_zenith.__doc__
-        self.get_alt_az.__func__.__doc__  = get_alt_az.__doc__
+        self.generate_phase_vector.__func__.__doc__ = generate_phase_vector.__doc__
+        self.get_sun.__func__.__doc__ = get_sun.__doc__
+        self.get_zenith.__func__.__doc__ = get_zenith.__doc__
+        self.get_alt_az.__func__.__doc__ = get_alt_az.__doc__
 
     def generate_phase_vector(self, *args, **kwargs):
         # Docstring inherited

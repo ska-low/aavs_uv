@@ -4,12 +4,17 @@
 From https://github.com/OxfordSKA/bda/blob/master/pybda/stefcal.py
 """
 
-
 import numpy as np
 import numpy.linalg
 
 
-def stefcal(a: np.array, b: np.array, tol: float=1.0e-8, niter: int=50, gstart: np.array=None) -> tuple:
+def stefcal(
+    a: np.array,
+    b: np.array,
+    tol: float = 1.0e-8,
+    niter: int = 50,
+    gstart: np.array = None,
+) -> tuple:
     """Python implementation of StefCal calibration algorithm.
 
     Description:

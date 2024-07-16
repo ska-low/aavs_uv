@@ -1,4 +1,5 @@
 """test_postx: tests for postx utilities and tools."""
+
 import os
 
 import pytest
@@ -16,7 +17,9 @@ def setup_test() -> ApertureArray:
     Returns:
         aa (ApertureArray): An ApertureArray object to use in testing.
     """
-    fn_data = get_test_data('aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5')
+    fn_data = get_test_data(
+        'aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
+    )
     v = hdf5_to_uvx(fn_data, telescope_name='aavs2')
 
     # RadioArray basics
@@ -30,7 +33,7 @@ def test_postx():
     print(aa.coords.get_zenith())
 
     # RadioArray - images
-    img  = aa.imaging.make_image()
+    img = aa.imaging.make_image()
     hmap = aa.imaging.make_healpix(n_side=64)
     hmap = aa.imaging.make_healpix(n_side=64, apply_mask=False)
 
@@ -55,7 +58,6 @@ def test_postx():
     aa.simulation.sim_vis_gsm()
 
 
-
 def test_viewer():
     """Test viewer tools."""
     aa = setup_test()
@@ -64,7 +66,7 @@ def test_viewer():
     aa.viewer.orthview()
     aa.viewer.mollview()
 
-    img  = aa.imaging.make_image(n_pix=150)
+    img = aa.imaging.make_image(n_pix=150)
     hmap = aa.imaging.make_healpix(n_side=64)
     aa.viewer.orthview(img)
     aa.viewer.mollview(hmap)
@@ -93,5 +95,6 @@ def test_viewer_mollview():
     aa.viewer.mollview(fig=fig)
     return fig
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     test_postx()

@@ -1,4 +1,5 @@
 """aa_simulation: ApertureArray simulation tools submodule."""
+
 from __future__ import annotations
 
 import typing
@@ -21,6 +22,7 @@ class AaSimulator(AaBaseModule):
         orthview_gsm(): View observed diffuse sky model (Orthographic)
         mollview_gsm(): View observed diffuse sky model (Mollview)
     """
+
     def __init__(self, aa: ApertureArray):
         """Setup AaPlotter.
 
@@ -28,11 +30,13 @@ class AaSimulator(AaBaseModule):
             aa (ApertureArray): Aperture array 'parent' object to use
         """
         self.aa = aa
-        self.model = Model(visibilities=None,
-                           point_source_skymodel=None,
-                           beam=None,
-                           gains=None,
-                           gsm=None)
+        self.model = Model(
+            visibilities=None,
+            point_source_skymodel=None,
+            beam=None,
+            gains=None,
+            gsm=None,
+        )
 
         self.__setup_docstrings('simulation')
 
@@ -40,12 +44,14 @@ class AaSimulator(AaBaseModule):
         self.__name__ = name
         self.name = name
         # Inherit docstrings
-        self.sim_vis_pointsrc.__func__.__doc__  = simulate_visibilities_pointsrc.__doc__
-        self.sim_vis_gsm.__func__.__doc__  = simulate_visibilities_gsm.__doc__
+        self.sim_vis_pointsrc.__func__.__doc__ = simulate_visibilities_pointsrc.__doc__
+        self.sim_vis_gsm.__func__.__doc__ = simulate_visibilities_gsm.__doc__
 
     def sim_vis_pointsrc(self, *args, **kwargs):
         # Docstring inherited
-        self.model.visibilities = simulate_visibilities_pointsrc(self.aa, *args, **kwargs)
+        self.model.visibilities = simulate_visibilities_pointsrc(
+            self.aa, *args, **kwargs
+        )
         return self.model.visibilities
 
     def sim_vis_gsm(self, *args, **kwargs):

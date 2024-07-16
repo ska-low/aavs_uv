@@ -1,4 +1,5 @@
 """aa_viewer: All-sky viewing utility for low-frequency compact radio interferometers."""
+
 from __future__ import annotations
 
 import typing
@@ -22,6 +23,7 @@ from .sky_model import generate_skycat, generate_skycat_solarsys
 # ALL-SKY VIEWER
 ###################
 
+
 class AllSkyViewer(AaBaseModule):
     """An all-sky imager based on matplotlib imshow with WCS support.
 
@@ -34,8 +36,15 @@ class AllSkyViewer(AaBaseModule):
         orthview_gsm() - orthview plot observed Global diffuse sky model using pygdsm
         mollview_gsm() - mollview plot observed Global diffuse sky model using pygdsm
     """
-    def __init__(self, observer: ApertureArray=None, skycat: dict=None, ts: Time=None,
-                 f_mhz: float=None, n_pix: int=128):
+
+    def __init__(
+        self,
+        observer: ApertureArray = None,
+        skycat: dict = None,
+        ts: Time = None,
+        f_mhz: float = None,
+        n_pix: int = 128,
+    ):
         """Create a new AllSkyViewer.
 
         Args:
@@ -51,9 +60,9 @@ class AllSkyViewer(AaBaseModule):
         self.skycat = skycat if skycat is not None else generate_skycat(observer)
         self.name = observer.name if hasattr(observer, 'name') else 'allsky'
 
-        self.ts     = ts
-        self.f_mhz  = f_mhz
-        self.n_pix  = n_pix
+        self.ts = ts
+        self.f_mhz = f_mhz
+        self.n_pix = n_pix
         self.name = 'All Sky Viewer'
         self._update_wcs()
 
@@ -62,19 +71,19 @@ class AllSkyViewer(AaBaseModule):
         zen_sc = self.observer.coords.get_zenith()
 
         self.wcsd = {
-                 'SIMPLE': 'T',
-                 'NAXIS': 2,
-                 'NAXIS1': self.n_pix,
-                 'NAXIS2': self.n_pix,
-                 'CTYPE1': 'RA---SIN',
-                 'CTYPE2': 'DEC--SIN',
-                 'CRPIX1': self.n_pix // 2 + 1,
-                 'CRPIX2': self.n_pix // 2 + 1,
-                 'CRVAL1': zen_sc.icrs.ra.to('deg').value,
-                 'CRVAL2': zen_sc.icrs.dec.to('deg').value,
-                 'CDELT1': -360/np.pi / self.n_pix,
-                 'CDELT2': 360/np.pi / self.n_pix
-            }
+            'SIMPLE': 'T',
+            'NAXIS': 2,
+            'NAXIS1': self.n_pix,
+            'NAXIS2': self.n_pix,
+            'CTYPE1': 'RA---SIN',
+            'CTYPE2': 'DEC--SIN',
+            'CRPIX1': self.n_pix // 2 + 1,
+            'CRPIX2': self.n_pix // 2 + 1,
+            'CRVAL1': zen_sc.icrs.ra.to('deg').value,
+            'CRVAL2': zen_sc.icrs.dec.to('deg').value,
+            'CDELT1': -360 / np.pi / self.n_pix,
+            'CDELT2': 360 / np.pi / self.n_pix,
+        }
 
         self.wcs = WCS(self.wcsd)
 
@@ -108,7 +117,7 @@ class AllSkyViewer(AaBaseModule):
         x, y = self.wcs.world_to_pixel(src)
         if ~np.isnan(x) and ~np.isnan(y):
             i, j = int(np.round(x)), int(np.round(y))
-            return (j, i)    # flip so you can use as numpy index
+            return (j, i)  # flip so you can use as numpy index
         else:
             return (0, 0)
 
@@ -132,14 +141,24 @@ class AllSkyViewer(AaBaseModule):
         """
         self.skycat = label_dict
 
-    def new_fig(self, size: int=6):
+    def new_fig(self, size: int = 6):
         """Create new matplotlib figure."""
         fig = plt.figure(self.name, figsize=(size, size), frameon=False)
         return fig
 
-    def orthview(self, data: np.array=None, pol_idx: int=0, sfunc: np.ufunc=np.abs,
-                  overlay_srcs: bool=False,  overlay_grid: bool=True, return_data: bool=False,
-                  title: str=None, colorbar: bool=False,  subplot_id: tuple=None, **kwargs):
+    def orthview(
+        self,
+        data: np.array = None,
+        pol_idx: int = 0,
+        sfunc: np.ufunc = np.abs,
+        overlay_srcs: bool = False,
+        overlay_grid: bool = True,
+        return_data: bool = False,
+        title: str = None,
+        colorbar: bool = False,
+        subplot_id: tuple = None,
+        **kwargs,
+    ):
         """Plot all-sky image.
 
         Args:
@@ -177,12 +196,12 @@ class AllSkyViewer(AaBaseModule):
         elif data.ndim == 3:
             im = plt.imshow(sfunc(data[..., pol_idx]), **kwargs)
         else:
-            raise RuntimeError(f"Invalid image dimensions {data.shape}")
+            raise RuntimeError(f'Invalid image dimensions {data.shape}')
 
         # Create title
         if title is None:
             ts = self.observer._ws('t')
-            f  = self.observer._ws('f')
+            f = self.observer._ws('f')
             lst_str = str(ts.sidereal_time('apparent'))
             title = f'{self.name}:  {ts.iso}  \n LST: {lst_str}  |  freq: {f.to("MHz").value:.2f} MHz'
         plt.title(title)
@@ -203,7 +222,6 @@ class AllSkyViewer(AaBaseModule):
         if colorbar is True:
             plt.colorbar(im, orientation='horizontal')
 
-
         if return_data:
             return data
 
@@ -215,18 +233,20 @@ class AllSkyViewer(AaBaseModule):
         """View diffuse sky model (Mollweide)."""
         return self.observer.simulation.mollview_gsm(*args, **kwargs)
 
-    def mollview(self,
-                 hmap: np.array=None,
-                 sfunc: np.ufunc=np.abs,
-                 n_side: int=64,
-                 fov: float=np.pi/2,
-                 apply_mask: bool=True,
-                 pol_idx: int=0,
-                 title: str=None,
-                 overlay_srcs: bool=False,
-                 overlay_grid: bool=True,
-                 colorbar: bool=False,
-                 **kwargs):
+    def mollview(
+        self,
+        hmap: np.array = None,
+        sfunc: np.ufunc = np.abs,
+        n_side: int = 64,
+        fov: float = np.pi / 2,
+        apply_mask: bool = True,
+        pol_idx: int = 0,
+        title: str = None,
+        overlay_srcs: bool = False,
+        overlay_grid: bool = True,
+        colorbar: bool = False,
+        **kwargs,
+    ):
         """Plot a healpix map in mollweide projection (healpy.mollview).
 
         Args:
@@ -249,14 +269,16 @@ class AllSkyViewer(AaBaseModule):
             **kwargs: These are passed on to mollview()
         """
         if hmap is None:
-            hmap = self.observer.imaging.make_healpix(n_side=n_side, fov=fov, apply_mask=apply_mask)
+            hmap = self.observer.imaging.make_healpix(
+                n_side=n_side, fov=fov, apply_mask=apply_mask
+            )
         else:
             n_side = hp.npix2nside(hmap.shape[0])
 
         # Create title
         if title is None:
             ts = self.observer._ws('t')
-            f  = self.observer._ws('f')
+            f = self.observer._ws('f')
             lst_str = str(ts.sidereal_time('apparent'))
             title = f'{self.name}:  {ts.iso} | LST: {lst_str}  |  freq: {f.to("MHz").value:.3f} MHz'
 
@@ -274,15 +296,29 @@ class AllSkyViewer(AaBaseModule):
                 show_src = True
                 if isinstance(hmap, np.ma.core.MaskedArray):
                     if hmap.mask[sky2hpix(n_side, src_sc), pol_idx]:
-                       show_src = False
-                if hmap[sky2hpix(n_side, src_sc), pol_idx] == 0 or np.isinf(hmap[sky2hpix(n_side, src_sc), pol_idx]):
+                        show_src = False
+                if hmap[sky2hpix(n_side, src_sc), pol_idx] == 0 or np.isinf(
+                    hmap[sky2hpix(n_side, src_sc), pol_idx]
+                ):
                     show_src = False
 
                 if show_src:
-                    hp.projscatter(src_sc.galactic.l.deg, src_sc.galactic.b.deg, lonlat=True, marker='x', color='red')
-                    hp.projtext(src_sc.galactic.l.deg - 2, src_sc.galactic.b.deg + 2, s=src, color='#DDDDDD', lonlat=True)
+                    hp.projscatter(
+                        src_sc.galactic.l.deg,
+                        src_sc.galactic.b.deg,
+                        lonlat=True,
+                        marker='x',
+                        color='red',
+                    )
+                    hp.projtext(
+                        src_sc.galactic.l.deg - 2,
+                        src_sc.galactic.b.deg + 2,
+                        s=src,
+                        color='#DDDDDD',
+                        lonlat=True,
+                    )
 
-    def write_fits(self, img_data: np.array, fn: str, pol_idx: int=0):
+    def write_fits(self, img_data: np.array, fn: str, pol_idx: int = 0):
         """Write image to FITS. Supports both healpix and regular images.
 
         Args:
@@ -297,7 +333,7 @@ class AllSkyViewer(AaBaseModule):
             self.n_pix = img_data.shape[0]
             self.update()
             h = self.wcs.to_header()
-            h.add_comment(f"TELESCOPE: {self.observer.name}")
+            h.add_comment(f'TELESCOPE: {self.observer.name}')
             h.add_comment(f"OBSDATA: {self.observer._ws('t').isot}")
             h.add_comment(f"OBSFREQ: {self.observer._ws('f').to('MHz')}")
             h.add_comment(f"POL_PROD: {self.observer._ws('p')}")

@@ -1,4 +1,5 @@
 """aperture_array: Basic antenna array geometry class."""
+
 import numpy as np
 from astropy.units import Quantity
 from loguru import logger
@@ -17,7 +18,13 @@ from .simulation.aa_simulation import AaSimulator
 class ApertureArray(object):
     """RadioArray class, designed for post-correlation beamforming and all-sky imaging."""
 
-    def __init__(self, uvx: UVX, conjugate_data: bool=False, verbose: bool=False, gsm: str='gsm08'):
+    def __init__(
+        self,
+        uvx: UVX,
+        conjugate_data: bool = False,
+        verbose: bool = False,
+        gsm: str = 'gsm08',
+    ):
         """Initialize RadioArray class (based on astropy EarthLocation).
 
         Args:
@@ -26,18 +33,19 @@ class ApertureArray(object):
             verbose (bool):          Print extra details to screen
             gsm (str):               Name of global sky model (gsm08, gsm16, lfsm, haslam)
         """
-        self.uvx = uvx
+        # fmt: off
+        self.uvx            = uvx
         self.conjugate_data = conjugate_data
-        self.verbose = verbose
-        self.name = uvx.name
+        self.verbose        = verbose
+        self.name           = uvx.name
 
-        self.earthloc = uvx.origin
+        self.earthloc       = uvx.origin
 
         xyz0 = uvx.antennas.attrs['array_origin_geocentric'].data
-        self.xyz_enu  = uvx.antennas.enu.data
-        self.xyz_ecef = uvx.antennas.ecef.data + xyz0
+        self.xyz_enu   = uvx.antennas.enu.data
+        self.xyz_ecef  = uvx.antennas.ecef.data + xyz0
 
-        self.n_ant = len(self.xyz_enu)
+        self.n_ant     = len(self.xyz_enu)
         self.ant_names = uvx.antennas.identifier
 
         # Setup frequency, time, and phase centre
@@ -58,33 +66,33 @@ class ApertureArray(object):
         self._to_workspace('hpx', {})
 
         # Add-on modules
-        self.coords       = AaCoords(self)
-        self.plotting     = AaPlotter(self)
-        self.viewer       = AllSkyViewer(self)
-        self.simulation   = AaSimulator(self)
-        self.calibration  = AaCalibrator(self)
-        self.imaging      = AaImager(self)
-        #self.holography   = AaHolographer(self)
+        self.coords      = AaCoords(self)
+        self.plotting    = AaPlotter(self)
+        self.viewer      = AllSkyViewer(self)
+        self.simulation  = AaSimulator(self)
+        self.calibration = AaCalibrator(self)
+        self.imaging     = AaImager(self)
 
         # Setup Global Sky Model
         self.set_gsm(gsm)
+        # fmt: off
 
     def __repr__(self):
         """Display representation of ApertureArray object."""
         eloc = self.earthloc.to_geodetic()
-        s = f"<ApertureArray: {self.name} (lat {eloc.lat.value:.2f}, lon {eloc.lon.value:.2f})>"
+        s = f'<ApertureArray: {self.name} (lat {eloc.lat.value:.2f}, lon {eloc.lon.value:.2f})>'
         return s
 
-    def set_gsm(self, gsm_str: str='gsm08'):
+    def set_gsm(self, gsm_str: str = 'gsm08'):
         """Set the Global Sky Model to use."""
-        self.simulation.model.gsm       = init_observer(gsm_str)
-        self.simulation.model.gsm.lat   = self.uvx.origin.lat.to('rad').value
-        self.simulation.model.gsm.lon   = self.uvx.origin.lon.to('rad').value
-        self.simulation.model.gsm.elev  = self.uvx.origin.height.to('m').value
-        self.simulation.model.gsm.date  = self.t[0].datetime
+        self.simulation.model.gsm = init_observer(gsm_str)
+        self.simulation.model.gsm.lat = self.uvx.origin.lat.to('rad').value
+        self.simulation.model.gsm.lon = self.uvx.origin.lon.to('rad').value
+        self.simulation.model.gsm.elev = self.uvx.origin.height.to('m').value
+        self.simulation.model.gsm.date = self.t[0].datetime
         self.gsm = self.simulation.model.gsm
 
-    def set_idx(self, f: int=None, t: int=None, p: int=None):
+    def set_idx(self, f: int = None, t: int = None, p: int = None):
         """Set index of UVX data array.
 
         Args:
@@ -128,13 +136,12 @@ class ApertureArray(object):
     def _to_workspace(self, key: str, val):
         self.workspace[key] = val
 
-
     def _generate_bl_matrix(self):
         """Compute a matrix of baseline lengths."""
 
         # Helper fn to compute length for one row
         def bl_len(xyz, idx):
-            return np.sqrt(np.sum((xyz - xyz[idx])**2, axis=-1))
+            return np.sqrt(np.sum((xyz - xyz[idx]) ** 2, axis=-1))
 
         bls = np.zeros((self.n_ant, self.n_ant), dtype='float32')
         # Loop over rows
@@ -150,7 +157,9 @@ class ApertureArray(object):
         """
         self.workspace['cal'] = cal
 
-    def generate_vis_matrix(self, vis: str='data', t_idx=None, f_idx=None) -> np.array:
+    def generate_vis_matrix(
+        self, vis: str = 'data', t_idx=None, f_idx=None
+    ) -> np.array:
         """Generate visibility matrix from underlying array data.
 
         Underlying UVX data has axes (time, frequency, baseline, polarization)
@@ -178,7 +187,7 @@ class ApertureArray(object):
                 if 'cal' in self.workspace.keys():
                     vis_mat *= self.workspace['cal'].to_matrix()
                 else:
-                    logger.warning("Calibration not set, returning raw visibilities.")
+                    logger.warning('Calibration not set, returning raw visibilities.')
             case 'model':
                 vis_mat = self.simulation.model.visibilities[t_idx, f_idx].values
 

@@ -1,4 +1,5 @@
 """Test stefcal calibration approach."""
+
 import numpy as np
 import pylab as plt
 import pytest
@@ -10,11 +11,14 @@ from ska_ost_low_uv.utils import get_test_data
 @pytest.mark.mpl_image_compare
 def test_stefcal():
     """Test Stefcal is working."""
-    uvx = hdf5_to_uvx(get_test_data('aavs3/correlation_burst_100_20240107_19437_0.hdf5'), telescope_name='aavs3')
+    uvx = hdf5_to_uvx(
+        get_test_data('aavs3/correlation_burst_100_20240107_19437_0.hdf5'),
+        telescope_name='aavs3',
+    )
     aa = ApertureArray(uvx)
 
     # Manual flags
-    flags = [  0,  72,  73,  85,  88,  98, 115, 117, 120, 121, 155, 188, 242, 244]
+    flags = [0, 72, 73, 85, 88, 98, 115, 117, 120, 121, 155, 188, 242, 244]
     flag_arr = np.zeros(256, dtype='bool')
     flag_arr[flags] = True
 
@@ -28,19 +32,24 @@ def test_stefcal():
 
     # Compare in plot
     a = np.arange(256)
-    fig = plt.figure(figsize=(8,6))
+    fig = plt.figure(figsize=(8, 6))
 
-    plt.subplot(2,1,1)
+    plt.subplot(2, 1, 1)
     plt.scatter(a, np.rad2deg(np.angle(sc.cal[0, :, 0])), marker='.', label='stefcal X')
-    plt.scatter(a, np.rad2deg(np.angle(jc.cal[0, :, 0])), marker='.', label='self-holo X')
+    plt.scatter(
+        a, np.rad2deg(np.angle(jc.cal[0, :, 0])), marker='.', label='self-holo X'
+    )
 
-    plt.subplot(2,1,2)
+    plt.subplot(2, 1, 2)
     plt.scatter(a, np.rad2deg(np.angle(sc.cal[0, :, 1])), marker='.', label='stefcal Y')
-    plt.scatter(a, np.rad2deg(np.angle(jc.cal[0, :, 1])), marker='.', label='self-holo Y')
-    plt.xlabel("Antenna ID")
+    plt.scatter(
+        a, np.rad2deg(np.angle(jc.cal[0, :, 1])), marker='.', label='self-holo Y'
+    )
+    plt.xlabel('Antenna ID')
     plt.legend()
 
     return fig
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     fig = test_stefcal()

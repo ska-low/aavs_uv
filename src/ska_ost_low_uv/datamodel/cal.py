@@ -1,4 +1,5 @@
 """cal: Data models for calibration data."""
+
 from dataclasses import dataclass
 
 import numpy as np
@@ -10,13 +11,15 @@ from ska_ost_low_uv.utils import get_resource_path, get_software_versions, load_
 @dataclass
 class UVXAntennaCal:
     """Dataclass for antenna calibration to accompany UVX data."""
-    telescope: str           # Antenna array name, e.g. AAVS3
-    method: str              # Calibration method name (e.g. JishnuCal)
-    cal: xp.DataArray        # An xarray dataset  (frequency, antenna, pol)
-    flags: xp.DataArray      # Flag xarray dataset (frequency, antenna, pol)
-    provenance: dict         # Provenance/history information and other metadata
+    # fmt: off
+    telescope: str          # Antenna array name, e.g. AAVS3
+    method: str             # Calibration method name (e.g. JishnuCal)
+    cal: xp.DataArray       # An xarray dataset  (frequency, antenna, pol)
+    flags: xp.DataArray     # Flag xarray dataset (frequency, antenna, pol)
+    provenance: dict        # Provenance/history information and other metadata
+    # fmt: on
 
-    def to_matrix(self, f_idx: int=0) -> np.ndarray:
+    def to_matrix(self, f_idx: int = 0) -> np.ndarray:
         """Convert to visibility matrix.
 
         Args:
@@ -43,16 +46,17 @@ class UVXAntennaCal:
         flags_x, flags_y = np.max(self.flags, axis=0).T
         flags_idx = np.arange(len(flags_x))
 
-        flag_dict = {'x': {'idx': flags_idx[flags_x],'name': flags_x.antenna[flags_x].values},
-                     'y': {'idx': flags_idx[flags_y],'name': flags_y.antenna[flags_y].values}}
+        flag_dict = {
+            'x': {'idx': flags_idx[flags_x], 'name': flags_x.antenna[flags_x].values},
+            'y': {'idx': flags_idx[flags_y], 'name': flags_y.antenna[flags_y].values},
+        }
 
         return flag_dict
 
+
 def create_provenance_dict():
     """Create a provenance dict, fill in software versions."""
-    provenance = {
-        'ska_ost_low_uv_config': get_software_versions()
-    }
+    provenance = {'ska_ost_low_uv_config': get_software_versions()}
     return provenance
 
 
@@ -71,33 +75,37 @@ def _create_antenna_cal_coords(f: Quantity, a: np.ndarray, p: np.ndarray) -> dic
     cal_schema = load_yaml(get_resource_path('datamodel/cal.yaml'))
 
     # Coordinate - antenna
-    a_coord = xp.DataArray(a, dims=('antenna',),
-                           attrs={'description': cal_schema['cal/coords/antenna']['description']})
+    a_coord = xp.DataArray(
+        a,
+        dims=('antenna',),
+        attrs={'description': cal_schema['cal/coords/antenna']['description']},
+    )
 
     # Coordinate - polarization
-    p_coord = xp.DataArray(p, dims=('polarization',),
-                           attrs={'description': cal_schema['cal/coords/polarization']['description']})
+    p_coord = xp.DataArray(
+        p,
+        dims=('polarization',),
+        attrs={'description': cal_schema['cal/coords/polarization']['description']},
+    )
 
     # Coordinate - frequency
-    f_center  = f.to('Hz').value
-    f_coord = xp.DataArray(f_center, dims=('frequency',),
-                           attrs={
-                               'units': cal_schema['cal/coords/frequency']['units'],
-                               'description': cal_schema['cal/coords/frequency']['description']
-                               }
-                            )
+    f_center = f.to('Hz').value
+    f_coord = xp.DataArray(
+        f_center,
+        dims=('frequency',),
+        attrs={
+            'units': cal_schema['cal/coords/frequency']['units'],
+            'description': cal_schema['cal/coords/frequency']['description'],
+        },
+    )
 
-
-    coords={
-        'polarization': p_coord,
-        'antenna': a_coord,
-        'frequency': f_coord
-    }
+    coords = {'polarization': p_coord, 'antenna': a_coord, 'frequency': f_coord}
     return coords
 
 
-def create_antenna_flags(antenna_flag_arr: np.ndarray,
-                       f: Quantity, a: np.ndarray, p: np.ndarray) -> xp.DataArray:
+def create_antenna_flags(
+    antenna_flag_arr: np.ndarray, f: Quantity, a: np.ndarray, p: np.ndarray
+) -> xp.DataArray:
     """Create an xarray dataarray for antenna calibration cofficients.
 
     Args:
@@ -114,16 +122,19 @@ def create_antenna_flags(antenna_flag_arr: np.ndarray,
 
     coords = _create_antenna_cal_coords(f, a, p)
 
-    antenna_cal = xp.DataArray(antenna_flag_arr,
-                               coords=coords,
-                               dims=cal_schema['cal/antenna_cal']['dims'],
-                               attrs={'description': cal_schema['cal/antenna_cal']['description']})
+    antenna_cal = xp.DataArray(
+        antenna_flag_arr,
+        coords=coords,
+        dims=cal_schema['cal/antenna_cal']['dims'],
+        attrs={'description': cal_schema['cal/antenna_cal']['description']},
+    )
 
     return antenna_cal
 
 
-def create_antenna_cal(antenna_cal_arr: np.ndarray,
-                       f: Quantity, a: np.ndarray, p: np.ndarray) -> xp.DataArray:
+def create_antenna_cal(
+    antenna_cal_arr: np.ndarray, f: Quantity, a: np.ndarray, p: np.ndarray
+) -> xp.DataArray:
     """Create an xarray dataarray for antenna calibration cofficients.
 
     Args:
@@ -140,18 +151,26 @@ def create_antenna_cal(antenna_cal_arr: np.ndarray,
 
     coords = _create_antenna_cal_coords(f, a, p)
 
-    antenna_cal = xp.DataArray(antenna_cal_arr,
-                               coords=coords,
-                               dims=cal_schema['cal/antenna_flags']['dims'],
-                               attrs={'description': cal_schema['cal/antenna_flags']['description']})
+    antenna_cal = xp.DataArray(
+        antenna_cal_arr,
+        coords=coords,
+        dims=cal_schema['cal/antenna_flags']['dims'],
+        attrs={'description': cal_schema['cal/antenna_flags']['description']},
+    )
 
     return antenna_cal
 
 
-def create_uvx_antenna_cal(telescope: str, method: str,
-                       antenna_cal_arr: np.ndarray, antenna_flags_arr: np.ndarray,
-                       f: Quantity, a: np.ndarray, p: np.ndarray,
-                       provenance: dict=None) -> UVXAntennaCal:
+def create_uvx_antenna_cal(
+    telescope: str,
+    method: str,
+    antenna_cal_arr: np.ndarray,
+    antenna_flags_arr: np.ndarray,
+    f: Quantity,
+    a: np.ndarray,
+    p: np.ndarray,
+    provenance: dict = None,
+) -> UVXAntennaCal:
     """Create an UVXAntennaCal for antenna locations.
 
     Args:
@@ -169,17 +188,19 @@ def create_uvx_antenna_cal(telescope: str, method: str,
     Returns:
         antenna_cal (xp.Dataset): xarray Dataset with antenna locations
     """
-    antenna_cal   = create_antenna_cal(antenna_cal_arr, f, a, p)
+    antenna_cal = create_antenna_cal(antenna_cal_arr, f, a, p)
     antenna_flags = create_antenna_flags(antenna_flags_arr, f, a, p)
 
     # Create empty provenance dictionary if not passed, then fill with creation info
     provenance = create_provenance_dict() if provenance is None else provenance
     provenance.update({'ska_ost_low_uv_config': get_software_versions()})
 
-    uvx_cal = UVXAntennaCal(telescope=telescope,
-                            method=method,
-                            cal=antenna_cal,
-                            flags=antenna_flags,
-                            provenance=provenance)
+    uvx_cal = UVXAntennaCal(
+        telescope=telescope,
+        method=method,
+        cal=antenna_cal,
+        flags=antenna_flags,
+        provenance=provenance,
+    )
 
     return uvx_cal

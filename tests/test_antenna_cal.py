@@ -1,4 +1,5 @@
 """test_antenna_cal: Testing antenna calibration tools."""
+
 import numpy as np
 from astropy.units import Quantity
 from ska_ost_low_uv.datamodel.cal import (
@@ -27,10 +28,13 @@ def test_antenna_cal():
     print(antenna_cal)
     print(antenna_flags)
 
-    cal = create_uvx_antenna_cal('AAVS3', 'manual', cal, flags, f, a, p, {'history':  'yo'})
+    cal = create_uvx_antenna_cal(
+        'AAVS3', 'manual', cal, flags, f, a, p, {'history': 'yo'}
+    )
 
     cal_mat = cal.to_matrix(f_idx=0)
     assert cal_mat.shape == (256, 256, 4)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     test_antenna_cal()

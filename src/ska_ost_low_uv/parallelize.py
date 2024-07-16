@@ -1,4 +1,5 @@
 """parallelize: tools to help parallelize tasks with dask/joblib."""
+
 import joblib
 import tqdm
 from joblib import Parallel, delayed
@@ -17,10 +18,17 @@ def task(*args, **kwargs):
             return result
 
     """
-    reset_logger(use_tqdm=True)      # Make sure TQDM output is turned on
+    reset_logger(use_tqdm=True)  # Make sure TQDM output is turned on
     return delayed(*args, **kwargs)
 
-def run_in_parallel(task_list: list, n_workers: int=-1, show_progressbar=True, backend: str='loky', verbose: bool=False):
+
+def run_in_parallel(
+    task_list: list,
+    n_workers: int = -1,
+    show_progressbar=True,
+    backend: str = 'loky',
+    verbose: bool = False,
+):
     """Run a list of tasks in parallel, using joblib + tqdm.
 
     Args:
@@ -48,23 +56,27 @@ def run_in_parallel(task_list: list, n_workers: int=-1, show_progressbar=True, b
     """
     if backend == 'dask':
         from dask.distributed import LocalCluster
-        with LocalCluster(n_workers=n_workers, threads_per_worker=1) as cluster, cluster.get_client() as client:
+
+        with LocalCluster(
+            n_workers=n_workers, threads_per_worker=1
+        ) as cluster, cluster.get_client() as client:
             # Print dashboard details
-            logger = reset_logger(use_tqdm=True, level="INFO")
-            logger.info(f"Using dask LocalCluster(n_workers={n_workers}) backend")
-            logger.info(f"Dashboard running at {client.dashboard_link}")
+            logger = reset_logger(use_tqdm=True, level='INFO')
+            logger.info(f'Using dask LocalCluster(n_workers={n_workers}) backend')
+            logger.info(f'Dashboard running at {client.dashboard_link}')
 
             with joblib.parallel_backend(backend):
                 # Now switch back to silent / verbose mode
-                level = "INFO" if verbose else "WARNING"
+                level = 'INFO' if verbose else 'WARNING'
                 logger = reset_logger(use_tqdm=True, level=level)
                 return Parallel(n_jobs=n_workers)(tqdm.tqdm(task_list))
 
     elif backend == 'loky':
         from joblib.externals.loky import get_reusable_executor
+
         with joblib.parallel_backend(backend):
             # Now switch back to silent / verbose mode
-            level = "INFO" if verbose else "WARNING"
+            level = 'INFO' if verbose else 'WARNING'
             logger = reset_logger(use_tqdm=True, level=level)
             retval = Parallel(n_jobs=n_workers)(tqdm.tqdm(task_list))
 

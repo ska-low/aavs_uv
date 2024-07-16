@@ -1,4 +1,5 @@
 """gsm_sim: Simulation tools using pygdsm diffuse sky model."""
+
 from __future__ import annotations
 
 import typing
@@ -14,9 +15,11 @@ from pyuvsim.analyticbeam import AnalyticBeam
 from ..coords.coord_utils import hpix2sky
 
 
-def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None, n_side: int=32) -> xr.DataArray:  # noqa: F821
+def simulate_visibilities_gsm(
+    aa: ApertureArray, beam_func: function = None, n_side: int = 32
+) -> xr.DataArray:  # noqa: F821
     """Use pygdsm + matvis to simulate visibilites, add in Sun."""
-    f_mhz    = aa.uvx.data.frequency[0] / 1e6
+    f_mhz = aa.uvx.data.frequency[0] / 1e6
     lsts_rad = aa.uvx.data.lst.values / 24 * np.pi * 2
     array_lat_rad = float(aa.gsm.lat)
 
@@ -30,27 +33,33 @@ def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None, n_sid
     # Compute corresponding RA/DEC
     sky_coord = hpix2sky(n_side, np.arange(len(sm64)))
     sky_coord = sky_coord[~sm64.mask].icrs
-    ra  = sky_coord.ra.to('rad')
+    ra = sky_coord.ra.to('rad')
     dec = sky_coord.dec.to('rad')
 
     if beam_func is not None:
-        beams = [AnalyticBeam("func", func=beam_func), ]
+        beams = [
+            AnalyticBeam('func', func=beam_func),
+        ]
     else:
-        beams = [AnalyticBeam("uniform"), ]
+        beams = [
+            AnalyticBeam('uniform'),
+        ]
     ants = dict(zip(np.arange(len(aa.xyz_enu)), aa.xyz_enu))
 
     vis_vc = simulate_vis(
-            ants=ants,
-            fluxes=sky_model,
-            ra=ra,
-            dec=dec,
-            freqs=np.array([f_mhz * 1e6, ]),
-            lsts=lsts_rad,
-            beams=beams,
-            polarized=False,
-            precision=1,
-            latitude=array_lat_rad
-        )
+        ants=ants,
+        fluxes=sky_model,
+        ra=ra,
+        dec=dec,
+        freqs=np.array([
+            f_mhz * 1e6,
+        ]),
+        lsts=lsts_rad,
+        beams=beams,
+        polarized=False,
+        precision=1,
+        latitude=array_lat_rad,
+    )
 
     # Convert to 4-pol
     v0 = np.zeros_like(vis_vc)
@@ -66,8 +75,8 @@ def simulate_visibilities_gsm(aa: ApertureArray, beam_func: function=None, n_sid
 
     # Add in Sun - TODO
     # Need to get units to match (Jy vs K)
-    #sun = sun_model(aa)
-    #sky_model = {'sun': sun}
-    #v_sun = simulate_visibilities(aa, sky_model=sky_model)
+    # sun = sun_model(aa)
+    # sky_model = {'sun': sun}
+    # v_sun = simulate_visibilities(aa, sky_model=sky_model)
 
     return V

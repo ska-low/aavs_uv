@@ -1,4 +1,5 @@
 """coord_utils: Coordinate utilities."""
+
 import warnings
 
 import healpy as hp
@@ -7,12 +8,14 @@ import pyuvdata.utils as uvutils
 from astropy.constants import c
 from astropy.coordinates import EarthLocation, SkyCoord
 
-#SHORTHAND
+# SHORTHAND
 sin, cos = np.sin, np.cos
 SPEED_OF_LIGHT = c.value
 
 
-def phase_vector(w: np.array, f: float, conj: bool=False, dtype='complex64') -> np.array:
+def phase_vector(
+    w: np.array, f: float, conj: bool = False, dtype='complex64'
+) -> np.array:
     """Compute Nx1 phase weight vector e(2πi w f)."""
     c0 = np.exp(1j * 2 * np.pi * w * f, dtype=dtype)
     c0 = np.conj(c0) if conj else c0
@@ -67,6 +70,7 @@ def skycoord_to_lmn(src: SkyCoord, zen: SkyCoord) -> np.array:
         Following Eqn 3.1 in
         http://math_research.uct.ac.za/~siphelo/admin/interferometry/3_Positional_Astronomy/3_4_Direction_Cosine_Coordinates.html
     """
+    # fmt: off
     if src.frame.name == 'galactic':
         src = src.icrs
 
@@ -74,12 +78,13 @@ def skycoord_to_lmn(src: SkyCoord, zen: SkyCoord) -> np.array:
     RA_rad  = src.ra.to('rad').value
 
     RA_delta_rad = RA_rad - zen.icrs.ra.to('rad').value
-    DEC_rad_0 = zen.icrs.dec.to('rad').value
+    DEC_rad_0    = zen.icrs.dec.to('rad').value
 
-    l = np.cos(DEC_rad) * np.sin(RA_delta_rad)
-    m = (np.sin(DEC_rad) * np.cos(DEC_rad_0) - np.cos(DEC_rad) * np.sin(DEC_rad_0) * np.cos(RA_delta_rad))
-    n = np.sqrt(1 - l**2 - m**2)
-    lmn = np.column_stack((l,m,n))
+    l   = np.cos(DEC_rad) * np.sin(RA_delta_rad)
+    m   = np.sin(DEC_rad) * np.cos(DEC_rad_0) - np.cos(DEC_rad) * np.sin(DEC_rad_0) * np.cos(RA_delta_rad)
+    n   = np.sqrt(1 - l**2 - m**2)
+    lmn = np.column_stack((l, m, n))
+    #fmt: on
     return lmn
 
 
@@ -92,13 +97,15 @@ def loc_xyz_ECEF_to_ENU(loc: EarthLocation, xyz: np.ndarray):
                         i.e. xyz = XYZ_ECEF - XYZ_ECEF0
 
     """
+    # fmt: off
     loc_xyz = list(loc.value)
-    loc = loc.to_geodetic()
-    enu = uvutils.ENU_from_ECEF(xyz + loc_xyz, loc.lat.to('rad'), loc.lon.to('rad'), loc.height)
+    loc     = loc.to_geodetic()
+    enu     = uvutils.ENU_from_ECEF(xyz + loc_xyz, loc.lat.to('rad'), loc.lon.to('rad'), loc.height)
+    # fmt: on
     return loc, enu
 
 
-def generate_lmn_grid(n_pix: int, abs_max: int=1, nan_below_horizon: bool=True):
+def generate_lmn_grid(n_pix: int, abs_max: int = 1, nan_below_horizon: bool = True):
     """Generate a grid of direction cosine unit vectors.
 
     Generates a square lmn grid across l=(-abs_max, abs_max), m=(-abs_max, abs_max).
@@ -127,11 +134,12 @@ def generate_lmn_grid(n_pix: int, abs_max: int=1, nan_below_horizon: bool=True):
     if nan_below_horizon:
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', 'invalid value encountered in sqrt')
-            ng     = np.sqrt(1 - lg**2 - mg**2)
+            ng = np.sqrt(1 - lg**2 - mg**2)
             lmn[:, :, 2] = ng
     else:
         lmn[:, :, 2] = 0
     return lmn
+
 
 def gaincal_vec_to_matrix(gc: np.array) -> np.array:
     """Create a gain calibration matrix out of 4-pol vector.

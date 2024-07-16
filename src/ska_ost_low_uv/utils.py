@@ -1,4 +1,5 @@
 """utils: Utilities used in ska_ost_low_uv package."""
+
 import importlib
 import os
 import shutil
@@ -12,7 +13,9 @@ from loguru import logger
 from tqdm import tqdm
 
 
-def reset_logger(use_tqdm: bool=False, disable: bool=False, level: str="INFO") -> logger:
+def reset_logger(
+    use_tqdm: bool = False, disable: bool = False, level: str = 'INFO'
+) -> logger:
     """Reset loguru logger and setup output format.
 
     Helps loguru (logger), tqdm (progress bar) and joblib/dask (parallel) work together.
@@ -35,14 +38,24 @@ def reset_logger(use_tqdm: bool=False, disable: bool=False, level: str="INFO") -
         logger (logger): loguru logger object
     """
     logger.remove()
-    logger_fmt = "<g>{time:HH:mm:ss.S}</g> | <w><b>{level}</b></w> | {message}"
+    logger_fmt = '<g>{time:HH:mm:ss.S}</g> | <w><b>{level}</b></w> | {message}'
     if not disable:
         if not use_tqdm:
             logger.add(sys.stdout, format=logger_fmt, level=level, colorize=True)
         else:
-            logger.add(lambda msg: tqdm.write(msg, end=""), format=logger_fmt, level=level, colorize=True)
+            logger.add(
+                lambda msg: tqdm.write(msg, end=''),
+                format=logger_fmt,
+                level=level,
+                colorize=True,
+            )
     else:
-        logger.add(lambda msg: tqdm.write(msg, end=""), format=logger_fmt, level="ERROR", colorize=True)
+        logger.add(
+            lambda msg: tqdm.write(msg, end=''),
+            format=logger_fmt,
+            level='ERROR',
+            colorize=True,
+        )
     return logger
 
 
@@ -72,7 +85,7 @@ def get_resource_path(relative_path: str) -> str:
     abs_path = os.path.join(path_root, relative_path)
 
     if not os.path.exists(abs_path):
-        logger.warning(f"File not found: {abs_path}")
+        logger.warning(f'File not found: {abs_path}')
 
     return os.path.abspath(abs_path)
 
@@ -86,9 +99,9 @@ def get_aa_config(name: str) -> str:
     Returns:
         abs_path (str): Absolute path to config file.
     """
-    relative_path = f"config/{name}/uv_config.yaml"
+    relative_path = f'config/{name}/uv_config.yaml'
     if name is None:
-        raise RuntimeError("A path / telescope_name must be set.")
+        raise RuntimeError('A path / telescope_name must be set.')
     return get_resource_path(relative_path)
 
 
@@ -103,20 +116,23 @@ def get_software_versions() -> dict:
     from ska_ost_low_uv import __version__ as ska_ost_low_uv_version
     from xarray import __version__ as xarray_version
 
+    # fmt: off
     software = {
         'ska_ost_low_uv': ska_ost_low_uv_version,
-        'astropy': astropy_version,
-        'numpy': numpy_version,
-        'pyuvdata': pyuvdata_version,
-        'xarray': xarray_version,
-        'pandas': pandas_version,
-        'h5py': h5py_version,
-        'erfa': erfa_version
+        'astropy':        astropy_version,
+        'numpy':          numpy_version,
+        'pyuvdata':       pyuvdata_version,
+        'xarray':         xarray_version,
+        'pandas':         pandas_version,
+        'h5py':           h5py_version,
+        'erfa':           erfa_version,
     }
+    # fmt: on
+
     return software
 
 
-def zipit(dirname: str, rm_dir: bool=False):
+def zipit(dirname: str, rm_dir: bool = False):
     """Zip up a directory.
 
     Args:
@@ -128,9 +144,10 @@ def zipit(dirname: str, rm_dir: bool=False):
         shutil.rmtree(dirname)
 
 
-def import_optional_dependency(name: str,
-                               errors: typing.Literal["raise", "warn", "ignore"] = "raise",
-                               ) -> types.ModuleType | None:
+def import_optional_dependency(
+    name: str,
+    errors: typing.Literal['raise', 'warn', 'ignore'] = 'raise',
+) -> types.ModuleType | None:
     """Import an optional dependency by name.
 
     Notes:
@@ -141,15 +158,14 @@ def import_optional_dependency(name: str,
         errors (typing.Literal): What to do if not installed; one of raise, warn, or ignore
     """
     msg = (
-        f"Missing optional dependency '{name}'. "
-        f"Use pip or conda to install {name}."
+        f"Missing optional dependency '{name}'. " f'Use pip or conda to install {name}.'
     )
     try:
         module = importlib.import_module(name)
     except ImportError as err:
-        if errors == "raise":
+        if errors == 'raise':
             raise ImportError(msg) from err
-        elif errors == "warn":
+        elif errors == 'warn':
             logger.warning(msg)
         return None
     return module

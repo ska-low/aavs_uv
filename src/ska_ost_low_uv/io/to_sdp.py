@@ -1,4 +1,5 @@
 """to_sdp: Convert data into SDP Visibility format."""
+
 import numpy as np
 import pandas as pd
 from astropy.constants import c
@@ -13,9 +14,18 @@ from ska_sdp_datamodels.visibility import Visibility
 
 LIGHT_SPEED = c.value
 
-def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None, conj: bool=True,
-                    scan_id: int=0, scan_intent: str="", execblock_id: str="", flip_uvw=True,
-                    apply_phasing: bool=True) -> Visibility:
+
+def hdf5_to_sdp_vis(
+    fn_raw: str,
+    yaml_config: str = None,
+    telescope_name: str = None,
+    conj: bool = True,
+    scan_id: int = 0,
+    scan_intent: str = '',
+    execblock_id: str = '',
+    flip_uvw=True,
+    apply_phasing: bool = True,
+) -> Visibility:
     """Generate a SDP Visibility object from a AAVS2 HDF5 file.
 
     Args:
@@ -40,12 +50,13 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None
         https://gitlab.com/ska-telescope/aavs-system/-/blob/master/python/pydaq/persisters/corr.py
 
     """
-    uv = hdf5_to_uvx(fn_raw, yaml_config=yaml_config, telescope_name=telescope_name, conj=conj)
+    uv = hdf5_to_uvx(
+        fn_raw, yaml_config=yaml_config, telescope_name=telescope_name, conj=conj
+    )
     md = uv.provenance['input_metadata']
 
-
     # Create Configuration and Frames
-    config    = Configuration()
+    config = Configuration()
     rec_frame = ReceptorFrame('linear')
     pol_frame = PolarisationFrame('linear')
 
@@ -60,21 +71,23 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None
         xyz=antpos_ECEF,
         receptor_frame=rec_frame,
         diameter=1.0,  # Errors if not set
-        mount='altaz')
+        mount='altaz',
+    )
 
     baselines = pd.MultiIndex.from_arrays(
-        (uv.data.baseline.ant1.values, uv.data.baseline.ant2.values), names=("antenna1", "antenna2")
+        (uv.data.baseline.ant1.values, uv.data.baseline.ant2.values),
+        names=('antenna1', 'antenna2'),
     )
 
     # Time and frequency
-    t  = uv.timestamps
+    t = uv.timestamps
     t_int = np.ones_like(t) * md['tsamp']
     fc = uv.data.frequency.values
     fbw = np.ones_like(fc) * uv.data.frequency.attrs['channel_bandwidth']
 
     # Phase center
     zen_sc = uv.phase_center.icrs
-    source_name = f"Zenith_at_mjd_{t[0].mjd}"
+    source_name = f'Zenith_at_mjd_{t[0].mjd}'
 
     # UVW coordinates
     uvw = calc_uvw(uv)
@@ -88,37 +101,45 @@ def hdf5_to_sdp_vis(fn_raw: str, yaml_config: str=None, telescope_name: str=None
     w = uvw[..., 2]
     Δt = w * (1 / LIGHT_SPEED)
     pol_dummy_axis = np.ones(vis_data.shape[-1])
-    phs_corr = np.exp(1j * 2 * np.pi * np.einsum('tb,f,p->tbfp', Δt, fc, pol_dummy_axis))
+    phs_corr = np.exp(
+        1j * 2 * np.pi * np.einsum('tb,f,p->tbfp', Δt, fc, pol_dummy_axis)
+    )
 
     if apply_phasing:
         vis_data *= phs_corr
 
     # Create SDP visibility
     v = Visibility.constructor(
-            uvw=uvw,
-            time=t.mjd * 86400,
-            frequency=fc,
-            vis=vis_data,
-            weight=np.ones(vis_data.shape),
-            baselines=baselines,
-            flags=np.zeros(vis_data.shape, dtype="int"),
-            integration_time=t_int,
-            channel_bandwidth=fbw,
-            polarisation_frame=pol_frame,
-            source=source_name,
-            scan_id=scan_id,
-            scan_intent=scan_intent,
-            execblock_id=execblock_id,
-            meta=md,
-            phasecentre=zen_sc,
-            configuration=config,
-        )
+        uvw=uvw,
+        time=t.mjd * 86400,
+        frequency=fc,
+        vis=vis_data,
+        weight=np.ones(vis_data.shape),
+        baselines=baselines,
+        flags=np.zeros(vis_data.shape, dtype='int'),
+        integration_time=t_int,
+        channel_bandwidth=fbw,
+        polarisation_frame=pol_frame,
+        source=source_name,
+        scan_id=scan_id,
+        scan_intent=scan_intent,
+        execblock_id=execblock_id,
+        meta=md,
+        phasecentre=zen_sc,
+        configuration=config,
+    )
 
     return v
 
 
-def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock_id: str="",
-                      conj: bool=False, flip_uvw: bool=True) -> Visibility:
+def uvdata_to_sdp_vis(
+    uv: UVData,
+    scan_id: int = 0,
+    scan_intent: str = '',
+    execblock_id: str = '',
+    conj: bool = False,
+    flip_uvw: bool = True,
+) -> Visibility:
     """Convert pyuvdata object to SDP Visibility.
 
     Notes:
@@ -138,7 +159,7 @@ def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock
     """
     # Create Configuration and Frames
     # TODO: Derive from UVData
-    config    = Configuration()
+    config = Configuration()
     rec_frame = ReceptorFrame('linear')
     pol_frame = PolarisationFrame('linear')
 
@@ -155,24 +176,30 @@ def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock
         xyz=antpos_ECEF,
         receptor_frame=rec_frame,
         diameter=1.0,  # Errors if not set
-        mount='altaz')
+        mount='altaz',
+    )
 
     # Setup time -- note time_array is Nbls*Nt long, we assume it is ordered
-    t = Time(uv.time_array[::uv.Nbls], format='jd', location=telescope_earthloc)
+    t = Time(uv.time_array[:: uv.Nbls], format='jd', location=telescope_earthloc)
 
     # Setup frequency
-    f_c  = uv.freq_array
+    f_c = uv.freq_array
     f_bw = np.ones_like(f_c) * uv.channel_width
 
     if len(uv.freq_array) > 1:
-        raise NotImplementedError("Only length-1 frequency arrays supported at present.")
+        raise NotImplementedError(
+            'Only length-1 frequency arrays supported at present.'
+        )
 
-    #integration_time (float, optional) – Only used in the specific case where times only has one element
+    # integration_time (float, optional) – Only used in the specific case where times only has one element
     t_int = uv.integration_time[0] if uv.Ntimes == 1 else None
 
     # Phase center
-    pc = SkyCoord(uv.phase_center_app_ra_degrees[0], uv.phase_center_app_dec_degrees[0],
-                  unit=('degree', 'degree'))
+    pc = SkyCoord(
+        uv.phase_center_app_ra_degrees[0],
+        uv.phase_center_app_dec_degrees[0],
+        unit=('degree', 'degree'),
+    )
 
     # Reshape UVW array -- note this assumes data are organized in same way as SDP
     uvw = uv.uvw_array.reshape((uv.Ntimes, uv.Nbls, 3))
@@ -180,21 +207,25 @@ def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock
         uvw *= -1
 
     # Reshape time array -- only need one entry per timestep
-    t = Time(uv.time_array.reshape((uv.Ntimes, uv.Nbls))[:, 0], format='jd', location=telescope_earthloc)
+    t = Time(
+        uv.time_array.reshape((uv.Ntimes, uv.Nbls))[:, 0],
+        format='jd',
+        location=telescope_earthloc,
+    )
 
     # Reshape visibility array -- should be same layout so no worries here
     vis_data = uv.data_array.reshape((uv.Ntimes, uv.Nbls, 1, 4))
 
-
     # Remap XX.YY,XY,YX -> XX,XY,YX,YY
-    vis_data = vis_data[..., [0,2,3,1]]
+    vis_data = vis_data[..., [0, 2, 3, 1]]
 
     if conj:
         vis_data = np.conj(vis_data)
 
     # Generate baseline IDs
     baselines = pd.MultiIndex.from_arrays(
-        (uv.ant_1_array[:uv.Nbls], uv.ant_2_array[:uv.Nbls]), names=("antenna1", "antenna2")
+        (uv.ant_1_array[: uv.Nbls], uv.ant_2_array[: uv.Nbls]),
+        names=('antenna1', 'antenna2'),
     )
 
     # Get source name (kinda hidden in phase_center_catalog)
@@ -202,23 +233,23 @@ def uvdata_to_sdp_vis(uv: UVData, scan_id: int=0, scan_intent: str="", execblock
 
     # Create SDP visibility
     v = Visibility.constructor(
-            uvw=uvw,
-            time=t.mjd * 86400,
-            frequency=f_c,
-            vis=vis_data,
-            weight=np.ones(vis_data.shape),
-            baselines=baselines,
-            flags=np.zeros(vis_data.shape, dtype="int"),
-            integration_time=t_int,
-            channel_bandwidth=f_bw,
-            polarisation_frame=pol_frame,
-            source=source_name,
-            scan_id=scan_id,
-            scan_intent=scan_intent,
-            execblock_id=execblock_id,
-            meta={},
-            phasecentre=pc,
-            configuration=config,
-        )
+        uvw=uvw,
+        time=t.mjd * 86400,
+        frequency=f_c,
+        vis=vis_data,
+        weight=np.ones(vis_data.shape),
+        baselines=baselines,
+        flags=np.zeros(vis_data.shape, dtype='int'),
+        integration_time=t_int,
+        channel_bandwidth=f_bw,
+        polarisation_frame=pol_frame,
+        source=source_name,
+        scan_id=scan_id,
+        scan_intent=scan_intent,
+        execblock_id=execblock_id,
+        meta={},
+        phasecentre=pc,
+        configuration=config,
+    )
 
     return v

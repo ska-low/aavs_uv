@@ -1,4 +1,5 @@
 """simple_cal: tools to apply simple stefcal."""
+
 from __future__ import annotations
 
 import typing
@@ -27,12 +28,17 @@ def create_baseline_matrix(xyz: np.array) -> np.ndarray:
     N = xyz.shape[0]
     bls = np.zeros((N, N), dtype='float32')
     for ii in range(N):
-        bls[:, ii] = np.sqrt(np.sum((xyz - xyz[ii])**2, axis=1))
+        bls[:, ii] = np.sqrt(np.sum((xyz - xyz[ii]) ** 2, axis=1))
     return bls
 
 
-def simple_stefcal(aa: ApertureArray, sky_model: dict, antenna_flags: np.ndarray=None,
-                   min_baseline: float=None, sigma_thr: float=10) -> tuple[ApertureArray, np.ndarray]:
+def simple_stefcal(
+    aa: ApertureArray,
+    sky_model: dict,
+    antenna_flags: np.ndarray = None,
+    min_baseline: float = None,
+    sigma_thr: float = 10,
+) -> tuple[ApertureArray, np.ndarray]:
     """Apply stefcal to calibrate UV data.
 
     Args:
@@ -51,16 +57,18 @@ def simple_stefcal(aa: ApertureArray, sky_model: dict, antenna_flags: np.ndarray
     # Setup indexes and create calibration array
     f_idx, t_idx = aa.idx['f'], aa.idx['t']
     # Arrays have shape (freq, antenna, pol), freq=1, pol=2
-    cal_arr  = np.zeros((1, aa.n_ant, 2), dtype='complex128')
+    cal_arr = np.zeros((1, aa.n_ant, 2), dtype='complex128')
     flag_arr = np.zeros((1, aa.n_ant, 2), dtype='bool')
 
     sc_log = {}
 
     # loop over polarization (and matching stokes index)
-    for p_idx, s_idx in ((0,0), (1,3)):
+    for p_idx, s_idx in ((0, 0), (1, 3)):
         # Generate model visibilities, and convert raw data to visibility matrix
-        v_meas  = aa.generate_vis_matrix(vis='data')[..., s_idx]
-        v_model = aa.simulation.sim_vis_pointsrc(sky_model)[t_idx, f_idx, :, :, s_idx].values
+        v_meas = aa.generate_vis_matrix(vis='data')[..., s_idx]
+        v_model = aa.simulation.sim_vis_pointsrc(sky_model)[
+            t_idx, f_idx, :, :, s_idx
+        ].values
 
         # If minimum baseline is set, flag short baselines
         if min_baseline:
@@ -71,7 +79,7 @@ def simple_stefcal(aa: ApertureArray, sky_model: dict, antenna_flags: np.ndarray
         # TODO: Add logger info
         if antenna_flags is None and 'cal' in aa.workspace:
             if aa.workspace['cal'] is not None:
-                logger.info(f"Using antenna flags from cal in workspace (pol {p_idx})")
+                logger.info(f'Using antenna flags from cal in workspace (pol {p_idx})')
                 cal = aa.workspace['cal']
                 flags = cal.flags[t_idx, ..., p_idx].values
             else:
@@ -82,7 +90,7 @@ def simple_stefcal(aa: ApertureArray, sky_model: dict, antenna_flags: np.ndarray
             flags = antenna_flags
 
         # Strip out flagged antennas
-        v_meas_sc  = v_meas[~flags][:, ~flags]
+        v_meas_sc = v_meas[~flags][:, ~flags]
         v_model_sc = v_model[~flags][:, ~flags]
 
         # Run stefcal
@@ -99,12 +107,16 @@ def simple_stefcal(aa: ApertureArray, sky_model: dict, antenna_flags: np.ndarray
     flag_arr = np.logical_or(flag_arr, cal_arr_abs_norm > sigma_thr)
     cal_arr[flag_arr] = 0
 
-    cal = create_uvx_antenna_cal(telescope=aa.name, method='stefcal',
-                                antenna_cal_arr=cal_arr,
-                                antenna_flags_arr=flag_arr,
-                                f=aa.f, a=aa.ant_names, p=np.array(('X', 'Y')),
-                                provenance={'stefcal': sc_log}
-                                )
+    cal = create_uvx_antenna_cal(
+        telescope=aa.name,
+        method='stefcal',
+        antenna_cal_arr=cal_arr,
+        antenna_flags_arr=flag_arr,
+        f=aa.f,
+        a=aa.ant_names,
+        p=np.array(('X', 'Y')),
+        provenance={'stefcal': sc_log},
+    )
 
     return cal
 
@@ -112,6 +124,7 @@ def simple_stefcal(aa: ApertureArray, sky_model: dict, antenna_flags: np.ndarray
 ####################
 ## HOLOGRAPHER CLASS
 ####################
+
 
 class AaStefcal(AaBaseModule):
     """A class version of the above simple stefcal routine.
@@ -121,7 +134,8 @@ class AaStefcal(AaBaseModule):
     run_stefcal() - run stefcal
 
     """
-    def __init__(self, aa: ApertureArray, sky_model: dict=None):
+
+    def __init__(self, aa: ApertureArray, sky_model: dict = None):
         """Setup AaStefcal.
 
         Args:
@@ -145,11 +159,11 @@ class AaStefcal(AaBaseModule):
         self.__name__ = name
         self.name = name
         # Inherit docstrings
-        self.run_stefcal.__func__.__doc__  = simple_stefcal.__doc__
+        self.run_stefcal.__func__.__doc__ = simple_stefcal.__doc__
 
     def __check_sky_model(self):
         if self.sky_model is None:
-            e = "Point source sky model not set! Run set_sky_model() first."
+            e = 'Point source sky model not set! Run set_sky_model() first.'
             logger.error(e)
             raise RuntimeError(e)
 

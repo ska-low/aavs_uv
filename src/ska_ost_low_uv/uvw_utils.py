@@ -1,10 +1,12 @@
 """uvw_utils: Utilities for UVW coordinates."""
+
 import numpy as np
 from astropy.constants import c
 from pyuvdata import utils as uvutils
 from ska_ost_low_uv.datamodel import UVX
 
 LIGHT_SPEED = c.value
+
 
 def calc_zenith_apparent_coords(uv: UVX) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the apparent RA/DEC coordinates of the array zenith.
@@ -35,11 +37,12 @@ def calc_zenith_apparent_coords(uv: UVX) -> tuple[np.ndarray, np.ndarray, np.nda
     )
 
     frame_pos_angle = uvutils.phasing.calc_frame_pos_angle(
-                                 time_array=uv.timestamps.jd,
-                                 app_ra=app_ras,
-                                 app_dec=app_decs,
-                                 ref_frame='icrs',
-                                 telescope_loc=uv.origin)
+        time_array=uv.timestamps.jd,
+        app_ra=app_ras,
+        app_dec=app_decs,
+        ref_frame='icrs',
+        telescope_loc=uv.origin,
+    )
 
     return app_ras, app_decs, frame_pos_angle
 

@@ -8,7 +8,7 @@ import ska_ost_low_uv
 
 # This is a sample pytest test fixture
 # See more at: http://doc.pytest.org/en/latest/fixture.html
-@pytest.fixture(name="version")
+@pytest.fixture(name='version')
 def version_fixture() -> str:
     """Return the package's version string.
 
@@ -23,4 +23,4 @@ def test_content(version: str) -> None:
 
     :param version: the version fixture
     """
-    assert version == "0.0.0"
+    assert version == '0.0.0'

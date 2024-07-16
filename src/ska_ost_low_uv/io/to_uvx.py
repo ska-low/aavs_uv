@@ -1,4 +1,5 @@
 """to_uvx: I/O for writing UVX data into HDF5 schema."""
+
 import os
 
 import h5py
@@ -20,7 +21,9 @@ from ska_ost_low_uv.io.mccs_yaml import station_location_from_platform_yaml
 from ska_ost_low_uv.utils import get_aa_config, get_software_versions, load_yaml
 
 
-def load_observation_metadata(filename: str, yaml_config: str=None, load_config: str=None) -> dict:
+def load_observation_metadata(
+    filename: str, yaml_config: str = None, load_config: str = None
+) -> dict:
     """Load observation metadata from correlator output HDF5.
 
     Args:
@@ -33,7 +36,7 @@ def load_observation_metadata(filename: str, yaml_config: str=None, load_config:
         is set, it will take precedence over internal config
     """
     # Load metadata from config and HDF5 file
-    md      = get_hdf5_metadata(filename)
+    md = get_hdf5_metadata(filename)
 
     if yaml_config is None:
         logger.info(f'Using internal config {load_config}')
@@ -46,22 +49,42 @@ def load_observation_metadata(filename: str, yaml_config: str=None, load_config:
 
     # Update path to antenna location files to use absolute path
     config_abspath = os.path.dirname(os.path.abspath(yaml_config))
-    md['antenna_locations_file'] = os.path.join(config_abspath, md['antenna_locations_file'])
-    md['baseline_order_file']  = os.path.join(config_abspath, md['baseline_order_file'])
-    md['station_config_file']  = os.path.abspath(yaml_config)
+    md['antenna_locations_file'] = os.path.join(
+        config_abspath, md['antenna_locations_file']
+    )
+    md['baseline_order_file'] = os.path.join(config_abspath, md['baseline_order_file'])
+    md['station_config_file'] = os.path.abspath(yaml_config)
     return md
 
 
 def get_hdf5_metadata(filename: str) -> dict:
     """Extract metadata from HDF5 and perform checks."""
     with h5py.File(filename, mode='r') as datafile:
-        expected_keys = ['n_antennas', 'ts_end', 'n_pols', 'n_beams', 'tile_id', 'n_chans', 'n_samples', 'type',
-                         'data_type', 'data_mode', 'ts_start', 'n_baselines', 'n_stokes', 'channel_id', 'timestamp',
-                         'date_time', 'n_blocks']
+        expected_keys = [
+            'n_antennas',
+            'ts_end',
+            'n_pols',
+            'n_beams',
+            'tile_id',
+            'n_chans',
+            'n_samples',
+            'type',
+            'data_type',
+            'data_mode',
+            'ts_start',
+            'n_baselines',
+            'n_stokes',
+            'channel_id',
+            'timestamp',
+            'date_time',
+            'n_blocks',
+        ]
 
         # Check that keys are present
-        if set(expected_keys) - set(datafile.get('root').attrs.keys()) != set(): # pragma: no cover
-            raise Exception("Missing metadata in file")
+        if (
+            set(expected_keys) - set(datafile.get('root').attrs.keys()) != set()
+        ):  # pragma: no cover
+            raise Exception('Missing metadata in file')
 
         # All good, get metadata
         metadata = {k: v for (k, v) in datafile.get('root').attrs.items()}
@@ -76,9 +99,15 @@ def get_hdf5_metadata(filename: str) -> dict:
     return metadata
 
 
-def hdf5_to_uvx(fn_data: str, telescope_name: str=None,
-               yaml_config: str=None, conj: bool=True,
-               from_platform_yaml: bool=False, context: dict=None, provenance: dict=None) -> UVX:
+def hdf5_to_uvx(
+    fn_data: str,
+    telescope_name: str = None,
+    yaml_config: str = None,
+    conj: bool = True,
+    from_platform_yaml: bool = False,
+    context: dict = None,
+    provenance: dict = None,
+) -> UVX:
     """Create UV from HDF5 data and config file.
 
     Args:
@@ -127,7 +156,9 @@ def hdf5_to_uvx(fn_data: str, telescope_name: str=None,
         data = h5['correlation_matrix']['data']
 
         if from_platform_yaml:
-            eloc, antpos = station_location_from_platform_yaml(md['antenna_locations_file'])
+            eloc, antpos = station_location_from_platform_yaml(
+                md['antenna_locations_file']
+            )
 
         else:
             # Telescope location
@@ -139,16 +170,26 @@ def hdf5_to_uvx(fn_data: str, telescope_name: str=None,
             antpos = pd.read_csv(md['antenna_locations_file'], delimiter=' ')
 
         # Generate time - note addition of ts/2 to move to center of integration
-        t     = Time(np.arange(md['n_integrations'], dtype='float64') * md['tsamp'] + md['ts_start'] +  md['tsamp']/2,
-                    format='unix', location=eloc)
-        f_arr = (np.arange(md['n_chans'], dtype='float64') + 1) * md['channel_spacing'] * md['channel_id']
-        f     = Quantity(f_arr, unit='Hz')
+        t = Time(
+            np.arange(md['n_integrations'], dtype='float64') * md['tsamp']
+            + md['ts_start']
+            + md['tsamp'] / 2,
+            format='unix',
+            location=eloc,
+        )
+        f_arr = (
+            (np.arange(md['n_chans'], dtype='float64') + 1)
+            * md['channel_spacing']
+            * md['channel_id']
+        )
+        f = Quantity(f_arr, unit='Hz')
 
         antennas = create_antenna_data_array(antpos, eloc)
-        data     = create_visibility_array(data, f, t, eloc, conj=conj)
+        data = create_visibility_array(data, f, t, eloc, conj=conj)
         data.attrs['unit'] = md['vis_units']
 
         # Add extra info about time resolution and frequency resolution from input metadata
+        # fmt: off
         data.time.attrs['resolution']             = md['tsamp']
         data.time.attrs['resolution_unit']        = 's'
 
@@ -157,49 +198,63 @@ def hdf5_to_uvx(fn_data: str, telescope_name: str=None,
         data.frequency.attrs['channel_bandwidth'] = md['channel_width']
         data.frequency.attrs['channel_id']        = md['channel_id']
         data.frequency.attrs['resolution_unit']   = 'Hz'
+        # fmt: on
 
         if md['channel_width'] > md['channel_spacing']:
             data.frequency.attrs['oversampled'] = True
 
         # Create empty provenance dictionary if not passed, then fill with creation info
-        provenance = create_empty_provenance_dict() if provenance is None else provenance
-        provenance.update({'input_files': {
-                            'data_filename': os.path.abspath(fn_data),
-                            'config_filename': md['station_config_file'],
-                            },
-                    'ska_ost_low_uv_config': get_software_versions(),
-                    'input_metadata': md})
+        provenance = (
+            create_empty_provenance_dict() if provenance is None else provenance
+        )
+        provenance.update({
+            'input_files': {
+                'data_filename': os.path.abspath(fn_data),
+                'config_filename': md['station_config_file'],
+            },
+            'ska_ost_low_uv_config': get_software_versions(),
+            'input_metadata': md,
+        })
 
         # Include observation_info attributes, which includes firmware and software versions
         if 'observation_info' in h5.keys():
             try:
+                # fmt: off
                 provenance['station_config'] = {
-                    'observation_description':       h5['observation_info'].attrs['description'],
-                    'tpm_firmware_version':          h5['observation_info'].attrs['firmware_version'],
-                    'daq_software_version':          h5['observation_info'].attrs['software_version'],
-                    'station_config_yaml':           h5['observation_info'].attrs['station_config']
+                    'observation_description': h5['observation_info'].attrs['description'],
+                    'tpm_firmware_version':    h5['observation_info'].attrs['firmware_version'],
+                    'daq_software_version':    h5['observation_info'].attrs['software_version'],
+                    'station_config_yaml':     h5['observation_info'].attrs['station_config'],
                 }
+                # fmt: on
+
             except KeyError:
-                logger.warning("Could not find expected keys in observation_info")
+                logger.warning('Could not find expected keys in observation_info')
                 obs_info_keys = h5['observation_info'].keys()
-                logger.warning(f"{obs_info_keys}")
+                logger.warning(f'{obs_info_keys}')
 
         # Compute zenith RA/DEC for phase center
-        zen_aa = AltAz(alt=Angle(90, unit='degree'), az=Angle(0, unit='degree'), obstime=t[0], location=t.location)
+        zen_aa = AltAz(
+            alt=Angle(90, unit='degree'),
+            az=Angle(0, unit='degree'),
+            obstime=t[0],
+            location=t.location,
+        )
         zen_sc = SkyCoord(zen_aa).icrs
 
         # Create empty context dictionary if not passed
         context_dict = create_empty_context_dict() if context is None else context
 
         # Create UV object
-        uv = UVX(name=md['telescope_name'],
-                antennas=antennas,
-                context=context_dict,
-                data=data,
-                timestamps=t,
-                origin=eloc,
-                phase_center=zen_sc,
-                provenance=provenance
-                )
+        uv = UVX(
+            name=md['telescope_name'],
+            antennas=antennas,
+            context=context_dict,
+            data=data,
+            timestamps=t,
+            origin=eloc,
+            phase_center=zen_sc,
+            provenance=provenance,
+        )
 
         return uv

@@ -1,5 +1,6 @@
 """aa_module: A basic class for child objects."""
 
+
 class AaBaseModule(object):
     """A basic class for ApertureArray child objects.
 
@@ -24,6 +25,7 @@ class AaBaseModule(object):
             get_alt_az() - Get the alt/az of a given SkyCoord
             generate_phase_vector() - Generate a phase vector toward a given SkyCoord
     """
+
     def __init__(self, name):
         """Initialize class.
 
@@ -34,4 +36,4 @@ class AaBaseModule(object):
 
     def __repr__(self):
         """Print simple representation of class."""
-        return f"<Aperture Array module: {self.name}>\n" + self.__doc__
+        return f'<Aperture Array module: {self.name}>\n' + self.__doc__

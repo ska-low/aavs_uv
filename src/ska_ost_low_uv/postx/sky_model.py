@@ -1,4 +1,5 @@
 """sky_model: Simple sky model class and tools."""
+
 from __future__ import annotations
 
 import typing
@@ -11,7 +12,8 @@ from astropy.coordinates import SkyCoord, get_body, get_sun
 
 class RadioSource(SkyCoord):
     """A SkyCoordinate with a magnitude."""
-    def __init__(self, *args, mag: float=1.0, unit: str=None, **kwargs):
+
+    def __init__(self, *args, mag: float = 1.0, unit: str = None, **kwargs):
         """Create a RadioSource (A SkyCoord with magnitude).
 
         Args:
@@ -22,9 +24,10 @@ class RadioSource(SkyCoord):
             **kwargs (dict): Keyword args to pass to SkyCoord
         """
         if unit is None:
-            unit=('hourangle', 'degree')
+            unit = ('hourangle', 'degree')
         super().__init__(*args, unit=unit, **kwargs)
         self.mag = mag
+
 
 def generate_skycat(observer: ApertureArray):
     """Generate a SkyModel for a given observer with major radio sources.
@@ -35,6 +38,7 @@ def generate_skycat(observer: ApertureArray):
     Returns:
         skycat (SkyModel): A sky catalog with the A-team sources
     """
+    # fmt: off
     skycat = {
         'Virgo_A':     RadioSource('12h 30m 49s',    '+12:23:28',    ),
         'Hydra_A':     RadioSource('09h 18m 5.6s',   '-12:5:44.0',   ),
@@ -52,25 +56,28 @@ def generate_skycat(observer: ApertureArray):
         'LMC':         RadioSource('05h 23m 34.6s',  '-69:45:22',    ),
         'SMC':         RadioSource('00h 52m 38.0s',  '-72:48:01',    ),
     }
+    # fmt: on
     skycat.update(generate_skycat_solarsys(observer))
     return skycat
 
 
 def generate_skycat_solarsys(observer: ApertureArray):
     """Generate Sun + Moon for observer."""
-    sun_gcrs  = get_body('sun', observer._ws('t'))
-    moon_gcrs = get_body('moon', observer._ws('t'))
+    # fmt: off
+    sun_gcrs     = get_body('sun', observer._ws('t'))
+    moon_gcrs    = get_body('moon', observer._ws('t'))
     jupiter_gcrs = get_body('jupiter', observer._ws('t'))
 
     skycat = {
-        'Sun': RadioSource(sun_gcrs.ra, sun_gcrs.dec, mag=1.0),
-        'Moon': RadioSource(moon_gcrs.ra, moon_gcrs.dec, mag=1.0),
+        'Sun':     RadioSource(sun_gcrs.ra, sun_gcrs.dec, mag=1.0),
+        'Moon':    RadioSource(moon_gcrs.ra, moon_gcrs.dec, mag=1.0),
         'Jupiter': RadioSource(jupiter_gcrs.ra, jupiter_gcrs.dec, mag=1.0),
     }
+    # fmt: on
     return skycat
 
 
-def sun_model(aa: ApertureArray, t_idx: int=0, scaling: str='hi') -> np.array:
+def sun_model(aa: ApertureArray, t_idx: int = 0, scaling: str = 'hi') -> np.array:
     """Generate sun flux model at given frequencies.
 
     Flux model values taken from Table 2 of Macario et al (2022).
@@ -100,8 +107,8 @@ def sun_model(aa: ApertureArray, t_idx: int=0, scaling: str='hi') -> np.array:
         by factor of 3.29 / 1.94 = 1.69587629x  (based on eqns 2, 4)
         https://doi.org/10.1051/swsc/2021039
     """
-    f_i = (50, 100, 150, 200, 300)                      # Frequency in MHz
-    α_i = (2.15, 1.86, 1.61, 1.50, 1.31)                # Spectral index  # noqa: F841
+    f_i = (50, 100, 150, 200, 300)  # Frequency in MHz
+    α_i = (2.15, 1.86, 1.61, 1.50, 1.31)  # Spectral index  # noqa: F841
     S_i = np.array((5400, 24000, 5100, 81000, 149000))  # Flux in Jy
 
     if scaling == 'hi':

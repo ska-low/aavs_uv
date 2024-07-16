@@ -1,4 +1,5 @@
 """aa_calibartion: ApertureArray calibration submodule."""
+
 from __future__ import annotations
 
 import typing
@@ -13,6 +14,7 @@ from . import holography, simple_cal
 ## AA_CALIBRATOR CLASS
 ######################
 
+
 class AaCalibrator(AaBaseModule):
     """ApertureArray Calibration module.
 
@@ -21,6 +23,7 @@ class AaCalibrator(AaBaseModule):
     stefcal - calibration based on stefcal approach
 
     """
+
     def __init__(self, aa: ApertureArray):
         """Setup AaCalibrator.
 
@@ -37,4 +40,4 @@ class AaCalibrator(AaBaseModule):
         self.__name__ = name
         self.name = name
         # Inherit docstrings
-        #self.make_image.__func__.__doc__  = make_image.__doc__
+        # self.make_image.__func__.__doc__  = make_image.__doc__
