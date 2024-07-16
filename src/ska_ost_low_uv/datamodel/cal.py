@@ -11,6 +11,7 @@ from ska_ost_low_uv.utils import get_resource_path, get_software_versions, load_
 @dataclass
 class UVXAntennaCal:
     """Dataclass for antenna calibration to accompany UVX data."""
+
     # fmt: off
     telescope: str          # Antenna array name, e.g. AAVS3
     method: str             # Calibration method name (e.g. JishnuCal)

@@ -74,7 +74,7 @@ def uvx_to_pyuvdata(
     # fmt: off
     md = {
         'telescope_name': uvx.name,
-        'instrument': uvx.name,
+        'instrument':     uvx.name,
         'n_integrations': uvx.data.time.shape[0],
         'n_antennas':     uvx.antennas.antenna.shape[0],
         'n_baselines':    uvx.data.baseline.shape[0],
@@ -89,7 +89,6 @@ def uvx_to_pyuvdata(
         'history': f"Generated with {__version__} at {Time(datetime.now()).iso}",
     }
     # fmt: on
-
 
     if max_int is None:
         max_int = md['n_integrations'] - start_int
@@ -343,17 +342,17 @@ def hdf5_to_pyuvdata(
     )
 
     # Now fill in antenna info fields
-    # fmt: of
-    uv.antenna_positions = antpos_ECEF
-    uv.antenna_names     = df_ant['name'].values.astype('str')
-    uv.antenna_numbers   = np.array(list(df_ant.index), dtype='int32')
-    uv.ant_1_array       = np.tile(df_bl['ant1'].values, md['n_integrations'])
-    uv.ant_2_array       = np.tile(df_bl['ant2'].values, md['n_integrations'])
+    # fmt: off
+    uv.antenna_positions    = antpos_ECEF
+    uv.antenna_names        = df_ant['name'].values.astype('str')
+    uv.antenna_numbers      = np.array(list(df_ant.index), dtype='int32')
+    uv.ant_1_array          = np.tile(df_bl['ant1'].values, md['n_integrations'])
+    uv.ant_2_array          = np.tile(df_bl['ant2'].values, md['n_integrations'])
     # Create baseline array - note: overwrites baseline ordering file with pyuvdata standard.
-    uv.baseline_array    = uvutils.antnums_to_baseline(
+    uv.baseline_array = uvutils.antnums_to_baseline(
         uv.ant_1_array, uv.ant_2_array, Nants_telescope=md['n_antennas']
     )
-    # fmt: off
+    # fmt: on
 
     # Frequency axis
     f0 = md['channel_spacing'] * md['channel_id']

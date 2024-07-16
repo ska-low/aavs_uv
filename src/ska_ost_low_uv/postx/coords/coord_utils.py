@@ -84,7 +84,7 @@ def skycoord_to_lmn(src: SkyCoord, zen: SkyCoord) -> np.array:
     m   = np.sin(DEC_rad) * np.cos(DEC_rad_0) - np.cos(DEC_rad) * np.sin(DEC_rad_0) * np.cos(RA_delta_rad)
     n   = np.sqrt(1 - l**2 - m**2)
     lmn = np.column_stack((l, m, n))
-    #fmt: on
+    # fmt: on
     return lmn
 
 

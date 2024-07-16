@@ -17,6 +17,7 @@ from ska_ost_low_uv.utils import get_resource_path, get_software_versions, load_
 @dataclass
 class UVX:
     """Dataclass for storing UVX interferometer data."""
+
     # fmt: off
     name: str               # Antenna array name, e.g. AAVS3
     context: dict           # Contextual information (observation intent, notes, observer name)
@@ -27,6 +28,7 @@ class UVX:
     phase_center: SkyCoord  # Astropy SkyCoord corresponding to phase center
     provenance: dict        # Provenance/history information and other metadata
     # fmt: on
+
 
 def create_empty_context_dict():
     """Create an empty context dictionary with default keys."""

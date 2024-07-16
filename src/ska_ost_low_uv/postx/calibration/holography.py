@@ -554,6 +554,7 @@ def plot_aperture(
         plt.scatter(ix[~ant_flags], iy[~ant_flags], s=circle_size, facecolors='none', edgecolors='white', alpha=0.7)
         # fmt: on
 
+
 def plot_aperture_xy(
     aa: ApertureArray,
     cal: dict,
