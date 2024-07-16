@@ -1,7 +1,11 @@
-"""test_pyuvdata_to_uvx: tests for aa_uv.io.from_pyuvdata."""
-from aa_uv.io.from_pyuvdata import convert_data_to_uvx_convention, pyuvdata_to_uvx
-from aa_uv.utils import get_test_data
+"""test_pyuvdata_to_uvx: tests for ska_ost_low_uv.io.from_pyuvdata."""
+
 from pyuvdata import UVData
+from ska_ost_low_uv.io.from_pyuvdata import (
+    convert_data_to_uvx_convention,
+    pyuvdata_to_uvx,
+)
+from ska_ost_low_uv.utils import get_test_data
 
 
 def test_pyuvdata_to_uvx():
@@ -16,5 +20,6 @@ def test_pyuvdata_to_uvx():
 
     print(uvx)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     test_pyuvdata_to_uvx()

@@ -4,23 +4,23 @@ Utilities
 uvw_utils.py
 ============
 
-.. automodule:: aa_uv.uvw_utils
+.. automodule:: ska_ost_low_uv.uvw_utils
     :members:
 
 vis_utils.py
 ============
 
-.. automodule:: aa_uv.vis_utils
+.. automodule:: ska_ost_low_uv.vis_utils
     :members:
 
 utils.py
 =========
 
-.. automodule:: aa_uv.utils
+.. automodule:: ska_ost_low_uv.utils
     :members:
 
 parallelize.py
 ==============
 
-.. automodule:: aa_uv.parallelize
+.. automodule:: ska_ost_low_uv.parallelize
     :members:

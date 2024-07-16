@@ -1,8 +1,8 @@
-## aa_uv
+## ska-ost-low-uv
 
 Utilities for handling UV data products for low-frequency aperture array telescopes.
 
-`aa_uv` provides a `UVX` data format and Python class for storing and handling interferometric data.
+`ska-ost-low-uv` provides a `UVX` data format and Python class for storing and handling interferometric data.
 
 These codes use the `UVData` class from [pyuvdata](https://pyuvdata.readthedocs.io) to convert the raw HDF5 correlator output files to science-ready data formats like UVFITS, MIRIAD, and CASA MeasurementSets.
 
@@ -31,10 +31,10 @@ To install from scratch using `conda`, download this repository, cd into the dir
 
 ```
 conda env create -f environment.yml
-conda activate aa_uv
+conda activate ska_ost_low_uv
 ```
 
-You can then use `conda activate aa_uv` to start up the environment, and `conda deactivate` to leave it.
+You can then use `conda activate ska_ost_low_uv` to start up the environment, and `conda deactivate` to leave it.
 
 Then run `pip install .` and any extras (e.g. `pip install .[postx]`).
 
@@ -58,9 +58,9 @@ options:
   -o OUTPUT_FORMAT, --output_format OUTPUT_FORMAT
                         Output file format (uvx, uvfits, miriad, ms, uvh5, sdp). Can be comma separated for multiple formats.
   -c ARRAY_CONFIG, --array_config ARRAY_CONFIG
-                        Array configuration YAML file. If supplied, will override aa_uv internal array configs.
+                        Array configuration YAML file. If supplied, will override ska_ost_low_uv internal array configs.
   -n TELESCOPE_NAME, --telescope_name TELESCOPE_NAME
-                        Telescope name, e.g. 'aavs3'. If supplied, will attempt to use aa_uv internal array config.
+                        Telescope name, e.g. 'aavs3'. If supplied, will attempt to use ska_ost_low_uv internal array config.
   -s, --phase-to-sun    Re-phase to point toward Sun (the sun must be visible!). If flag not set, data will be phased toward zenith.
   -j, --no_conj         Do not conjugate visibility data (note AAVS2 and AAVS3 require conjugation)
   -b, --batch           Batch mode. Input and output are treated as directories, and all subfiles are converted.
@@ -90,7 +90,7 @@ The converter needs a [yaml configuration file](https://github.com/ska-sci-ops/a
 
 ```python
 
-from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis
+from ska_ost_low_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis
 
 def hdf5_to_pyuvdata(filename: str, yaml_config: str) -> pyuvdata.UVData:
     """ Convert AAVS2/3 HDF5 correlator output to UVData object
@@ -136,7 +136,7 @@ This will create an environment called `aavs`, which you enter by typing `conda 
 conda activate aavs
 pip install .
 ```
-Pip will then install `aa_uv` and the few final packages that are not available in the conda-forge package manager (e.g. `pygdsm`, `pyuvdata`, `ska-sdp-datamodels`).
+Pip will then install `ska_ost_low_uv` and the few final packages that are not available in the conda-forge package manager (e.g. `pygdsm`, `pyuvdata`, `ska-sdp-datamodels`).
 
 #### Pip / manual
 
@@ -152,8 +152,19 @@ Alternatively, download this repository and install using `pip install .`. A lis
 
 [![astropy](http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat)](http://www.astropy.org/)
 
-`aa_uv` is built upon the following astronomy packages:
+`ska_ost_low_uv` is built upon the following astronomy packages:
 * [astropy](http://www.astropy.org/) for coordinate calculations.
 * [pyuvdata](https://github.com/RadioAstronomySoftwareGroup/pyuvdata) for interferometric data format conversion.
 * [matvis](https://github.com/HERA-Team/matvis) for visibility simulation.
-* [pygdsm](https://github.com/telegraphic/pygdsm) for diffuse sky model generation.
+* [pygdsm](https://github.com/telegraphic/pygdsm) for diffuse sky model generation.# ska-ost-low-uv
+
+SKA Ost Low UV provides utilities for handling UV data products for SKA Low.
+
+
+## Documentation
+
+[![Documentation Status](https://readthedocs.org/projects/ska-telescope-ska-ost-low-uv/badge/?version=latest)](https://developer.skao.int/projects/ska-ost-low-uv/en/latest/?badge=latest)
+
+The documentation for this project, including how to get started with it, can be found in the `docs` folder, or browsed in the SKA development portal:
+
+* [ska-ost-low-uv documentation](https://developer.skatelescope.org/projects/ska-ost-low-uv/en/latest/index.html "SKA Developer Portal: ska-ost-low-uv documentation")

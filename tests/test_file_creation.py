@@ -1,9 +1,10 @@
 """test_file_creation: test output data formats."""
+
 import os
 
-from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, phase_to_sun
-from aa_uv.utils import get_aa_config, get_test_data
 from astropy.time import Time
+from ska_ost_low_uv.io import hdf5_to_pyuvdata, hdf5_to_sdp_vis, phase_to_sun
+from ska_ost_low_uv.utils import get_aa_config, get_test_data
 from ska_sdp_datamodels.visibility import export_visibility_to_hdf5
 
 
@@ -12,7 +13,9 @@ def test_file_creation():
     try:
         # Files to open
         yaml_raw = get_aa_config('aavs2')
-        fn_raw   = get_test_data('aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5')
+        fn_raw = get_test_data(
+            'aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
+        )
 
         # Load raw data and phase to sun
         uv = hdf5_to_pyuvdata(fn_raw, yaml_raw)
@@ -38,5 +41,6 @@ def test_file_creation():
             except FileNotFoundError:
                 pass
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     test_file_creation()

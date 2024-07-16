@@ -1,14 +1,15 @@
 """Update UV config from MCCS YAML.
 
 * Retrieves the lasest ska-low-deployment git repository (where station YAML files are located)
-* Generates aa_uv's internally-used UV Configuration for a station
-* Copies these over to aa_uv/src/aa_uv/config
+* Generates ska_ost_low_uv's internally-used UV Configuration for a station
+* Copies these over to ska_ost_low_uv/src/ska_ost_low_uv/config
 """
+
 import os
 from datetime import datetime
 
-from aa_uv.io.mccs_yaml import station_location_from_platform_yaml
 from astropy.time import Time
+from ska_ost_low_uv.io.mccs_yaml import station_location_from_platform_yaml
 
 MCCS_CONFIG_PATH = 'ska-low-deployment/tmdata/instrument/mccs-configuration'
 
@@ -22,7 +23,9 @@ def generate_uv_config(name: str):
     now = Time(datetime.now())
 
     # Read the YAML file and return an EarthLocation and pandas Dataframe of antenna positions
-    eloc, antennas = station_location_from_platform_yaml(f'{MCCS_CONFIG_PATH}/{name}.yaml', name)
+    eloc, antennas = station_location_from_platform_yaml(
+        f'{MCCS_CONFIG_PATH}/{name}.yaml', name
+    )
 
     # Create Directory
     os.mkdir(name)
@@ -49,21 +52,26 @@ def generate_uv_config(name: str):
             fh.write(line.strip() + '\n')
 
     # Write antenna csv
-    antennas.to_csv(os.path.join(name, 'antenna_locations.txt'), sep=' ', header=('name', 'E', 'N', 'U', 'flagged', 'rotation'), index_label='idx')
+    antennas.to_csv(
+        os.path.join(name, 'antenna_locations.txt'),
+        sep=' ',
+        header=('name', 'E', 'N', 'U', 'flagged', 'rotation'),
+        index_label='idx',
+    )
 
     # Copy over baseline order
-    os.system(f"cp config/baseline_order.txt {name}/")
+    os.system(f'cp config/baseline_order.txt {name}/')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import glob
 
-    os.system("bash update_mccs_configuration_yaml.sh")
+    os.system('bash update_mccs_configuration_yaml.sh')
 
-    yaml_list = sorted(glob.glob(f"{MCCS_CONFIG_PATH}/*.yaml"))
+    yaml_list = sorted(glob.glob(f'{MCCS_CONFIG_PATH}/*.yaml'))
     for fn in yaml_list:
         name = os.path.splitext(os.path.basename(fn))[0]
         if name.startswith('s'):
-            print(f"Generating {name}")
+            print(f'Generating {name}')
             generate_uv_config(name)
-            os.system(f"mv {name} ../../src/aa_uv/config")
+            os.system(f'mv {name} ../../src/ska_ost_low_uv/config')

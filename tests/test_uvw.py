@@ -1,9 +1,10 @@
 """test_uvw: Test UVW calculations."""
+
 import numpy as np
-from aa_uv.io import hdf5_to_pyuvdata, hdf5_to_uvx
-from aa_uv.utils import get_test_data
-from aa_uv.uvw_utils import calc_uvw
 from pyuvdata import utils as uvutils
+from ska_ost_low_uv.io import hdf5_to_pyuvdata, hdf5_to_uvx
+from ska_ost_low_uv.utils import get_test_data
+from ska_ost_low_uv.uvw_utils import calc_uvw
 
 
 def test_uvw():
@@ -34,11 +35,12 @@ def test_uvw():
 
     # Now compute position angle
     frame_pos_angle = uvutils.phasing.calc_frame_pos_angle(
-                                 time_array=uv.timestamps.jd,
-                                 app_ra=app_ras,
-                                 app_dec=app_decs,
-                                 ref_frame='icrs',
-                                 telescope_loc=uv.origin)
+        time_array=uv.timestamps.jd,
+        app_ra=app_ras,
+        app_dec=app_decs,
+        ref_frame='icrs',
+        telescope_loc=uv.origin,
+    )
 
     # And now we can compute UVWs
     uvw = uvutils.phasing.calc_uvw(
@@ -72,8 +74,14 @@ def test_uvw():
     assert np.allclose(uvd.antenna_numbers, uv.antennas.coords['antenna'].values)
 
     # Check telescope positions match
-    assert np.isclose(uvd.telescope_location_lat_lon_alt[0], uv.origin.to_geodetic().lat.to('rad').value)
-    assert np.isclose(uvd.telescope_location_lat_lon_alt[1], uv.origin.to_geodetic().lon.to('rad').value)
+    assert np.isclose(
+        uvd.telescope_location_lat_lon_alt[0],
+        uv.origin.to_geodetic().lat.to('rad').value,
+    )
+    assert np.isclose(
+        uvd.telescope_location_lat_lon_alt[1],
+        uv.origin.to_geodetic().lon.to('rad').value,
+    )
 
     # Finally, check UVW positions match
     assert np.allclose(uvd.uvw_array, uvw, atol=1e-7)
@@ -82,5 +90,6 @@ def test_uvw():
     uvw_ = calc_uvw(uv)
     assert np.allclose(uvw.reshape((n_ts, n_bl, 3)), uvw_)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     test_uvw()

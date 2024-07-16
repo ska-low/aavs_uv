@@ -174,3 +174,4 @@ cython_debug/
 #.idea/
 .DS_Store
 docs/generate_aa_images.ipynb
+docs/diagrams/test copy.d2

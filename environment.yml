@@ -1,4 +1,4 @@
-name: aa_uv
+name: ska_ost_low_uv
 channels:
   - conda-forge
   - nodefaults

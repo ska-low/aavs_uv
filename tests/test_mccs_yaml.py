@@ -1,6 +1,7 @@
 """test_mccs_yaml: Testing MCCS YAML parsing."""
-from aa_uv.io.mccs_yaml import station_location_from_platform_yaml
-from aa_uv.utils import get_resource_path
+
+from ska_ost_low_uv.io.mccs_yaml import station_location_from_platform_yaml
+from ska_ost_low_uv.utils import get_resource_path
 
 
 def test_mccs_yaml():
@@ -11,5 +12,5 @@ def test_mccs_yaml():
     print(ant_enu)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_mccs_yaml()

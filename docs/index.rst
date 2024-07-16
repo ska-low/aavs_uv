@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-aa_uv: Aperture Array UV Utilities
-==================================
+ska_ost_low_uv: Aperture Array UV Utilities
+===========================================
 
 .. image:: images/allsky_triptych.png
    :width: 100 %
@@ -17,6 +17,7 @@ Utilities for handling UV data products for low-frequency aperture array telesco
    :maxdepth: 2
    :caption: Overview
 
+   index
    conversion
    uvx
 
@@ -32,6 +33,7 @@ Utilities for handling UV data products for low-frequency aperture array telesco
    :caption: QA + Imaging
 
    postx
+   postx_modules
 
 
 
