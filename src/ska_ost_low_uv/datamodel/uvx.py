@@ -173,6 +173,7 @@ def create_visibility_array(
     t: Time,
     eloc: EarthLocation,
     conj: bool = True,
+    transpose: bool = True,
     N_ant: int = 256,
 ) -> xp.DataArray:
     """Create visibility array out of data array + metadata.
@@ -187,6 +188,7 @@ def create_visibility_array(
         md (dict): Dictionary of metadata, as found in raw HDF5 file.
         eloc (EarthLocation): Astropy EarthLocation for array center
         conj (bool): Conjugate visibility data (default True).
+        transpose (bool): Transpose XY* and YX* (default True).
         N_ant (int): Number of antennas in array.
 
 
@@ -206,6 +208,7 @@ def create_visibility_array(
                 * ant1          (baseline) int64 0 0 0 0 0 0 0 ... N_ant
                 * ant2          (baseline) int64 0 1 2 3 4 5 6 ... N_ant
                 * frequency     (frequency) float64 channel frequency values, in Hz
+
 
     Speed notes:
         this code generates MJD and LST timestamps attached as coordinates, as well as an
@@ -252,6 +255,11 @@ def create_visibility_array(
     if conj:
         logger.info('Conjugating data')
         data = np.conj(data)
+
+    if transpose:
+        logger.info('Transposing data')
+        # Remap XX,XY,YX,YX -> XX,YX,XY,YY
+        data = data[..., [0, 2, 1, 3]]
 
     vis = xp.DataArray(
         data, coords=coords, dims=('time', 'frequency', 'baseline', 'polarization')

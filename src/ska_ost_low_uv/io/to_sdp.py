@@ -19,7 +19,6 @@ def hdf5_to_sdp_vis(
     fn_raw: str,
     yaml_config: str = None,
     telescope_name: str = None,
-    conj: bool = True,
     scan_id: int = 0,
     scan_intent: str = '',
     execblock_id: str = '',
@@ -33,7 +32,6 @@ def hdf5_to_sdp_vis(
         yaml_config (str): YAML config data with telescope information.
         telescope_name (str=None): If set, ska_ost_low_uv will try and use internal config file
                                    for telescope_name, e.g. 'aavs2' or 'aavs3'
-        conj (bool): Conjugate visibility data (default True).
         flip_uvw (bool): Negate UVW coordinates (``uvw *= -1``). Default True, as needed to match
                          SDP convention (as of 2023/12).
         apply_phasing (bool): Apply phasing (zenith tracking corrections) to visibility data.
@@ -51,7 +49,9 @@ def hdf5_to_sdp_vis(
 
     """
     uv = hdf5_to_uvx(
-        fn_raw, yaml_config=yaml_config, telescope_name=telescope_name, conj=conj
+        fn_raw,
+        yaml_config=yaml_config,
+        telescope_name=telescope_name,
     )
     md = uv.provenance['input_metadata']
 
@@ -137,14 +137,10 @@ def uvdata_to_sdp_vis(
     scan_id: int = 0,
     scan_intent: str = '',
     execblock_id: str = '',
-    conj: bool = False,
     flip_uvw: bool = True,
+    conj: bool = True,
 ) -> Visibility:
     """Convert pyuvdata object to SDP Visibility.
-
-    Notes:
-        Visibility data conjugation and UVW convention need to match. Default for
-        HDF5 data from SKA-Low is to flip UVW (ant1 - ant2) and NOT conjugate.
 
     Args:
         uv (UVData): pyuvdata UVData object

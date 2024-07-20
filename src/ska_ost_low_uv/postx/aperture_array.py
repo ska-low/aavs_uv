@@ -21,7 +21,6 @@ class ApertureArray(object):
     def __init__(
         self,
         uvx: UVX,
-        conjugate_data: bool = False,
         verbose: bool = False,
         gsm: str = 'gsm08',
     ):
@@ -29,13 +28,11 @@ class ApertureArray(object):
 
         Args:
             uvx (UVX):                datamodel visibility dataclass, UVX
-            conjugate_data (bool):   Flag to conjugate data (in case upper/lower triangle confusion)
             verbose (bool):          Print extra details to screen
             gsm (str):               Name of global sky model (gsm08, gsm16, lfsm, haslam)
         """
         # fmt: off
         self.uvx            = uvx
-        self.conjugate_data = conjugate_data
         self.verbose        = verbose
         self.name           = uvx.name
 

@@ -70,14 +70,6 @@ def parse_args(args):
         default=False,
     )
     p.add_argument(
-        '-j',
-        '--no_conj',
-        help='Do not conjugate visibility data (note AAVS2 and AAVS3 require conjugation)',
-        required=False,
-        action='store_true',
-        default=False,
-    )
-    p.add_argument(
         '-b',
         '--batch',
         help='Batch mode. Input and output are treated as directories, and all subfiles are converted.',
@@ -155,7 +147,6 @@ def convert_file(
     fn_out: str,
     array_config: str,
     output_format: str,
-    conj: bool,
     context: dict,
 ):
     """Convert a file.
@@ -166,7 +157,6 @@ def convert_file(
         fn_out (str): Output filename
         array_config (str): Path to array config directory
         output_format (str): Output format, one of uvfits, miriad, mir, ms, uvh5, sdp, uvx
-        conj (bool): Apply conjugation to visibility data. Useful for matching UVW convention.
         context (dict): Dictionary of additional metadata. Only supported by SDP and UVX formats.
     """
     # Create subdirectories as needed
@@ -178,8 +168,8 @@ def convert_file(
 
     # Load file and read basic metadata
     vis = hdf5_to_uvx(
-        fn_in, yaml_config=array_config, conj=False
-    )  # Conj=False flag so data is not read into memory
+        fn_in, yaml_config=array_config, load_data=False
+    )  # load_data=False flag so data is not read into memory
 
     # Print basic info to screen (skip if in batch mode)
     if not args.batch and not args.megabatch:
@@ -206,7 +196,6 @@ def convert_file(
             uv = hdf5_to_pyuvdata(
                 fn_in,
                 yaml_config=array_config,
-                conj=conj,
                 max_int=args.n_int_per_file,
                 start_int=start_int,
             )
@@ -282,7 +271,7 @@ def convert_file(
 
     elif output_format == 'uvx':
         tr0 = time.time()
-        vis = hdf5_to_uvx(fn_in, yaml_config=array_config, conj=conj, context=context)
+        vis = hdf5_to_uvx(fn_in, yaml_config=array_config, context=context)
         tr = time.time() - tr0
         tw0 = time.time()
         logger.info(f'Creating {args.output_format} file: {fn_out}')
@@ -300,7 +289,6 @@ def convert_file_task(
     fn_out: str,
     array_config: str,
     output_format: str,
-    conj: bool,
     context: dict,
     verbose: bool,
 ):
@@ -312,7 +300,6 @@ def convert_file_task(
         fn_out (str): Output filename
         array_config (str): Path to array config directory
         output_format (str): Output format, one of uvfits, miriad, mir, ms, uvh5, sdp, uvx
-        conj (bool): Apply conjugation to visibility data. Useful for matching UVW convention.
         context (dict): Dictionary of additional metadata. Only supported by SDP and UVX formats.
         verbose (bool): Turn on verbose mode
     """
@@ -320,7 +307,7 @@ def convert_file_task(
         # Silence warnings from other packages (e.g. pyuvdata)
         warnings.simplefilter('ignore')
         reset_logger(use_tqdm=True, disable=True)
-    convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
+    convert_file(args, fn_in, fn_out, array_config, output_format, context)
 
 
 def run(args=None):
@@ -353,7 +340,6 @@ def run(args=None):
             logger.error(f'Cannot find array config: {array_config}')
             config_error_found = True
 
-    conj = False if args.no_conj else True
     output_formats = args.output_format.lower().split(',')
 
     # Check input file exists
@@ -388,7 +374,6 @@ def run(args=None):
     logger.info(f'Array config:     {array_config}')
     logger.info(f'Output path:      {args.outfile}')
     logger.info(f'Output formats:   {output_formats} \n')
-    logger.info(f'Conjugating data: {conj} \n')
 
     # Check if we need to zip data
     if args.zipit:
@@ -460,7 +445,6 @@ def run(args=None):
                             fn_out,
                             array_config,
                             output_format,
-                            conj,
                             context,
                             args.verbose,
                         )
@@ -476,7 +460,7 @@ def run(args=None):
             else:
                 for fn_in, fn_out in zip(filelist, filelist_out):
                     convert_file(
-                        args, fn_in, fn_out, array_config, output_format, conj, context
+                        args, fn_in, fn_out, array_config, output_format, context
                     )
 
 

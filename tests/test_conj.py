@@ -2,6 +2,7 @@
 
 import os
 
+import h5py
 import numpy as np
 from pyuvdata import UVData
 from ska_ost_low_uv.converter import run
@@ -10,74 +11,45 @@ from ska_ost_low_uv.utils import get_aa_config, get_test_data
 
 FN_RAW = get_test_data('aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5')
 YAML_RAW = get_aa_config('aavs2')
-
+YAML_NOCONJ = get_test_data('uv_config/aavs2_noconj/uv_config.yaml')
 
 def test_conj():
     """Test data conjugation is working."""
-    print('Testing conjgation: aavs UV')
-    vis = hdf5_to_uvx(FN_RAW, telescope_name='aavs2')
-    visc = hdf5_to_uvx(FN_RAW, yaml_config=YAML_RAW, conj=True)
-    visn = hdf5_to_uvx(FN_RAW, yaml_config=YAML_RAW, conj=False)
 
-    assert np.allclose(vis.data, visc.data)
-    assert np.allclose(visc.data, np.conj(visn.data))
+    # Load original correlation data
+    # AAVS2 data will be conjugated and transposed when loaded
+    # Due to config/aavs2/uv_config.yaml settings
+    h5 = h5py.File(FN_RAW)
+    data_orig = h5['correlation_matrix']['data'][:]
+    remap = np.array((0,2,1,3))
+
+    print('Testing conjgation: UVX')
+    vis = hdf5_to_uvx(FN_RAW, telescope_name='aavs2')
+    assert np.allclose(np.conj(vis.data[..., remap]), data_orig)
 
     print('Testing conjgation: SDP vis')
     sdp = hdf5_to_sdp_vis(FN_RAW, telescope_name='aavs2', apply_phasing=False)
-    sdpc = hdf5_to_sdp_vis(FN_RAW, yaml_config=YAML_RAW, conj=True, apply_phasing=False)
-    sdpn = hdf5_to_sdp_vis(
-        FN_RAW, yaml_config=YAML_RAW, conj=False, apply_phasing=False
-    )
-
-    assert np.allclose(sdp.vis, sdpc.vis)
-    assert np.allclose(sdp.vis, np.conj(sdpn.vis))
+    assert np.allclose(np.conj(sdp.vis.squeeze()[..., remap]), data_orig.squeeze())
 
     print('Testing conjgation: pyuvdata')
+    remap_uv = np.array((0, 3, 2, 1))
     vis = hdf5_to_pyuvdata(FN_RAW, telescope_name='aavs2', phase_to_t0=False)
-    visc = hdf5_to_pyuvdata(FN_RAW, yaml_config=YAML_RAW, phase_to_t0=False, conj=True)
-    visn = hdf5_to_pyuvdata(FN_RAW, yaml_config=YAML_RAW, phase_to_t0=False, conj=False)
+    uv_data = vis.data_array.reshape((1, 1, 32896, 4))
+    assert np.allclose(np.conj(uv_data[..., remap_uv]), data_orig)
 
-    assert np.allclose(vis.data_array, visc.data_array)
-    assert np.allclose(visc.data_array, np.conj(visn.data_array))
+    print('Testing no conjgation: UVX')
+    vis = hdf5_to_uvx(FN_RAW, yaml_config=YAML_NOCONJ)
+    assert np.allclose(vis.data, data_orig)
 
+    print('Testing no conjgation: SDP vis')
+    sdp = hdf5_to_sdp_vis(FN_RAW, yaml_config=YAML_NOCONJ, apply_phasing=False)
+    assert np.allclose(sdp.vis.squeeze(), data_orig.squeeze())
 
-def test_converter():
-    """Test converter command-line tool."""
-    try:
-        cmd = [
-            '-o',
-            'uvfits',
-            '-n',
-            'aavs3',
-            '-j',
-            'tests/test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5',
-            'tests/test_noconj.uvfits',
-        ]
-        run(cmd)
-        cmd = [
-            '-o',
-            'uvfits',
-            '-n',
-            'aavs3',
-            'tests/test-data/aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5',
-            'tests/test.uvfits',
-        ]
-        run(cmd)
-
-        vis = UVData()
-        vis.read_uvfits('tests/test.uvfits')
-
-        visn = UVData()
-        visn.read_uvfits('tests/test_noconj.uvfits')
-        assert not np.allclose(vis.data_array, visn.data_array)
-
-    finally:
-        if os.path.exists('tests/test.uvfits'):
-            os.remove('tests/test.uvfits')
-        if os.path.exists('tests/test_noconj.uvfits'):
-            os.remove('tests/test_noconj.uvfits')
-
+    print('Testing no conjgation: pyuvdata')
+    remap_uv = np.array((0, 3, 1, 2))
+    vis = hdf5_to_pyuvdata(FN_RAW,  yaml_config=YAML_NOCONJ, phase_to_t0=False)
+    uv_data = vis.data_array.reshape((1, 1, 32896, 4))
+    assert np.allclose(uv_data, data_orig[..., remap_uv])
 
 if __name__ == '__main__':
-    test_converter()
     test_conj()

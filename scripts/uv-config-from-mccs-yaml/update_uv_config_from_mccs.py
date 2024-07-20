@@ -44,6 +44,8 @@ def generate_uv_config(name: str):
     baseline_order_file: baseline_order.txt
     polarization_type: linear_crossed  # stokes, circular, linear (XX, YY, XY, YX) or linear_crossed (XX, XY, YX, YY)
     receptor_angle: {antennas['rotation'].values[0]}            # clockwise rotation angle in degrees away from N-E
+    conjugate_hdf5: true               # Apply complex conjugation to HDF5 data when loading
+    transpose_hdf5: true               # Transpose cross-pol terms when loading HDF5 data
     vis_units: uncalib"""
 
     # Write to file

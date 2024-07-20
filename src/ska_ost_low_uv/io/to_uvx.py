@@ -103,10 +103,10 @@ def hdf5_to_uvx(
     fn_data: str,
     telescope_name: str = None,
     yaml_config: str = None,
-    conj: bool = True,
     from_platform_yaml: bool = False,
     context: dict = None,
     provenance: dict = None,
+    load_data: bool = True,
 ) -> UVX:
     """Create UV from HDF5 data and config file.
 
@@ -118,7 +118,7 @@ def hdf5_to_uvx(
                                          simple CSV text file is used.
         telescope_name (str=None): If set, ska_ost_low_uv will try and use internal config file
                                    for telescope_name, e.g. 'aavs2' or 'aavs3'
-        conj (bool): Conjugate visibility data (default True).
+        load_data (bool): Set to false to skip loading into memory (don't apply conjugate/transpose)
         context (dict): Dictionary with observation context information
                         should include 'intent', 'notes', 'observer' and 'date' as keys.
         provenance (dict): Dictionary with additional provenance information to add to
@@ -128,6 +128,11 @@ def hdf5_to_uvx(
         uv (UV): A UV dataclass object with xarray datasets
 
     Notes:
+        Data in HDF5 files usually need to be conjugated and cross-pol terms transposed.
+
+            default order: A1A2*, A1B2*, B1A2*, B1B2*
+            swapped order: A2A1*, A2B1*, B2A1*, B2B1*
+
         The dataclass is defined as::
 
             class UV:
@@ -185,7 +190,16 @@ def hdf5_to_uvx(
         f = Quantity(f_arr, unit='Hz')
 
         antennas = create_antenna_data_array(antpos, eloc)
-        data = create_visibility_array(data, f, t, eloc, conj=conj)
+        if load_data:
+            data = create_visibility_array(data, f, t, eloc, conj=md['conjugate_hdf5'],
+                                        transpose=md['transpose_hdf5']
+                                        )
+        else:
+            # Avoid data load by not conjugating / transposing
+            data = create_visibility_array(data, f, t, eloc, conj=False,
+                                        transpose=False
+                                       )
+
         data.attrs['unit'] = md['vis_units']
 
         # Add extra info about time resolution and frequency resolution from input metadata
