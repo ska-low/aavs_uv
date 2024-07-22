@@ -12,6 +12,8 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
+from .cal import read_cal as read_cal
+from .cal import write_cal as write_cal
 from .to_pyuvdata import hdf5_to_pyuvdata as hdf5_to_pyuvdata
 from .to_pyuvdata import phase_to_sun as phase_to_sun
 from .uvx import read_uvx as read_uvx

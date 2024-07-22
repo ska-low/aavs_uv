@@ -352,7 +352,7 @@ def jishnu_phasecal(
     cal = create_uvx_antenna_cal(
         telescope=aa.name,
         method='jishnu_phasecal',
-        antenna_cal_arr=cal_arr,
+        antenna_gains_arr=cal_arr,
         antenna_flags_arr=flag_arr,
         f=aa.f,
         a=aa.ant_names,
@@ -408,7 +408,7 @@ def jishnu_cal(
 
     # Now, get gain coefficients and combine with phase corrs
     mag_cal = meas_corr_to_magcal(meas_corr_src, target_mag)
-    cal_arr = mag_cal * cal.cal.values
+    cal_arr = mag_cal * cal.gains.values
     flag_arr = np.logical_or(mag_cal.mask, cal.flags)
 
     # Set any flagged antennas to zero
@@ -417,7 +417,7 @@ def jishnu_cal(
     cal = create_uvx_antenna_cal(
         telescope=aa.name,
         method='jishnu_cal',
-        antenna_cal_arr=cal_arr,
+        antenna_gains_arr=cal_arr,
         antenna_flags_arr=flag_arr,
         f=aa.f,
         a=aa.ant_names,

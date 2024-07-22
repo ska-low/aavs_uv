@@ -15,7 +15,7 @@ class UVXAntennaCal:
     # fmt: off
     telescope: str          # Antenna array name, e.g. AAVS3
     method: str             # Calibration method name (e.g. JishnuCal)
-    cal: xp.DataArray       # An xarray dataset  (frequency, antenna, pol)
+    gains: xp.DataArray     # An xarray dataset  (frequency, antenna, pol)
     flags: xp.DataArray     # Flag xarray dataset (frequency, antenna, pol)
     provenance: dict        # Provenance/history information and other metadata
     # fmt: on
@@ -29,7 +29,7 @@ class UVXAntennaCal:
         Returns:
             cal_mat (np.ndarray): Calibration matrix, (N_ant, N_ant, N_stokes)
         """
-        gc = self.cal
+        gc = self.gains
         cal_mat = np.zeros((gc.shape[1], gc.shape[1], 4), dtype='complex64')
         cal_mat[..., 0] = np.outer(gc[f_idx, ..., 0], gc[f_idx, ..., 0])
         cal_mat[..., 1] = np.outer(gc[f_idx, ..., 0], gc[f_idx, ..., 1])
@@ -123,17 +123,19 @@ def create_antenna_flags(
 
     coords = _create_antenna_cal_coords(f, a, p)
 
-    antenna_cal = xp.DataArray(
+    antenna_flags = xp.DataArray(
         antenna_flag_arr,
         coords=coords,
-        dims=cal_schema['cal/antenna_cal']['dims'],
-        attrs={'description': cal_schema['cal/antenna_cal']['description']},
+        dims=cal_schema['cal/gains']['dims'],
+        attrs={'description': cal_schema['cal/gains']['description']},
     )
 
-    return antenna_cal
+    return antenna_flags
 
 
-def create_antenna_cal(antenna_cal_arr: np.ndarray, f: Quantity, a: np.ndarray, p: np.ndarray) -> xp.DataArray:
+def create_antenna_gains(
+    antenna_cal_arr: np.ndarray, f: Quantity, a: np.ndarray, p: np.ndarray
+) -> xp.DataArray:
     """Create an xarray dataarray for antenna calibration cofficients.
 
     Args:
@@ -153,8 +155,8 @@ def create_antenna_cal(antenna_cal_arr: np.ndarray, f: Quantity, a: np.ndarray, 
     antenna_cal = xp.DataArray(
         antenna_cal_arr,
         coords=coords,
-        dims=cal_schema['cal/antenna_flags']['dims'],
-        attrs={'description': cal_schema['cal/antenna_flags']['description']},
+        dims=cal_schema['cal/flags']['dims'],
+        attrs={'description': cal_schema['cal/flags']['description']},
     )
 
     return antenna_cal
@@ -163,7 +165,7 @@ def create_antenna_cal(antenna_cal_arr: np.ndarray, f: Quantity, a: np.ndarray, 
 def create_uvx_antenna_cal(
     telescope: str,
     method: str,
-    antenna_cal_arr: np.ndarray,
+    antenna_gains_arr: np.ndarray,
     antenna_flags_arr: np.ndarray,
     f: Quantity,
     a: np.ndarray,
@@ -175,7 +177,7 @@ def create_uvx_antenna_cal(
     Args:
         telescope (str): Name of telescope
         method (str): Calibration method used to generate
-        antenna_cal_arr (np.array): Antenna calibration coefficients.
+        antenna_gains_arr (np.array): Antenna calibration coefficients.
                                     Shape: (freq, antenna, pol) complex-valued
         antenna_flags_arr (np.ndarray): Boolean antenna flag array, True = flagged (bad)
                                         Shape: (freq, antenna, pol), boolean
@@ -187,7 +189,7 @@ def create_uvx_antenna_cal(
     Returns:
         antenna_cal (xp.Dataset): xarray Dataset with antenna locations
     """
-    antenna_cal = create_antenna_cal(antenna_cal_arr, f, a, p)
+    antenna_cal = create_antenna_gains(antenna_gains_arr, f, a, p)
     antenna_flags = create_antenna_flags(antenna_flags_arr, f, a, p)
 
     # Create empty provenance dictionary if not passed, then fill with creation info
@@ -197,7 +199,7 @@ def create_uvx_antenna_cal(
     uvx_cal = UVXAntennaCal(
         telescope=telescope,
         method=method,
-        cal=antenna_cal,
+        gains=antenna_cal,
         flags=antenna_flags,
         provenance=provenance,
     )

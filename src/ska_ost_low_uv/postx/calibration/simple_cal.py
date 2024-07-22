@@ -16,22 +16,6 @@ from ..aa_module import AaBaseModule
 from .stefcal import stefcal
 
 
-def create_baseline_matrix(xyz: np.array) -> np.ndarray:
-    """Create NxN array of baseline lengths.
-
-    Args:
-        xyz (np.array): (N_ant, 3) array of antenna locations
-
-    Returns:
-        bls (np.array): NxN array of distances between antenna pairs
-    """
-    N = xyz.shape[0]
-    bls = np.zeros((N, N), dtype='float32')
-    for ii in range(N):
-        bls[:, ii] = np.sqrt(np.sum((xyz - xyz[ii]) ** 2, axis=1))
-    return bls
-
-
 def simple_stefcal(
     aa: ApertureArray,
     sky_model: dict,
@@ -109,7 +93,7 @@ def simple_stefcal(
     cal = create_uvx_antenna_cal(
         telescope=aa.name,
         method='stefcal',
-        antenna_cal_arr=cal_arr,
+        antenna_gains_arr=cal_arr,
         antenna_flags_arr=flag_arr,
         f=aa.f,
         a=aa.ant_names,

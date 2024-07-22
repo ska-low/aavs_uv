@@ -5,6 +5,7 @@ from astropy.units import Quantity
 from loguru import logger
 from pygdsm import init_observer
 from ska_ost_low_uv.datamodel import UVX, UVXAntennaCal
+from ska_ost_low_uv.io import read_cal
 from ska_ost_low_uv.vis_utils import vis_arr_to_matrix_4pol
 
 from .aa_plotting import AaPlotter
@@ -152,7 +153,38 @@ class ApertureArray(object):
         Args:
             cal (UVXAntennaCal): Calibration to apply
         """
+        if cal is not None:
+            f_cal = Quantity(cal.gains.frequency, cal.gains.frequency.attrs['units'])
+            f_match = np.allclose(self.f, f_cal)
+            a_match = len(self.ant_names.values) == len(cal.gains.antenna.values)
+            n_match = self.name == cal.telescope
+
+            if not f_match:
+                e = 'Calibration frequencies do not match!'
+                logger.error(e)
+                raise RuntimeError(e)
+            if not a_match:
+                e = 'Antenna IDs in cal file do not match!'
+                logger.error(e)
+                raise RuntimeError(e)
+            if not n_match:
+                logger.warning(f'Calibration is from {cal.telescope}, array name is {self.name}')
+
+        # Cal can be set to None by the user
         self.workspace['cal'] = cal
+
+    def load_cal(self, cal_filename: str) -> UVXAntennaCal:
+        """Load a UVXAntennaCal from a file and set it to be used.
+
+        Args:
+            cal_filename (str): Path to uvx antenna cal file
+
+        Returns:
+            cal (UVXAntennaCal): Antenna calibration and flags
+        """
+        cal = read_cal(cal_filename)
+        self.set_cal(cal)
+        return cal
 
     def generate_vis_matrix(self, vis: str = 'data', t_idx=None, f_idx=None) -> np.array:
         """Generate visibility matrix from underlying array data.
