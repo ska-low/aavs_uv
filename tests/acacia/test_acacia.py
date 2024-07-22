@@ -1,4 +1,5 @@
 """Test reading data from acacia."""
+
 import pylab as plt
 import pytest
 from ska_ost_low_uv.acacia import AcaciaStorage
@@ -22,7 +23,7 @@ def test_acacia_plots():
     """Test read and then plot from acacia using ROS3 VFD."""
     acacia = AcaciaStorage()
     bucket = 'devel'
-    fpath  = 'test/correlation_burst_204_20210612_16699_0.uvx'
+    fpath = 'test/correlation_burst_204_20210612_16699_0.uvx'
     h5 = acacia.get_h5(bucket, fpath, debug=True)
     print(h5.keys())
 

@@ -179,9 +179,7 @@ def convert_file(
         logger.info(f'UTC start:      {vis.timestamps[0].iso}')
         logger.info(f'MJD start:      {vis.timestamps[0].mjd}')
         logger.info(f'LST start:      {vis.data.time.data[0][1]:.5f}')
-        logger.info(
-            f'Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.units}'
-        )
+        logger.info(f'Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.units}')
         logger.info(f'Polarization:   {vis.data.polarization.data}\n')
 
     if output_format in PYUVDATA_FORMATS:
@@ -202,9 +200,7 @@ def convert_file(
 
             if args.phase_to_sun:
                 logger.info('Phasing to sun')
-                ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(
-                    uv.integration_time[0] / 2, format='sec'
-                )
+                ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0] / 2, format='sec')
                 uv = phase_to_sun(uv, ts0)
             tr = time.time() - tr0
 
@@ -224,11 +220,7 @@ def convert_file(
 
             if N_cycles > 1:
                 # Update filename if we are iterating over the file
-                new_fn_out = (
-                    os.path.splitext(fn_out)[0]
-                    + f'.{start_int:05d}'
-                    + EXT_LUT[output_format]
-                )
+                new_fn_out = os.path.splitext(fn_out)[0] + f'.{start_int:05d}' + EXT_LUT[output_format]
             else:
                 new_fn_out = fn_out
 
@@ -331,9 +323,7 @@ def run(args=None):
         array_config = get_aa_config(args.telescope_name)
 
     if array_config is None:
-        logger.error(
-            'No telescope name or array config file passed. Please re-run with -n or -c flag set'
-        )
+        logger.error('No telescope name or array config file passed. Please re-run with -n or -c flag set')
         config_error_found = True
     else:
         if not os.path.exists(array_config):
@@ -379,9 +369,7 @@ def run(args=None):
     if args.zipit:
         logger.info('Zip output:      Yes')
         if output_format not in ('miriad', 'ms'):
-            logger.warning(
-                f'Output format {output_format} is not MS or Miriad, so will not be zipped'
-            )
+            logger.warning(f'Output format {output_format} is not MS or Miriad, so will not be zipped')
 
     # Check if context yaml was included
     context = load_yaml(args.context_yaml) if args.context_yaml is not None else None
@@ -396,9 +384,7 @@ def run(args=None):
                 os.mkdir(args.outfile)
 
             if args.batch:
-                filelist = sorted(
-                    glob.glob(os.path.join(args.infile, f'*.{args.file_ext}'))
-                )
+                filelist = sorted(glob.glob(os.path.join(args.infile, f'*.{args.file_ext}')))
             else:
                 filelist = sorted(
                     glob.glob(
@@ -413,9 +399,7 @@ def run(args=None):
                 bn = os.path.basename(fn)
                 bn_out = os.path.splitext(bn)[0] + EXT_LUT[output_format]
                 if args.megabatch:
-                    subdir = os.path.join(
-                        args.outfile, os.path.basename(os.path.dirname(fn))
-                    )
+                    subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn)))
                     filelist_out.append(os.path.join(subdir, bn_out))
                 else:
                     filelist_out.append(os.path.join(args.outfile, bn_out))
@@ -430,9 +414,7 @@ def run(args=None):
                 warnings.simplefilter('ignore')
                 logger.remove()
 
-            logger.info(
-                f'Starting conversion on {len(filelist)} files with {args.num_workers} workers'
-            )
+            logger.info(f'Starting conversion on {len(filelist)} files with {args.num_workers} workers')
 
             if args.num_workers > 1:
                 # Create a list of tasks to run
@@ -459,9 +441,7 @@ def run(args=None):
                 )
             else:
                 for fn_in, fn_out in zip(filelist, filelist_out):
-                    convert_file(
-                        args, fn_in, fn_out, array_config, output_format, context
-                    )
+                    convert_file(args, fn_in, fn_out, array_config, output_format, context)
 
 
 if __name__ == '__main__':  # pragma: no cover

@@ -41,9 +41,7 @@ def convert_data_to_uvx_convention(uv: UVData, check: bool = False) -> np.array:
         assert uv.Nbls == uv.Nants_data * (uv.Nants_data + 1) // 2
 
     # Create empty numpy array
-    data = np.zeros(
-        (uv.Ntimes, uv.Nfreqs, uv.Nbls, uv.Npols), dtype=uv.data_array.dtype
-    )
+    data = np.zeros((uv.Ntimes, uv.Nfreqs, uv.Nbls, uv.Npols), dtype=uv.data_array.dtype)
 
     # Generate indexes
     # fmt: off
@@ -79,9 +77,7 @@ def pyuvdata_to_uvx(uv: UVData, check: bool = False) -> UVX:
     eloc = EarthLocation(*uv.telescope_location, unit='m')
 
     # Create Antenna dataset
-    antpos_ENU = uvutils.ENU_from_ECEF(
-        uv.antenna_positions + uv.telescope_location, center_loc=eloc
-    )
+    antpos_ENU = uvutils.ENU_from_ECEF(uv.antenna_positions + uv.telescope_location, center_loc=eloc)
     df = pd.DataFrame(antpos_ENU, columns=('E', 'N', 'U'))
     df['flagged'] = False
     df['name'] = uv.antenna_names

@@ -32,7 +32,7 @@ class AaBaseModule(object):
         Args:
             name (str): Name of module.
         """
-        self.name = name # pragma: no cover
+        self.name = name  # pragma: no cover
 
     def __repr__(self):
         """Print simple representation of class."""

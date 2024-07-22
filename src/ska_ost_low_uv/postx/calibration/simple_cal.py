@@ -66,9 +66,7 @@ def simple_stefcal(
     for p_idx, s_idx in ((0, 0), (1, 3)):
         # Generate model visibilities, and convert raw data to visibility matrix
         v_meas = aa.generate_vis_matrix(vis='data')[..., s_idx]
-        v_model = aa.simulation.sim_vis_pointsrc(sky_model)[
-            t_idx, f_idx, :, :, s_idx
-        ].values
+        v_model = aa.simulation.sim_vis_pointsrc(sky_model)[t_idx, f_idx, :, :, s_idx].values
 
         # If minimum baseline is set, flag short baselines
         if min_baseline:
@@ -170,8 +168,8 @@ class AaStefcal(AaBaseModule):
 
     def run_stefcal(self, *args, **kwargs):
         # Docstring inherited from simple_stefcal function
-        self.__check_sky_model()
         if 'sky_model' not in kwargs:
+            self.__check_sky_model()
             kwargs['sky_model'] = self.sky_model
         else:
             self.sky_model = kwargs['sky_model']

@@ -269,9 +269,7 @@ class AllSkyViewer(AaBaseModule):
             **kwargs: These are passed on to mollview()
         """
         if hmap is None:
-            hmap = self.observer.imaging.make_healpix(
-                n_side=n_side, fov=fov, apply_mask=apply_mask
-            )
+            hmap = self.observer.imaging.make_healpix(n_side=n_side, fov=fov, apply_mask=apply_mask)
         else:
             n_side = hp.npix2nside(hmap.shape[0])
 

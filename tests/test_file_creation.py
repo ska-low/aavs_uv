@@ -13,9 +13,7 @@ def test_file_creation():
     try:
         # Files to open
         yaml_raw = get_aa_config('aavs2')
-        fn_raw = get_test_data(
-            'aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
-        )
+        fn_raw = get_test_data('aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5')
 
         # Load raw data and phase to sun
         uv = hdf5_to_pyuvdata(fn_raw, yaml_raw)

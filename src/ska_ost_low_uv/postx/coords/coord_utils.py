@@ -13,9 +13,7 @@ sin, cos = np.sin, np.cos
 SPEED_OF_LIGHT = c.value
 
 
-def phase_vector(
-    w: np.array, f: float, conj: bool = False, dtype='complex64'
-) -> np.array:
+def phase_vector(w: np.array, f: float, conj: bool = False, dtype='complex64') -> np.array:
     """Compute Nx1 phase weight vector e(2πi w f)."""
     c0 = np.exp(1j * 2 * np.pi * w * f, dtype=dtype)
     c0 = np.conj(c0) if conj else c0

@@ -116,18 +116,12 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
         'identifier': xp.DataArray(
             antpos['name'],
             dims=uvx_schema['uvx/antennas/attrs/identifier']['dims'],
-            attrs={
-                'description': uvx_schema['uvx/antennas/attrs/identifier'][
-                    'description'
-                ]
-            },
+            attrs={'description': uvx_schema['uvx/antennas/attrs/identifier']['description']},
         ),
         'flags': xp.DataArray(
             antpos['flagged'],
             dims=uvx_schema['uvx/antennas/attrs/flags']['dims'],
-            attrs={
-                'description': uvx_schema['uvx/antennas/attrs/flags']['description']
-            },
+            attrs={'description': uvx_schema['uvx/antennas/attrs/flags']['description']},
         ),
     }
 
@@ -139,9 +133,7 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
         np.array(array_origin_m),
         attrs={
             'units': 'm',
-            'description': uvx_schema['uvx/antennas/attrs/array_origin_geocentric'][
-                'description'
-            ],
+            'description': uvx_schema['uvx/antennas/attrs/array_origin_geocentric']['description'],
         },
         coords={'spatial': np.array(('x', 'y', 'z'))},
         dims=('spatial'),
@@ -151,9 +143,7 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
         np.array((eloc.lon.value, eloc.lat.value, eloc.height.value)),
         attrs={
             'units': np.array(('deg', 'deg', 'm')),
-            'description': uvx_schema['uvx/antennas/attrs/array_origin_geodetic'][
-                'description'
-            ],
+            'description': uvx_schema['uvx/antennas/attrs/array_origin_geodetic']['description'],
         },
         coords={'spatial': np.array(('longitude', 'latitude', 'height'))},
         dims=('spatial'),
@@ -221,9 +211,7 @@ def create_visibility_array(
     # Coordinate - time
     t.location = eloc
     lst = t.sidereal_time('apparent').to('hourangle')
-    t_coord = pd.MultiIndex.from_arrays(
-        (t.mjd, lst.value, t.unix), names=('mjd', 'lst', 'unix')
-    )
+    t_coord = pd.MultiIndex.from_arrays((t.mjd, lst.value, t.unix), names=('mjd', 'lst', 'unix'))
 
     # Coordinate - baseline
     ix, iy = np.triu_indices(N_ant)
@@ -239,9 +227,7 @@ def create_visibility_array(
         dims=('frequency',),
         attrs={
             'units': uvx_schema['uvx/visibilities/coords/frequency']['units'],
-            'description': uvx_schema['uvx/visibilities/coords/frequency'][
-                'description'
-            ],
+            'description': uvx_schema['uvx/visibilities/coords/frequency']['description'],
         },
     )
 
@@ -261,7 +247,5 @@ def create_visibility_array(
         # Remap XX,XY,YX,YX -> XX,YX,XY,YY
         data = data[..., [0, 2, 1, 3]]
 
-    vis = xp.DataArray(
-        data, coords=coords, dims=('time', 'frequency', 'baseline', 'polarization')
-    )
+    vis = xp.DataArray(data, coords=coords, dims=('time', 'frequency', 'baseline', 'polarization'))
     return vis

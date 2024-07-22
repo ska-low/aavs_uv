@@ -23,9 +23,7 @@ def generate_uv_config(name: str):
     now = Time(datetime.now())
 
     # Read the YAML file and return an EarthLocation and pandas Dataframe of antenna positions
-    eloc, antennas = station_location_from_platform_yaml(
-        f'{MCCS_CONFIG_PATH}/{name}.yaml', name
-    )
+    eloc, antennas = station_location_from_platform_yaml(f'{MCCS_CONFIG_PATH}/{name}.yaml', name)
 
     # Create Directory
     os.mkdir(name)

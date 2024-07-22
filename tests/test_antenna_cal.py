@@ -28,9 +28,7 @@ def test_antenna_cal():
     print(antenna_cal)
     print(antenna_flags)
 
-    cal = create_uvx_antenna_cal(
-        'AAVS3', 'manual', cal, flags, f, a, p, {'history': 'yo'}
-    )
+    cal = create_uvx_antenna_cal('AAVS3', 'manual', cal, flags, f, a, p, {'history': 'yo'})
 
     cal_mat = cal.to_matrix(f_idx=0)
     assert cal_mat.shape == (256, 256, 4)

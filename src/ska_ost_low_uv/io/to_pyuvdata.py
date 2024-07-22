@@ -44,9 +44,7 @@ def phase_to_sun(uv: UVData, t0: Time) -> UVData:
 
     # sun will be returned in GCRS (Geocentric)
     # Need to use GCRS, not ICRS!
-    uv.phase(
-        ra=sun.ra.rad, dec=sun.dec.rad, cat_type='sidereal', cat_name=f'sun_{t0.isot}'
-    )
+    uv.phase(ra=sun.ra.rad, dec=sun.dec.rad, cat_type='sidereal', cat_name=f'sun_{t0.isot}')
     return uv
 
 
@@ -335,9 +333,7 @@ def hdf5_to_pyuvdata(
     # Convert ENU locations to 'local' ECEF
     # Following https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/mwa_corr_fits.py#L1456
     antpos_ENU = np.column_stack((df_ant['E'], df_ant['N'], df_ant['U']))
-    antpos_ECEF = (
-        uvutils.ECEF_from_ENU(antpos_ENU, telescope_earthloc) - uv.telescope_location
-    )
+    antpos_ECEF = uvutils.ECEF_from_ENU(antpos_ENU, telescope_earthloc) - uv.telescope_location
 
     # Now fill in antenna info fields
     # fmt: off
@@ -461,7 +457,7 @@ def hdf5_to_pyuvdata(
         if md['polarization_type'].lower() == 'linear_crossed':
             # AIPS expects -5 -6 -7 -8, so we need to remap pols
             # we can also do the optional transpose to swap XY and YX here
-            pol_remap =  [0, 3, 1, 2]
+            pol_remap = [0, 3, 1, 2]
             logger.info(f'Remapping {md["polarization_type"]} to FITS standard')
             if md['transpose_hdf5']:
                 logger.info('Transposing cross-pol terms')

@@ -101,9 +101,7 @@ def hdf5_to_sdp_vis(
     w = uvw[..., 2]
     Δt = w * (1 / LIGHT_SPEED)
     pol_dummy_axis = np.ones(vis_data.shape[-1])
-    phs_corr = np.exp(
-        1j * 2 * np.pi * np.einsum('tb,f,p->tbfp', Δt, fc, pol_dummy_axis)
-    )
+    phs_corr = np.exp(1j * 2 * np.pi * np.einsum('tb,f,p->tbfp', Δt, fc, pol_dummy_axis))
 
     if apply_phasing:
         vis_data *= phs_corr
@@ -183,9 +181,7 @@ def uvdata_to_sdp_vis(
     f_bw = np.ones_like(f_c) * uv.channel_width
 
     if len(uv.freq_array) > 1:
-        raise NotImplementedError(
-            'Only length-1 frequency arrays supported at present.'
-        )
+        raise NotImplementedError('Only length-1 frequency arrays supported at present.')
 
     # integration_time (float, optional) – Only used in the specific case where times only has one element
     t_int = uv.integration_time[0] if uv.Ntimes == 1 else None

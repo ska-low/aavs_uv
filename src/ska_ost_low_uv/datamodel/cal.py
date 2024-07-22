@@ -133,9 +133,7 @@ def create_antenna_flags(
     return antenna_cal
 
 
-def create_antenna_cal(
-    antenna_cal_arr: np.ndarray, f: Quantity, a: np.ndarray, p: np.ndarray
-) -> xp.DataArray:
+def create_antenna_cal(antenna_cal_arr: np.ndarray, f: Quantity, a: np.ndarray, p: np.ndarray) -> xp.DataArray:
     """Create an xarray dataarray for antenna calibration cofficients.
 
     Args:

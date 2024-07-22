@@ -17,9 +17,7 @@ def setup_test() -> ApertureArray:
     Returns:
         aa (ApertureArray): An ApertureArray object to use in testing.
     """
-    fn_data = get_test_data(
-        'aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
-    )
+    fn_data = get_test_data('aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5')
     v = hdf5_to_uvx(fn_data, telescope_name='aavs2')
 
     # RadioArray basics

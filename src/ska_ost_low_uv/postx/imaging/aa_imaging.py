@@ -23,9 +23,7 @@ from ..coords.coord_utils import (
 SPEED_OF_LIGHT = c.value
 
 
-def generate_weight_grid(
-    aa, n_pix: int, abs_max: int = 1, nan_below_horizon: bool = True
-):
+def generate_weight_grid(aa, n_pix: int, abs_max: int = 1, nan_below_horizon: bool = True):
     """Generate a grid of direction cosine pointing weights.
 
     Generates a square lmn grid across l=(-abs_max, abs_max), m=(-abs_max, abs_max).
@@ -74,9 +72,7 @@ def generate_weight_grid(
     return pv_grid, lmn
 
 
-def make_image(
-    aa: ApertureArray, n_pix: int = 128, update: bool = True, vis: str = 'data'
-) -> np.array:
+def make_image(aa: ApertureArray, n_pix: int = 128, update: bool = True, vis: str = 'data') -> np.array:
     """Make an image out of a beam grid.
 
     Args:

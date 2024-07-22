@@ -36,19 +36,16 @@ def test_stefcal():
 
     plt.subplot(2, 1, 1)
     plt.scatter(a, np.rad2deg(np.angle(sc.cal[0, :, 0])), marker='.', label='stefcal X')
-    plt.scatter(
-        a, np.rad2deg(np.angle(jc.cal[0, :, 0])), marker='.', label='self-holo X'
-    )
+    plt.scatter(a, np.rad2deg(np.angle(jc.cal[0, :, 0])), marker='.', label='self-holo X')
 
     plt.subplot(2, 1, 2)
     plt.scatter(a, np.rad2deg(np.angle(sc.cal[0, :, 1])), marker='.', label='stefcal Y')
-    plt.scatter(
-        a, np.rad2deg(np.angle(jc.cal[0, :, 1])), marker='.', label='self-holo Y'
-    )
+    plt.scatter(a, np.rad2deg(np.angle(jc.cal[0, :, 1])), marker='.', label='self-holo Y')
     plt.xlabel('Antenna ID')
     plt.legend()
 
     return fig
+
 
 def test_stefcal_args():
     """Test Stefcal is working."""
@@ -57,6 +54,9 @@ def test_stefcal_args():
         telescope_name='aavs3',
     )
     aa = ApertureArray(uvx)
+
+    with pytest.raises(RuntimeError):
+         aa.calibration.stefcal.run_stefcal(antenna_flags=None, min_baseline=15)
 
     # Run stefcal
     aa.calibration.stefcal.set_sky_model({'sun': aa.coords.get_sun()})
@@ -71,8 +71,9 @@ def test_stefcal_args():
     flag_arr = np.zeros(256, dtype='bool')
     flag_arr[flags] = True
 
-    sc = aa.calibration.stefcal.run_stefcal(antenna_flags=flag_arr, min_baseline=15)
+    aa.calibration.stefcal.run_stefcal(antenna_flags=flag_arr, min_baseline=15)
 
+    aa.calibration.stefcal.run_stefcal(min_baseline=10, sky_model={'sun': aa.coords.get_sun()})
 
 
 if __name__ == '__main__':

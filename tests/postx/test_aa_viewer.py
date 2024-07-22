@@ -13,9 +13,7 @@ def setup_test() -> ApertureArray:
     Returns:
         aa (ApertureArray): An ApertureArray object to use in testing.
     """
-    fn_data = get_test_data(
-        'aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
-    )
+    fn_data = get_test_data('aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5')
     v = hdf5_to_uvx(fn_data, telescope_name='aavs2')
 
     # RadioArray basics
@@ -27,7 +25,6 @@ def test_aa_viewer():
     """Test viewer - basic."""
     aa = setup_test()
     img = aa.imaging.make_image()
-    hpx = aa.imaging.make_healpix()
 
     aa.viewer.orthview(img)
     aa.viewer.orthview(img[..., 0])
@@ -43,7 +40,6 @@ def test_aa_viewer():
 def test_orthview():
     """Test viewer - orthview()."""
     aa = setup_test()
-
 
     fig = plt.figure()
     aa.set_idx(f=0, t=0, p=0)
@@ -65,7 +61,8 @@ def test_mollview():
     aa.viewer.mollview(hpx, overlay_srcs=True, overlay_grid=False, colorbar=True)
     return fig
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     test_aa_viewer()
     test_orthview()
     test_mollview()

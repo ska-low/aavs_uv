@@ -154,9 +154,7 @@ class ApertureArray(object):
         """
         self.workspace['cal'] = cal
 
-    def generate_vis_matrix(
-        self, vis: str = 'data', t_idx=None, f_idx=None
-    ) -> np.array:
+    def generate_vis_matrix(self, vis: str = 'data', t_idx=None, f_idx=None) -> np.array:
         """Generate visibility matrix from underlying array data.
 
         Underlying UVX data has axes (time, frequency, baseline, polarization)

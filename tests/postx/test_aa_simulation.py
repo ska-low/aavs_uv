@@ -12,6 +12,7 @@ uvx = hdf5_to_uvx(
 )
 aa = ApertureArray(uvx)
 
+
 @pytest.mark.mpl_image_compare
 def test_orthview():
     """Test plotting routines."""
@@ -28,6 +29,6 @@ def test_mollview():
     return fig
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_orthview()
     test_mollview()

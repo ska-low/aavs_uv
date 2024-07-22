@@ -3,9 +3,7 @@
 import numpy as np
 
 
-def vis_arr_to_matrix(
-    d: np.ndarray, n_ant: int, tri: str = 'upper', V: np.array = None, conj=False
-):
+def vis_arr_to_matrix(d: np.ndarray, n_ant: int, tri: str = 'upper', V: np.array = None, conj=False):
     """Convert 1D visibility array (lower/upper) triangular to correlation matrix.
 
     Args:
@@ -20,9 +18,7 @@ def vis_arr_to_matrix(
     """
     n_bl = n_ant * (n_ant + 1) // 2
     if d.shape[0] != n_bl:
-        raise RuntimeError(
-            f'N_ant: {n_ant} -> N_bl: {n_bl}, but d.shape = {d.shape[0]}'
-        )
+        raise RuntimeError(f'N_ant: {n_ant} -> N_bl: {n_bl}, but d.shape = {d.shape[0]}')
     if tri == 'upper':
         ix, iy = np.triu_indices(n_ant)
     elif tri == 'lower':
@@ -47,9 +43,7 @@ def vis_arr_to_matrix(
     return V
 
 
-def vis_arr_to_matrix_4pol(
-    d: np.ndarray, n_ant: int, tri: str = 'upper', V: np.array = None, conj=False
-):
+def vis_arr_to_matrix_4pol(d: np.ndarray, n_ant: int, tri: str = 'upper', V: np.array = None, conj=False):
     """Convert 1D visibility array (lower/upper) triangular to correlation matrix, 4-pol.
 
     Args:
@@ -64,9 +58,7 @@ def vis_arr_to_matrix_4pol(
     """
     n_bl = n_ant * (n_ant + 1) // 2
     if d.shape[0] != n_bl:
-        raise RuntimeError(
-            f'N_ant: {n_ant} -> N_bl: {n_bl}, but d.shape = {d.shape[0]}'
-        )
+        raise RuntimeError(f'N_ant: {n_ant} -> N_bl: {n_bl}, but d.shape = {d.shape[0]}')
     if tri == 'upper':
         ix, iy = np.triu_indices(n_ant)
     elif tri == 'lower':

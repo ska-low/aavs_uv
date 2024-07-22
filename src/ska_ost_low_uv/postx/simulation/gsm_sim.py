@@ -16,8 +16,10 @@ from ..coords.coord_utils import hpix2sky
 
 
 def simulate_visibilities_gsm(
-    aa: ApertureArray, beam_func: function = None, n_side: int = 32
-) -> xr.DataArray:  # noqa: F821
+    aa: ApertureArray,
+    beam_func: function = None,  # noqa: F821
+    n_side: int = 32,
+) -> xr.DataArray:
     """Use pygdsm + matvis to simulate visibilites, add in Sun."""
     f_mhz = aa.uvx.data.frequency[0] / 1e6
     lsts_rad = aa.uvx.data.lst.values / 24 * np.pi * 2
