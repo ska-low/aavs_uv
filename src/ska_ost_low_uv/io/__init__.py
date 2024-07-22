@@ -9,7 +9,7 @@ try:
     import_optional_dependency('ska_sdp_datamodels')
     from .to_sdp import hdf5_to_sdp_vis as hdf5_to_sdp_vis
     from .to_sdp import uvdata_to_sdp_vis as uvdata_to_sdp_vis
-except ImportError:
+except ImportError: # pragma: no cover
     pass
 
 from .to_pyuvdata import hdf5_to_pyuvdata as hdf5_to_pyuvdata

@@ -13,6 +13,10 @@ def test_vis_arr_to_matrix():
     V = vis_arr_to_matrix(d, 256, 'upper')
     assert np.allclose(V, V0)
 
+    V = vis_arr_to_matrix(d, 256, 'upper', conj=False)
+    assert np.allclose(V, np.conj(V0))
+
+
     # Roundtrip
     ix, iy = np.triu_indices(256)
     assert np.allclose(V[ix, iy], d)
@@ -47,6 +51,19 @@ def test_vis_arr_to_matrix_4pol():
     d = np.arange(32896 * 4).reshape((32896, 4))
     V = vis_arr_to_matrix_4pol(d, 256)
     assert V.shape == (256, 256, 4)
+
+    V = vis_arr_to_matrix_4pol(d, 256, 'upper')
+    V = vis_arr_to_matrix_4pol(d, 256, 'lower')
+    V = vis_arr_to_matrix_4pol(d, 256, 'lower', conj=False)
+    Vc = vis_arr_to_matrix_4pol(d, 256, 'lower', conj=True)
+    assert np.allclose(V, np.conj(Vc))
+
+    with pytest.raises(RuntimeError):
+        V = vis_arr_to_matrix_4pol(d, 256, 'chicken')
+
+    with pytest.raises(RuntimeError):
+        V = np.zeros((99, 99))
+        V = vis_arr_to_matrix_4pol(d, 256, 'upper')
 
 
 if __name__ == '__main__':

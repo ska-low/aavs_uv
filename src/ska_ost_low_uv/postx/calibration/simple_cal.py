@@ -96,6 +96,7 @@ def simple_stefcal(
         # Run stefcal
         _g, nit, z = stefcal(v_meas_sc, v_model_sc)
         sc_log[f'pol_{p_idx}'] = {'nit': nit, 'z': z}
+        logger.info(f'Stefcal pol{p_idx}: nit: {nit} z: {z:.4f}')
 
         cal_arr[0, ~flags, p_idx] = 1 / np.conj(_g)
         flag_arr[0, :, p_idx] = flags

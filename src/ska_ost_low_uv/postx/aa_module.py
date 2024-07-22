@@ -26,13 +26,13 @@ class AaBaseModule(object):
             generate_phase_vector() - Generate a phase vector toward a given SkyCoord
     """
 
-    def __init__(self, name):
+    def __init__(self, name='aa_base_module'):
         """Initialize class.
 
         Args:
             name (str): Name of module.
         """
-        self.name = name
+        self.name = name # pragma: no cover
 
     def __repr__(self):
         """Print simple representation of class."""

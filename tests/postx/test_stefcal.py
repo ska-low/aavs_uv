@@ -50,6 +50,31 @@ def test_stefcal():
 
     return fig
 
+def test_stefcal_args():
+    """Test Stefcal is working."""
+    uvx = hdf5_to_uvx(
+        get_test_data('aavs3/correlation_burst_100_20240107_19437_0.hdf5'),
+        telescope_name='aavs3',
+    )
+    aa = ApertureArray(uvx)
+
+    # Run stefcal
+    aa.calibration.stefcal.set_sky_model({'sun': aa.coords.get_sun()})
+    sc = aa.calibration.stefcal.run_stefcal(antenna_flags=None, min_baseline=15)
+    aa.set_cal(sc)
+
+    # Run with pre-existing calibration set
+    sc = aa.calibration.stefcal.run_stefcal(antenna_flags=None, min_baseline=15)
+
+    # Manual flags
+    flags = [0, 72, 73, 85, 88, 98, 115, 117, 120, 121, 155, 188, 242, 244]
+    flag_arr = np.zeros(256, dtype='bool')
+    flag_arr[flags] = True
+
+    sc = aa.calibration.stefcal.run_stefcal(antenna_flags=flag_arr, min_baseline=15)
+
+
 
 if __name__ == '__main__':
     fig = test_stefcal()
+    test_stefcal_args()

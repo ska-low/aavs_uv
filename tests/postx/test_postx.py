@@ -32,6 +32,8 @@ def test_postx():
     aa = setup_test()
     print(aa.coords.get_zenith())
 
+    print(aa.simulation)
+
     # RadioArray - images
     img = aa.imaging.make_image()
     hmap = aa.imaging.make_healpix(n_side=64)
@@ -61,6 +63,8 @@ def test_postx():
 def test_viewer():
     """Test viewer tools."""
     aa = setup_test()
+    print(aa)
+    aa.set_idx(f=0, t=0, p=0)
 
     # All-sky-viewer via aa
     aa.viewer.orthview()
@@ -73,9 +77,12 @@ def test_viewer():
 
     try:
         aa.viewer.write_fits(img, 'tests/test.fits')
+        aa.viewer.write_fits(hmap, 'tests/test_hpx.fits')
     finally:
         if os.path.exists('tests/test.fits'):
             os.system('rm tests/test.fits')
+        if os.path.exists('tests/test_hpx.fits'):
+            os.system('rm tests/test_hpx.fits')
 
 
 @pytest.mark.mpl_image_compare

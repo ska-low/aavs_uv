@@ -138,7 +138,7 @@ def uvdata_to_sdp_vis(
     scan_intent: str = '',
     execblock_id: str = '',
     flip_uvw: bool = True,
-    conj: bool = True,
+    conj: bool = False,
 ) -> Visibility:
     """Convert pyuvdata object to SDP Visibility.
 

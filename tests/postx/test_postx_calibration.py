@@ -23,7 +23,7 @@ def test_calibration():
     """
     vis = hdf5_to_uvx(FN_RAW, yaml_config=YAML_RAW)
 
-    aa = ApertureArray(vis, conjugate_data=False)
+    aa = ApertureArray(vis)
     asv = AllSkyViewer(aa)
     sc = generate_skycat(aa)
     asv.load_labels(sc)
