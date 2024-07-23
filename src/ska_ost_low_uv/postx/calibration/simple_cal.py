@@ -18,7 +18,8 @@ from .stefcal import stefcal
 
 def simple_stefcal(
     aa: ApertureArray,
-    sky_model: dict,
+    sky_model: dict = None,
+    diffuse_model: str = None,
     antenna_flags: np.ndarray = None,
     min_baseline: float = None,
     sigma_thr: float = 10,
@@ -28,6 +29,7 @@ def simple_stefcal(
     Args:
         aa (ApertureArray): A RadioArray with UV data to calibrate
         sky_model (dict): sky model to use (dictionary of SkyCoords)
+        diffuse_model (str): If set, includes diffuse model. Calls aa.set_gsm().
         antenna_flags (np.ndarray): Antenna flags, shape (N_ant)
         min_baseline (float): Minimum baseline cut in meters. Useful for mitigating
                               diffuse emission, which can dominate short baselines.
@@ -50,7 +52,13 @@ def simple_stefcal(
     for p_idx, s_idx in ((0, 0), (1, 3)):
         # Generate model visibilities, and convert raw data to visibility matrix
         v_meas = aa.generate_vis_matrix(vis='data')[..., s_idx]
-        v_model = aa.simulation.sim_vis_pointsrc(sky_model)[t_idx, f_idx, :, :, s_idx].values
+
+        v_model = np.zeros_like(v_meas)
+        if sky_model is not None:
+            v_model += aa.simulation.sim_vis_pointsrc(sky_model)[t_idx, f_idx, :, :, s_idx].values
+        if diffuse_model is not None:
+            aa.set_gsm(diffuse_model)
+            v_model += aa.simulation.aa.simulation.sim_vis_gsm()[t_idx, f_idx, :, :, s_idx].values
 
         # If minimum baseline is set, flag short baselines
         if min_baseline:
@@ -118,15 +126,21 @@ class AaStefcal(AaBaseModule):
 
     """
 
-    def __init__(self, aa: ApertureArray, sky_model: dict = None):
+    def __init__(self, aa: ApertureArray, sky_model: dict = None, diffuse_model: str = None):
         """Setup AaStefcal.
 
         Args:
             aa (ApertureArray): Aperture array 'parent' object to use
             sky_model (dict): Point source sky model to use (dictionary of SkyCoords).
+            diffuse_model (str): Set diffuse model - runs aa.set_gsm(). Default None
         """
         self.aa = aa
         self.sky_model = sky_model
+        self.diffuse_model = diffuse_model
+
+        if isinstance(diffuse_model, str):
+            self.aa.set_gsm(diffuse_model)
+
         self.cal = None
         self.__setup_docstrings('stefcal')
 
@@ -138,6 +152,15 @@ class AaStefcal(AaBaseModule):
         """
         self.sky_model = sky_model
 
+    def set_diffuse_model(self, diffuse_model: str):
+        """Set diffuse model.
+
+        Args:
+            diffuse_model (str): pygdsm model name. One of 'gsm08', 'gsm16', 'lfsm'.
+        """
+        self.diffuse_model = diffuse_model
+        self.aa.set_gsm(diffuse_model)
+
     def __setup_docstrings(self, name):
         self.__name__ = name
         self.name = name
@@ -145,17 +168,24 @@ class AaStefcal(AaBaseModule):
         self.run_stefcal.__func__.__doc__ = simple_stefcal.__doc__
 
     def __check_sky_model(self):
-        if self.sky_model is None:
+        if self.sky_model is None and self.diffuse_model is None:
             e = 'Point source sky model not set! Run set_sky_model() first.'
             logger.error(e)
             raise RuntimeError(e)
 
+        if isinstance(self.diffuse_model, str):
+            self.aa.set_gsm(self.diffuse_model)
+
     def run_stefcal(self, *args, **kwargs):
         # Docstring inherited from simple_stefcal function
-        if 'sky_model' not in kwargs:
-            self.__check_sky_model()
-            kwargs['sky_model'] = self.sky_model
-        else:
+        if 'sky_model' in kwargs:
             self.sky_model = kwargs['sky_model']
+        if 'diffuse_model' in kwargs:
+            self.diffuse_model = kwargs['diffuse_model']
+
+        self.__check_sky_model()
+        kwargs['sky_model'] = self.sky_model
+        kwargs['diffuse_model'] = self.diffuse_model
+
         self.cal = simple_stefcal(self.aa, *args, **kwargs)
         return self.cal
