@@ -3,8 +3,10 @@
 from dataclasses import dataclass
 
 import numpy as np
+import pylab as plt
 import xarray as xp
 from astropy.units import Quantity
+from matplotlib.cm import viridis
 from ska_ost_low_uv.utils import get_resource_path, get_software_versions, load_yaml
 
 
@@ -53,6 +55,37 @@ class UVXAntennaCal:
         }
 
         return flag_dict
+
+    def plot_gains(self, f_idx: int = 0, plot_type='mag'):
+        """Simple plotting for cal coefficients.
+
+        Args:
+            f_idx (int): Frequency index
+            plot_type (str): one of 'mag' or 'phs'
+        """
+        cm = viridis.colors
+        _a = np.arange(len(self.gains.antenna))
+
+        # Create flag indexes
+        flg_x = self.report_flagged_antennas()['x']['idx']
+        flg_y = self.report_flagged_antennas()['y']['idx']
+        unflg_x = ~np.in1d(_a, flg_x)
+        unflg_y = ~np.in1d(_a, flg_y)
+
+        g = np.abs(self.gains) if plot_type == 'mag' else np.rad2deg(np.angle(self.gains))
+
+        plt.scatter(_a[unflg_x], g[f_idx, unflg_x, 0], marker='.', color=cm[20], label='X-pol')
+        plt.scatter(_a[flg_x], g[f_idx, flg_x, 0], marker='x', c='#bb0000')
+        plt.scatter(_a[unflg_y], g[f_idx, unflg_y, 1], marker='.', color=cm[180], label='Y-pol')
+        plt.scatter(_a[flg_y], g[f_idx, flg_y, 1], marker='+', c='#dd0000')
+        if plot_type == 'phs':
+            plt.ylim(-185, 185)
+            plt.yticks(np.arange(-180, 181, 30))
+            plt.ylabel('Phase [deg]')
+        else:
+            plt.ylabel('Gain magnitude')
+        plt.xlabel('Antenna')
+        plt.legend()
 
 
 def create_provenance_dict():
