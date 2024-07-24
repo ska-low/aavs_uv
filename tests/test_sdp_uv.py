@@ -16,14 +16,9 @@ def test_sdp_vis():
 
 def test_sdp_vis_conj():
     """Load data and test visibility generation."""
-    v1 = hdf5_to_sdp_vis(
-        FN_RAW, yaml_config=YAML_RAW, conj=True, flip_uvw=True, apply_phasing=False
-    )
-    v2 = hdf5_to_sdp_vis(
-        FN_RAW, yaml_config=YAML_RAW, conj=False, flip_uvw=False, apply_phasing=False
-    )
+    v1 = hdf5_to_sdp_vis(FN_RAW, yaml_config=YAML_RAW, flip_uvw=True, apply_phasing=False)
+    v2 = hdf5_to_sdp_vis(FN_RAW, yaml_config=YAML_RAW, flip_uvw=False, apply_phasing=False)
     assert np.allclose(v1.uvw, -1 * v2.uvw)
-    assert np.allclose(np.conj(v1.vis.values), v2.vis.values)
 
 
 def test_uvdata_to_sdp_vis():
@@ -42,6 +37,9 @@ def test_uvdata_to_sdp_vis():
     assert np.allclose(v.uvw, v2.uvw, atol=0.5e-4)
     assert np.allclose(np.abs(v.vis.values), np.abs(v2.vis.values))
     assert np.allclose(v.vis.values, v2.vis.values)
+
+    v3 = uvdata_to_sdp_vis(uv, conj=True)
+    assert np.allclose(v.vis.values, np.conj(v3.vis.values))
     print('Hooray!')
 
 

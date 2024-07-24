@@ -25,9 +25,7 @@ def test_phasing():
 
     try:
         # Read in test data, converting into a pyuvdata.UVData and sdp Visibility
-        test_data_fn = get_test_data(
-            'aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
-        )
+        test_data_fn = get_test_data('aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5')
         uvdp = hdf5_to_pyuvdata(test_data_fn, telescope_name='aavs2', phase_to_t0=True)
         sdp = hdf5_to_sdp_vis(test_data_fn, telescope_name='aavs2')
 

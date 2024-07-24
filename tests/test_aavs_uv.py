@@ -35,9 +35,7 @@ def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
                 if isinstance(param.value, (np.int32, np.int64, str, bool, int)):
                     try:
                         if param_comp.value is None:
-                            print(
-                                f'{Fore.orange_1} WARNING: {key} missing in comparison  {Style.reset}'
-                            )
+                            print(f'{Fore.orange_1} WARNING: {key} missing in comparison  {Style.reset}')
                         assert param.value == param_comp.value
                     except AssertionError:
                         print(
@@ -50,13 +48,9 @@ def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
                         assert type(param.value) is type(param_comp.value)
                     except AssertionError:
                         if param_comp.value is None:
-                            print(
-                                f'{Fore.orange_1} WARNING: {key} missing in comparison {Style.reset}'
-                            )
+                            print(f'{Fore.orange_1} WARNING: {key} missing in comparison {Style.reset}')
                         else:
-                            print(
-                                f'{Fore.red} ERROR: {key} type mismatch {Style.reset}'
-                            )
+                            print(f'{Fore.red} ERROR: {key} type mismatch {Style.reset}')
                         print(
                             f' --- {key} --- \n Original: \n {param.value} \n Comparison: \n {param_comp.value}'
                         )
@@ -121,9 +115,7 @@ def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
                             assert dk in param_comp.value.keys()
                         except AssertionError:
                             not_exact_match = True
-                            print(
-                                f'{Fore.red} ERROR: {key} dict: subkey missing: {dk} {Style.reset} '
-                            )
+                            print(f'{Fore.red} ERROR: {key} dict: subkey missing: {dk} {Style.reset} ')
                     if not_exact_match:
                         print(
                             f' --- {key} --- \n Original: \t {param.value} \n Comparison: \t {param_comp.value}'
@@ -135,13 +127,9 @@ def compare_uv_datasets(uv_orig: UVData, uv_comp: UVData):
                         print(f'{Fore.cornsilk_1} Unset in both: {key} {Style.reset}')
                     except AssertionError:
                         print(f'{Fore.orange_1} Unset in orig: {key} {Style.reset}')
-                        print(
-                            f' --- {key} --- \n Original: None \n Comparison: {param_comp.value}'
-                        )
+                        print(f' --- {key} --- \n Original: None \n Comparison: {param_comp.value}')
                 else:
-                    print(
-                        f'{Fore.orange_1} UNTESTED: {key} {type(param.value)} {Style.reset}'
-                    )
+                    print(f'{Fore.orange_1} UNTESTED: {key} {type(param.value)} {Style.reset}')
 
         if key == '_data_array':
             param_comp = uv_comp.__dict__[key]
@@ -171,9 +159,7 @@ def test0():
     print(uv)
 
 
-def _setup_test(
-    test_name: str = None, load_comp: bool = False, load_2x500: bool = False
-) -> UVData:
+def _setup_test(test_name: str = None, load_comp: bool = False, load_2x500: bool = False) -> UVData:
     """Load datasets to use in tests.
 
     Args:
@@ -198,9 +184,7 @@ def _setup_test(
     fn_uvf = get_test_data('aavs2_1x1000ms/chan_204_20230823T055556.uvfits')
     fn_mir = get_test_data('aavs2_1x1000ms/chan_204_20230823T055556.uv')
 
-    fn_2x500_raw = get_test_data(
-        'aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5'
-    )
+    fn_2x500_raw = get_test_data('aavs2_2x500ms/correlation_burst_204_20230927_35116_0.hdf5')
     fn_2x500_uvf = get_test_data('aavs2_2x500ms/chan_204_20230927T094734.uvfits')
 
     def _load_and_phase_hdf5():

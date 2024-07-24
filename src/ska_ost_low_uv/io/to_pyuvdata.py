@@ -44,9 +44,7 @@ def phase_to_sun(uv: UVData, t0: Time) -> UVData:
 
     # sun will be returned in GCRS (Geocentric)
     # Need to use GCRS, not ICRS!
-    uv.phase(
-        ra=sun.ra.rad, dec=sun.dec.rad, cat_type='sidereal', cat_name=f'sun_{t0.isot}'
-    )
+    uv.phase(ra=sun.ra.rad, dec=sun.dec.rad, cat_type='sidereal', cat_name=f'sun_{t0.isot}')
     return uv
 
 
@@ -148,7 +146,7 @@ def uvx_to_pyuvdata(
     # Polarization axis
     # fmt: off
     _pol_types = {
-        'stokes':           np.array([1, 2, 3, 4]),
+        'stokes':           np.array([ 1,  2,  3,  4]),
         'linear':           np.array([-5, -6, -7, -8]),
         'linear_crossed':   np.array([-5, -7, -8, -6]),   # Note: must be converted to linear for pyuvdata
         'circular':         np.array([-1, -2, -3, -4]),
@@ -271,7 +269,6 @@ def hdf5_to_pyuvdata(
     phase_to_t0: bool = True,
     start_int: int = 0,
     max_int: int = None,
-    conj: bool = True,
 ) -> pyuvdata.UVData:
     """Convert MCCS HDF5 correlator output to UVData object.
 
@@ -287,7 +284,6 @@ def hdf5_to_pyuvdata(
                             are doing snapshot imaging of each timestep. Default True.
         start_int (int):    First integration index to read (allows skipping ahead through file)
         max_int (int):      Maximum number of intergrations to read. Default None (read all)
-        conj (bool):        Conjugate visibility data (default True).
 
     Returns:
         uv (pyuvdata.UVData): A UVData object that can be used to create
@@ -337,9 +333,7 @@ def hdf5_to_pyuvdata(
     # Convert ENU locations to 'local' ECEF
     # Following https://github.com/RadioAstronomySoftwareGroup/pyuvdata/blob/f703a985869b974892fc4732910c83790f9c72b4/pyuvdata/uvdata/mwa_corr_fits.py#L1456
     antpos_ENU = np.column_stack((df_ant['E'], df_ant['N'], df_ant['U']))
-    antpos_ECEF = (
-        uvutils.ECEF_from_ENU(antpos_ENU, telescope_earthloc) - uv.telescope_location
-    )
+    antpos_ECEF = uvutils.ECEF_from_ENU(antpos_ENU, telescope_earthloc) - uv.telescope_location
 
     # Now fill in antenna info fields
     # fmt: off
@@ -462,11 +456,16 @@ def hdf5_to_pyuvdata(
         # HDF5 data are written as XX, XY, YX, YY (AIPS codes -5, -7, -8, -6)
         if md['polarization_type'].lower() == 'linear_crossed':
             # AIPS expects -5 -6 -7 -8, so we need to remap pols
+            # we can also do the optional transpose to swap XY and YX here
             pol_remap = [0, 3, 1, 2]
+            logger.info(f'Remapping {md["polarization_type"]} to FITS standard')
+            if md['transpose_hdf5']:
+                logger.info('Transposing cross-pol terms')
+                pol_remap = [0, 3, 2, 1]
             uv.data_array = uv.data_array[..., pol_remap]
             uv.polarization_array = _pol_types['linear']
 
-        if conj:
+        if md['conjugate_hdf5']:
             logger.info('Conjugating data')
             uv.data_array = np.conj(uv.data_array)
 

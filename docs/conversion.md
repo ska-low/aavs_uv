@@ -35,7 +35,6 @@ options:
                         Telescope name, e.g. 'aavs3'. If supplied, will attempt to use ska_ost_low_uv internal array config.
   -s, --phase-to-sun    Re-phase to point toward Sun (the sun must be visible!). If flag not set, data will be phased
                         toward zenith.
-  -j, --no_conj         Do not conjugate visibility data (note AAVS2 and AAVS3 require conjugation)
   -b, --batch           Batch mode. Input and output are treated as directories, and all subfiles are converted.
   -B, --megabatch       MEGA batch mode. Runs on subdirectories too, e.g. eb-aavs3/2023_12_12/*.hdf5.
   -x FILE_EXT, --file_ext FILE_EXT

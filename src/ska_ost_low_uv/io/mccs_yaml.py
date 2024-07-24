@@ -8,9 +8,7 @@ from astropy.coordinates import EarthLocation
 from ska_ost_low_uv.utils import load_yaml
 
 
-def station_location_from_platform_yaml(
-    fn_yaml: str, station_name: str
-) -> tuple[EarthLocation, pd.DataFrame]:
+def station_location_from_platform_yaml(fn_yaml: str, station_name: str) -> tuple[EarthLocation, pd.DataFrame]:
     """Load station location from AAVS3 MCCS yaml config.
 
     Args:
@@ -46,9 +44,7 @@ def station_location_from_platform_yaml(
     # Generate array central reference position
     # NOTE: Currently using WGS84, ignoring epoch
     loc = d_station['reference']
-    earth_loc = EarthLocation.from_geodetic(
-        loc['longitude'], loc['latitude'], loc['ellipsoidal_height']
-    )
+    earth_loc = EarthLocation.from_geodetic(loc['longitude'], loc['latitude'], loc['ellipsoidal_height'])
 
     # Add station rotation info
     ant_enu['rotation'] = d_station.get('rotation', 0.0)

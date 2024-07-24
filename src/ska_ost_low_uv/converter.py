@@ -70,14 +70,6 @@ def parse_args(args):
         default=False,
     )
     p.add_argument(
-        '-j',
-        '--no_conj',
-        help='Do not conjugate visibility data (note AAVS2 and AAVS3 require conjugation)',
-        required=False,
-        action='store_true',
-        default=False,
-    )
-    p.add_argument(
         '-b',
         '--batch',
         help='Batch mode. Input and output are treated as directories, and all subfiles are converted.',
@@ -155,7 +147,6 @@ def convert_file(
     fn_out: str,
     array_config: str,
     output_format: str,
-    conj: bool,
     context: dict,
 ):
     """Convert a file.
@@ -166,7 +157,6 @@ def convert_file(
         fn_out (str): Output filename
         array_config (str): Path to array config directory
         output_format (str): Output format, one of uvfits, miriad, mir, ms, uvh5, sdp, uvx
-        conj (bool): Apply conjugation to visibility data. Useful for matching UVW convention.
         context (dict): Dictionary of additional metadata. Only supported by SDP and UVX formats.
     """
     # Create subdirectories as needed
@@ -178,8 +168,8 @@ def convert_file(
 
     # Load file and read basic metadata
     vis = hdf5_to_uvx(
-        fn_in, yaml_config=array_config, conj=False
-    )  # Conj=False flag so data is not read into memory
+        fn_in, yaml_config=array_config, load_data=False
+    )  # load_data=False flag so data is not read into memory
 
     # Print basic info to screen (skip if in batch mode)
     if not args.batch and not args.megabatch:
@@ -189,9 +179,7 @@ def convert_file(
         logger.info(f'UTC start:      {vis.timestamps[0].iso}')
         logger.info(f'MJD start:      {vis.timestamps[0].mjd}')
         logger.info(f'LST start:      {vis.data.time.data[0][1]:.5f}')
-        logger.info(
-            f'Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.units}'
-        )
+        logger.info(f'Frequency 0:    {vis.data.frequency.data[0]} {vis.data.frequency.units}')
         logger.info(f'Polarization:   {vis.data.polarization.data}\n')
 
     if output_format in PYUVDATA_FORMATS:
@@ -206,16 +194,13 @@ def convert_file(
             uv = hdf5_to_pyuvdata(
                 fn_in,
                 yaml_config=array_config,
-                conj=conj,
                 max_int=args.n_int_per_file,
                 start_int=start_int,
             )
 
             if args.phase_to_sun:
                 logger.info('Phasing to sun')
-                ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(
-                    uv.integration_time[0] / 2, format='sec'
-                )
+                ts0 = Time(uv.time_array[0], format='jd') + TimeDelta(uv.integration_time[0] / 2, format='sec')
                 uv = phase_to_sun(uv, ts0)
             tr = time.time() - tr0
 
@@ -235,11 +220,7 @@ def convert_file(
 
             if N_cycles > 1:
                 # Update filename if we are iterating over the file
-                new_fn_out = (
-                    os.path.splitext(fn_out)[0]
-                    + f'.{start_int:05d}'
-                    + EXT_LUT[output_format]
-                )
+                new_fn_out = os.path.splitext(fn_out)[0] + f'.{start_int:05d}' + EXT_LUT[output_format]
             else:
                 new_fn_out = fn_out
 
@@ -282,7 +263,7 @@ def convert_file(
 
     elif output_format == 'uvx':
         tr0 = time.time()
-        vis = hdf5_to_uvx(fn_in, yaml_config=array_config, conj=conj, context=context)
+        vis = hdf5_to_uvx(fn_in, yaml_config=array_config, context=context)
         tr = time.time() - tr0
         tw0 = time.time()
         logger.info(f'Creating {args.output_format} file: {fn_out}')
@@ -300,7 +281,6 @@ def convert_file_task(
     fn_out: str,
     array_config: str,
     output_format: str,
-    conj: bool,
     context: dict,
     verbose: bool,
 ):
@@ -312,7 +292,6 @@ def convert_file_task(
         fn_out (str): Output filename
         array_config (str): Path to array config directory
         output_format (str): Output format, one of uvfits, miriad, mir, ms, uvh5, sdp, uvx
-        conj (bool): Apply conjugation to visibility data. Useful for matching UVW convention.
         context (dict): Dictionary of additional metadata. Only supported by SDP and UVX formats.
         verbose (bool): Turn on verbose mode
     """
@@ -320,7 +299,7 @@ def convert_file_task(
         # Silence warnings from other packages (e.g. pyuvdata)
         warnings.simplefilter('ignore')
         reset_logger(use_tqdm=True, disable=True)
-    convert_file(args, fn_in, fn_out, array_config, output_format, conj, context)
+    convert_file(args, fn_in, fn_out, array_config, output_format, context)
 
 
 def run(args=None):
@@ -344,16 +323,13 @@ def run(args=None):
         array_config = get_aa_config(args.telescope_name)
 
     if array_config is None:
-        logger.error(
-            'No telescope name or array config file passed. Please re-run with -n or -c flag set'
-        )
+        logger.error('No telescope name or array config file passed. Please re-run with -n or -c flag set')
         config_error_found = True
     else:
         if not os.path.exists(array_config):
             logger.error(f'Cannot find array config: {array_config}')
             config_error_found = True
 
-    conj = False if args.no_conj else True
     output_formats = args.output_format.lower().split(',')
 
     # Check input file exists
@@ -388,15 +364,12 @@ def run(args=None):
     logger.info(f'Array config:     {array_config}')
     logger.info(f'Output path:      {args.outfile}')
     logger.info(f'Output formats:   {output_formats} \n')
-    logger.info(f'Conjugating data: {conj} \n')
 
     # Check if we need to zip data
     if args.zipit:
         logger.info('Zip output:      Yes')
         if output_format not in ('miriad', 'ms'):
-            logger.warning(
-                f'Output format {output_format} is not MS or Miriad, so will not be zipped'
-            )
+            logger.warning(f'Output format {output_format} is not MS or Miriad, so will not be zipped')
 
     # Check if context yaml was included
     context = load_yaml(args.context_yaml) if args.context_yaml is not None else None
@@ -411,9 +384,7 @@ def run(args=None):
                 os.mkdir(args.outfile)
 
             if args.batch:
-                filelist = sorted(
-                    glob.glob(os.path.join(args.infile, f'*.{args.file_ext}'))
-                )
+                filelist = sorted(glob.glob(os.path.join(args.infile, f'*.{args.file_ext}')))
             else:
                 filelist = sorted(
                     glob.glob(
@@ -428,9 +399,7 @@ def run(args=None):
                 bn = os.path.basename(fn)
                 bn_out = os.path.splitext(bn)[0] + EXT_LUT[output_format]
                 if args.megabatch:
-                    subdir = os.path.join(
-                        args.outfile, os.path.basename(os.path.dirname(fn))
-                    )
+                    subdir = os.path.join(args.outfile, os.path.basename(os.path.dirname(fn)))
                     filelist_out.append(os.path.join(subdir, bn_out))
                 else:
                     filelist_out.append(os.path.join(args.outfile, bn_out))
@@ -445,9 +414,7 @@ def run(args=None):
                 warnings.simplefilter('ignore')
                 logger.remove()
 
-            logger.info(
-                f'Starting conversion on {len(filelist)} files with {args.num_workers} workers'
-            )
+            logger.info(f'Starting conversion on {len(filelist)} files with {args.num_workers} workers')
 
             if args.num_workers > 1:
                 # Create a list of tasks to run
@@ -460,7 +427,6 @@ def run(args=None):
                             fn_out,
                             array_config,
                             output_format,
-                            conj,
                             context,
                             args.verbose,
                         )
@@ -475,9 +441,7 @@ def run(args=None):
                 )
             else:
                 for fn_in, fn_out in zip(filelist, filelist_out):
-                    convert_file(
-                        args, fn_in, fn_out, array_config, output_format, conj, context
-                    )
+                    convert_file(args, fn_in, fn_out, array_config, output_format, context)
 
 
 if __name__ == '__main__':  # pragma: no cover

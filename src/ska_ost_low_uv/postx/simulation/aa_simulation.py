@@ -49,9 +49,7 @@ class AaSimulator(AaBaseModule):
 
     def sim_vis_pointsrc(self, *args, **kwargs):
         # Docstring inherited
-        self.model.visibilities = simulate_visibilities_pointsrc(
-            self.aa, *args, **kwargs
-        )
+        self.model.visibilities = simulate_visibilities_pointsrc(self.aa, *args, **kwargs)
         return self.model.visibilities
 
     def sim_vis_gsm(self, *args, **kwargs):

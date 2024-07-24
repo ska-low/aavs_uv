@@ -17,9 +17,7 @@ def setup_test() -> ApertureArray:
     Returns:
         aa (ApertureArray): An ApertureArray object to use in testing.
     """
-    fn_data = get_test_data(
-        'aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5'
-    )
+    fn_data = get_test_data('aavs2_1x1000ms/correlation_burst_204_20230823_21356_0.hdf5')
     v = hdf5_to_uvx(fn_data, telescope_name='aavs2')
 
     # RadioArray basics
@@ -31,6 +29,8 @@ def test_postx():
     """Test postx - basic."""
     aa = setup_test()
     print(aa.coords.get_zenith())
+
+    print(aa.simulation)
 
     # RadioArray - images
     img = aa.imaging.make_image()
@@ -61,6 +61,8 @@ def test_postx():
 def test_viewer():
     """Test viewer tools."""
     aa = setup_test()
+    print(aa)
+    aa.set_idx(f=0, t=0, p=0)
 
     # All-sky-viewer via aa
     aa.viewer.orthview()
@@ -73,9 +75,12 @@ def test_viewer():
 
     try:
         aa.viewer.write_fits(img, 'tests/test.fits')
+        aa.viewer.write_fits(hmap, 'tests/test_hpx.fits')
     finally:
         if os.path.exists('tests/test.fits'):
             os.system('rm tests/test.fits')
+        if os.path.exists('tests/test_hpx.fits'):
+            os.system('rm tests/test_hpx.fits')
 
 
 @pytest.mark.mpl_image_compare

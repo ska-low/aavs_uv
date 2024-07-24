@@ -13,9 +13,7 @@ from loguru import logger
 from tqdm import tqdm
 
 
-def reset_logger(
-    use_tqdm: bool = False, disable: bool = False, level: str = 'INFO'
-) -> logger:
+def reset_logger(use_tqdm: bool = False, disable: bool = False, level: str = 'INFO') -> logger:
     """Reset loguru logger and setup output format.
 
     Helps loguru (logger), tqdm (progress bar) and joblib/dask (parallel) work together.
@@ -157,9 +155,7 @@ def import_optional_dependency(
         name (str): Name of dependency to import
         errors (typing.Literal): What to do if not installed; one of raise, warn, or ignore
     """
-    msg = (
-        f"Missing optional dependency '{name}'. " f'Use pip or conda to install {name}.'
-    )
+    msg = f"Missing optional dependency '{name}'. " f'Use pip or conda to install {name}.'
     try:
         module = importlib.import_module(name)
     except ImportError as err:

@@ -57,9 +57,7 @@ def run_in_parallel(
     if backend == 'dask':
         from dask.distributed import LocalCluster
 
-        with LocalCluster(
-            n_workers=n_workers, threads_per_worker=1
-        ) as cluster, cluster.get_client() as client:
+        with LocalCluster(n_workers=n_workers, threads_per_worker=1) as cluster, cluster.get_client() as client:
             # Print dashboard details
             logger = reset_logger(use_tqdm=True, level='INFO')
             logger.info(f'Using dask LocalCluster(n_workers={n_workers}) backend')

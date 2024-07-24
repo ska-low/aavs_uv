@@ -16,9 +16,7 @@ if typing.TYPE_CHECKING:
 from ..aa_module import AaBaseModule
 
 
-def generate_phase_vector(
-    aa, src: SkyCoord, conj: bool = False, coplanar: bool = False
-):
+def generate_phase_vector(aa, src: SkyCoord, conj: bool = False, coplanar: bool = False):
     """Generate a phase vector for a given source.
 
     Args:

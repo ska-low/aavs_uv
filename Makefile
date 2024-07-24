@@ -9,4 +9,4 @@ docs-pre-build:
 
 .PHONY: docs-pre-build
 
-PYTHON_LINE_LENGTH = 88
+PYTHON_LINE_LENGTH = 112

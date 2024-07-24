@@ -21,9 +21,7 @@ from ska_ost_low_uv.io.mccs_yaml import station_location_from_platform_yaml
 from ska_ost_low_uv.utils import get_aa_config, get_software_versions, load_yaml
 
 
-def load_observation_metadata(
-    filename: str, yaml_config: str = None, load_config: str = None
-) -> dict:
+def load_observation_metadata(filename: str, yaml_config: str = None, load_config: str = None) -> dict:
     """Load observation metadata from correlator output HDF5.
 
     Args:
@@ -49,9 +47,7 @@ def load_observation_metadata(
 
     # Update path to antenna location files to use absolute path
     config_abspath = os.path.dirname(os.path.abspath(yaml_config))
-    md['antenna_locations_file'] = os.path.join(
-        config_abspath, md['antenna_locations_file']
-    )
+    md['antenna_locations_file'] = os.path.join(config_abspath, md['antenna_locations_file'])
     md['baseline_order_file'] = os.path.join(config_abspath, md['baseline_order_file'])
     md['station_config_file'] = os.path.abspath(yaml_config)
     return md
@@ -81,9 +77,7 @@ def get_hdf5_metadata(filename: str) -> dict:
         ]
 
         # Check that keys are present
-        if (
-            set(expected_keys) - set(datafile.get('root').attrs.keys()) != set()
-        ):  # pragma: no cover
+        if set(expected_keys) - set(datafile.get('root').attrs.keys()) != set():  # pragma: no cover
             raise Exception('Missing metadata in file')
 
         # All good, get metadata
@@ -103,10 +97,10 @@ def hdf5_to_uvx(
     fn_data: str,
     telescope_name: str = None,
     yaml_config: str = None,
-    conj: bool = True,
     from_platform_yaml: bool = False,
     context: dict = None,
     provenance: dict = None,
+    load_data: bool = True,
 ) -> UVX:
     """Create UV from HDF5 data and config file.
 
@@ -118,7 +112,7 @@ def hdf5_to_uvx(
                                          simple CSV text file is used.
         telescope_name (str=None): If set, ska_ost_low_uv will try and use internal config file
                                    for telescope_name, e.g. 'aavs2' or 'aavs3'
-        conj (bool): Conjugate visibility data (default True).
+        load_data (bool): Set to false to skip loading into memory (don't apply conjugate/transpose)
         context (dict): Dictionary with observation context information
                         should include 'intent', 'notes', 'observer' and 'date' as keys.
         provenance (dict): Dictionary with additional provenance information to add to
@@ -128,6 +122,11 @@ def hdf5_to_uvx(
         uv (UV): A UV dataclass object with xarray datasets
 
     Notes:
+        Data in HDF5 files usually need to be conjugated and cross-pol terms transposed.
+
+            default order: A1A2*, A1B2*, B1A2*, B1B2*
+            swapped order: A2A1*, A2B1*, B2A1*, B2B1*
+
         The dataclass is defined as::
 
             class UV:
@@ -156,9 +155,7 @@ def hdf5_to_uvx(
         data = h5['correlation_matrix']['data']
 
         if from_platform_yaml:
-            eloc, antpos = station_location_from_platform_yaml(
-                md['antenna_locations_file']
-            )
+            eloc, antpos = station_location_from_platform_yaml(md['antenna_locations_file'])
 
         else:
             # Telescope location
@@ -171,21 +168,27 @@ def hdf5_to_uvx(
 
         # Generate time - note addition of ts/2 to move to center of integration
         t = Time(
-            np.arange(md['n_integrations'], dtype='float64') * md['tsamp']
-            + md['ts_start']
-            + md['tsamp'] / 2,
+            np.arange(md['n_integrations'], dtype='float64') * md['tsamp'] + md['ts_start'] + md['tsamp'] / 2,
             format='unix',
             location=eloc,
         )
-        f_arr = (
-            (np.arange(md['n_chans'], dtype='float64') + 1)
-            * md['channel_spacing']
-            * md['channel_id']
-        )
+        f_arr = (np.arange(md['n_chans'], dtype='float64') + 1) * md['channel_spacing'] * md['channel_id']
         f = Quantity(f_arr, unit='Hz')
 
         antennas = create_antenna_data_array(antpos, eloc)
-        data = create_visibility_array(data, f, t, eloc, conj=conj)
+        if load_data:
+            data = create_visibility_array(
+                data,
+                f,
+                t,
+                eloc,
+                conj=md['conjugate_hdf5'],
+                transpose=md['transpose_hdf5'],
+            )
+        else:
+            # Avoid data load by not conjugating / transposing
+            data = create_visibility_array(data, f, t, eloc, conj=False, transpose=False)
+
         data.attrs['unit'] = md['vis_units']
 
         # Add extra info about time resolution and frequency resolution from input metadata
@@ -204,9 +207,7 @@ def hdf5_to_uvx(
             data.frequency.attrs['oversampled'] = True
 
         # Create empty provenance dictionary if not passed, then fill with creation info
-        provenance = (
-            create_empty_provenance_dict() if provenance is None else provenance
-        )
+        provenance = create_empty_provenance_dict() if provenance is None else provenance
         provenance.update({
             'input_files': {
                 'data_filename': os.path.abspath(fn_data),

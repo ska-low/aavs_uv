@@ -35,11 +35,7 @@ def test_create_arrays():
         format='unix',
         location=eloc,
     )
-    f_arr = (
-        (np.arange(md['n_chans'], dtype='float64') + 1)
-        * md['channel_spacing']
-        * md['channel_id']
-    )
+    f_arr = (np.arange(md['n_chans'], dtype='float64') + 1) * md['channel_spacing'] * md['channel_id']
     f = Quantity(f_arr, unit='Hz')
     data = create_visibility_array(data, f, t, eloc)
     print(data)

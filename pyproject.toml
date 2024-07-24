@@ -62,6 +62,7 @@ myst-parser = ">3.0.0"
 ska-ser-sphinx-theme = "^0.1.1"
 sphinx-autodoc-typehints = "^1.23.0"
 
+# Run with: ruff check --fix
 [tool.ruff.lint]
 # Setup linting
 # E: pycodestyle
@@ -80,8 +81,10 @@ ignore = ["E221", "E501", "E741", "D102"]
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+# Run with: ruff format --respect-gitignore --preview --line-length=112
 [tool.ruff.format]
 quote-style = "single"
+docstring-code-line-length = 112
 
 [tool.pytest.ini_options]
 addopts = "--cov=ska_ost_low_uv --cov-report html --nbmake"

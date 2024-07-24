@@ -91,9 +91,7 @@ def generate_aperture_image(
     return aperture_image
 
 
-def meas_corr_to_magcal(
-    mc: np.array, target_mag: float = 1.0, sigma_thr: float = 10
-) -> np.array:
+def meas_corr_to_magcal(mc: np.array, target_mag: float = 1.0, sigma_thr: float = 10) -> np.array:
     """Compute magnitude calibration coefficients from meas_corr.
 
     Args:
@@ -140,9 +138,7 @@ def meas_corr_to_phasecal(mc: np.array) -> np.array:
                        Shape (N_ant, N_pol=2), dtype complex
     """
     with warnings.catch_warnings():
-        warnings.filterwarnings(
-            'ignore', "Warning: 'partition' will ignore the 'mask' of the MaskedArray."
-        )
+        warnings.filterwarnings('ignore', "Warning: 'partition' will ignore the 'mask' of the MaskedArray.")
 
         mc_xy = mc[..., [0, 3]]
 
@@ -244,18 +240,14 @@ def jishnu_selfholo(
         V[short_bls] = 0
 
     # Generate a grid of pointing vectors, and lmn direction cosine coords
-    pv_grid, lmn = generate_weight_grid(
-        aa, n_pix, abs_max=abs_max, nan_below_horizon=False
-    )
+    pv_grid, lmn = generate_weight_grid(aa, n_pix, abs_max=abs_max, nan_below_horizon=False)
 
     # Compute the phase vector required to phase up to the cal source
     pv_src = aa.coords.generate_phase_vector(cal_src, coplanar=True)
 
     # Compute the measured correlation between the source and each antenna
     # This has shape (N_ant, N_pol=4)
-    meas_corr_src = np.einsum(
-        'i,ilp,l->ip', pv_src[0], V, np.conj(pv_src[0]), optimize='optimal'
-    )
+    meas_corr_src = np.einsum('i,ilp,l->ip', pv_src[0], V, np.conj(pv_src[0]), optimize='optimal')
 
     # Compute the beam correlation (a measure of far-field radiation pattern)
     # beam_corr will have shape (N_pix, N_pix, N_pol=4)
@@ -318,9 +310,7 @@ def jishnu_phasecal(
     phs_iter_list = np.zeros(n_iter_max)
     for ii in range(n_iter_max):
         if ii == 0:
-            meas_corr_src = np.einsum(
-                'i,ilp,l->ip', pv_src[0], V, np.conj(pv_src[0]), optimize='optimal'
-            )
+            meas_corr_src = np.einsum('i,ilp,l->ip', pv_src[0], V, np.conj(pv_src[0]), optimize='optimal')
             cc = meas_corr_to_phasecal(meas_corr_src)
 
             cc_mat = gaincal_vec_to_matrix(cc)
@@ -337,9 +327,7 @@ def jishnu_phasecal(
 
             phs_std_iter = np.std(np.angle(cc_iter))
             if phs_std_iter >= phs_std:
-                logger.info(
-                    f'Iter {ii - 1}: Iteration phase std minima reached, breaking'
-                )
+                logger.info(f'Iter {ii - 1}: Iteration phase std minima reached, breaking')
                 break
             elif target_phs_std > np.rad2deg(phs_std_iter):
                 logger.info(f'Iter {ii - 1}: Target phase std reached, breaking')
@@ -364,7 +352,7 @@ def jishnu_phasecal(
     cal = create_uvx_antenna_cal(
         telescope=aa.name,
         method='jishnu_phasecal',
-        antenna_cal_arr=cal_arr,
+        antenna_gains_arr=cal_arr,
         antenna_flags_arr=flag_arr,
         f=aa.f,
         a=aa.ant_names,
@@ -416,13 +404,11 @@ def jishnu_cal(
 
     # Compute the measured correlation between the source and each antenna
     pv_src = aa.coords.generate_phase_vector(cal_src, coplanar=True)
-    meas_corr_src = np.einsum(
-        'i,ilp,l->ip', pv_src[0], V, np.conj(pv_src[0]), optimize='optimal'
-    )
+    meas_corr_src = np.einsum('i,ilp,l->ip', pv_src[0], V, np.conj(pv_src[0]), optimize='optimal')
 
     # Now, get gain coefficients and combine with phase corrs
     mag_cal = meas_corr_to_magcal(meas_corr_src, target_mag)
-    cal_arr = mag_cal * cal.cal.values
+    cal_arr = mag_cal * cal.gains.values
     flag_arr = np.logical_or(mag_cal.mask, cal.flags)
 
     # Set any flagged antennas to zero
@@ -431,7 +417,7 @@ def jishnu_cal(
     cal = create_uvx_antenna_cal(
         telescope=aa.name,
         method='jishnu_cal',
-        antenna_cal_arr=cal_arr,
+        antenna_gains_arr=cal_arr,
         antenna_flags_arr=flag_arr,
         f=aa.f,
         a=aa.ant_names,
@@ -521,9 +507,7 @@ def plot_aperture(
         plt.colorbar(label='dB')
     elif plot_type == 'phs':
         plt.title(f'{aa.p[pol_idx]} Phase')
-        plt.imshow(
-            img_phs, cmap=phs_cmap, vmin=phs_range[0], vmax=phs_range[1], extent=extent
-        )
+        plt.imshow(img_phs, cmap=phs_cmap, vmin=phs_range[0], vmax=phs_range[1], extent=extent)
         plt.colorbar(label='deg')
     else:
         raise RuntimeError("Need to plot 'mag' or 'phs'")
@@ -690,12 +674,8 @@ class AaHolographer(AaBaseModule):
         self.report_flagged_antennas.__func__.__doc__ = report_flagged_antennas.__doc__
         self.plot_aperture.__func__.__doc__ = plot_aperture.__doc__
         self.plot_aperture_xy.__func__.__doc__ = plot_aperture_xy.__doc__
-        self.plot_farfield_beam_pattern.__func__.__doc__ = (
-            plot_farfield_beam_pattern.__doc__
-        )
-        self.plot_phasecal_iterations.__func__.__doc__ = (
-            plot_jishnu_phasecal_iterations.__doc__
-        )
+        self.plot_farfield_beam_pattern.__func__.__doc__ = plot_farfield_beam_pattern.__doc__
+        self.plot_phasecal_iterations.__func__.__doc__ = plot_jishnu_phasecal_iterations.__doc__
 
     def __check_cal_src_set(self):
         if self.cal_src is None:

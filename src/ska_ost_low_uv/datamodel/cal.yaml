@@ -6,7 +6,11 @@ cal:
 ###############
 # Calibration dataset
 
-cal/antenna_cal:
+cal/attrs:
+  description: Calibration array metadata
+  hdf5_type: group
+
+cal/gains:
   description: Per-antenna calibration coefficients
   dims:
     - frequency
@@ -14,7 +18,7 @@ cal/antenna_cal:
     - polarization
   hdf5_type: dataset
 
-cal/antenna_flags:
+cal/flags:
   description: Boolean flags for antenna. 0=unflagged (good), 1=flagged (bad).
   dims:
     - frequency
@@ -22,8 +26,6 @@ cal/antenna_flags:
     - polarization
   hdf5_type: dataset
 
-###############
-# Coordinates
 cal/coords/frequency:
   description: Frequency at channel center
   hdf5_type: dataset
@@ -31,17 +33,18 @@ cal/coords/frequency:
     - frequency
   units: Hz
 
+cal/coords/antenna:
+  description: Antenna index (numerical, 0-based)
+  hdf5_type: dataset
+  dims:
+    - antenna
+  units: Hz
+
 cal/coords/polarization:
   description: Polarization products coordinate
   hdf5_type: dataset
   dims:
     - polarization
-
-cal/coords/antenna:
-  description: Antenna index (numerical, 0-based)
-  dims:
-    - antenna
-  hdf5_type: dataset
 
 
 ###############

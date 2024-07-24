@@ -89,9 +89,7 @@ def plot_antennas(
     ax.axis('equal')
     enu_map = {'E': 0, 'N': 1, 'U': 2}
     title = f'{aa.name} | Lon: {aa.earthloc.to_geodetic().lon:.2f} | Lat: {aa.earthloc.to_geodetic().lat:.2f}'
-    plt.scatter(
-        aa.xyz_enu[:, enu_map[x.upper()]], aa.xyz_enu[:, enu_map[y.upper()]], **kwargs
-    )
+    plt.scatter(aa.xyz_enu[:, enu_map[x.upper()]], aa.xyz_enu[:, enu_map[y.upper()]], **kwargs)
     plt.xlabel(f'{x} [m]')
     plt.ylabel(f'{y} [m]')
 
