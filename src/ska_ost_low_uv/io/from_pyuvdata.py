@@ -141,7 +141,7 @@ def write_ms(uv: UVData, filename: str, *args, **kwargs):
     with tables.table(f'{filename}/FEED', readonly=False) as t:
         logger.debug('Applying station rotation (RECEPTOR_ANGLE)')
         r_ang = np.zeros(shape=t.getcol('RECEPTOR_ANGLE').shape, dtype='float64')
-        x_ang = -np.pi/180 * uv.receptor_angle
+        x_ang = -np.pi / 180 * uv.receptor_angle
         r_ang[:, 0] = x_ang
         r_ang[:, 1] = x_ang + np.pi
 

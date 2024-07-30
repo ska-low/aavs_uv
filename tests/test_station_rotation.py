@@ -1,4 +1,5 @@
 """test_station_rotation: test application of station rotation code."""
+
 import os
 
 import numpy as np
@@ -19,6 +20,7 @@ tables = import_optional_dependency('casacore.tables', errors='raise')
 TEST_DATA = get_test_data('s8-6/correlation_burst_204_20240701_65074_0.hdf5')
 TEST_RANG = 193.6
 TEST_RANG_MS = [-3.37895743, -0.23736478]
+
 
 def test_station_rotation():
     """Test station rotation keywords in written files."""
@@ -58,5 +60,6 @@ def test_station_rotation():
         if os.path.exists('tests/test_rotation.ms'):
             os.system('rm -rf tests/test_rotation.ms')
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     test_station_rotation()
