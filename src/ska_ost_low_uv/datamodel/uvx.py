@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pyuvdata.utils as uvutils
 import xarray as xp
-from astropy.coordinates import EarthLocation, SkyCoord, Angle
+from astropy.coordinates import Angle, EarthLocation, SkyCoord
 from astropy.time import Time
 from astropy.units import Quantity
 from loguru import logger
