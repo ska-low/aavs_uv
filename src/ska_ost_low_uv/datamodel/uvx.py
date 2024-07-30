@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pyuvdata.utils as uvutils
 import xarray as xp
-from astropy.coordinates import EarthLocation, SkyCoord
+from astropy.coordinates import EarthLocation, SkyCoord, Angle
 from astropy.time import Time
 from astropy.units import Quantity
 from loguru import logger
@@ -52,13 +52,16 @@ def create_empty_provenance_dict():
     return provenance
 
 
-def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.Dataset:
+def create_antenna_data_array(
+    antpos: pd.DataFrame, eloc: EarthLocation, array_rotation_angle: Angle = None
+) -> xp.Dataset:
     """Create an xarray Dataset for antenna locations.
 
     Args:
         antpos (pd.Dataframe): Pandas dataframe with antenna positions. Should have
                                columns: ``id | name | E | N | U | flagged``
         eloc (EarthLocation): Astropy EarthLocation corresponding to array center
+        array_rotation_angle (Angle): Station rotation angle in degrees (optional)
 
     Returns:
         dant (xp.Dataset): xarray Dataset with antenna locations
@@ -81,6 +84,7 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
                     flags:                    Flags if antenna is bad
                     array_origin_geocentric:  Array origin (ECEF)
                     array_origin_geodetic:    Array origin (lat/lon/height)
+                    array_rotation_angle:     Array rotation angle
     """
     uvx_schema = load_yaml(get_resource_path('datamodel/uvx.yaml'))
 
@@ -149,8 +153,19 @@ def create_antenna_data_array(antpos: pd.DataFrame, eloc: EarthLocation) -> xp.D
         dims=('spatial'),
     )
 
+    # Array rotation angle
+    rot_angle_deg = 0 if array_rotation_angle is None else array_rotation_angle.to('deg').value
+    array_rotation_angle = xp.DataArray(
+        rot_angle_deg,
+        attrs={
+            'units': 'deg',
+            'description': uvx_schema['uvx/antennas/attrs/array_rotation_angle']['description'],
+        },
+    )
+
     attrs['array_origin_geocentric'] = array_origin_ecef
     attrs['array_origin_geodetic'] = array_origin_geodetic
+    attrs['array_rotation_angle'] = array_rotation_angle
 
     dant = xp.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
 

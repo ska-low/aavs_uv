@@ -123,10 +123,13 @@ def uvx_to_pyuvdata(
     # Now fill in antenna info fields
     # fmt: off
     uv.antenna_positions = antpos_ECEF
-    uv.antenna_names     = uvx.antennas.identifier.values
+    uv.antenna_names     = uvx.antennas.identifier.values.astype('str')
     uv.antenna_numbers   = uvx.antennas.antenna.values
     uv.ant_1_array       = np.tile(uvx.data.baseline.ant1, md['n_integrations'])
     uv.ant_2_array       = np.tile(uvx.data.baseline.ant2, md['n_integrations'])
+
+    # Add in station rotation - note this is not currently part of pyuvdata spec
+    uv.receptor_angle    = uvx.antennas.attrs['array_rotation_angle']
     # fmt: off
 
     # Create baseline array - note: overwrites baseline ordering file with pyuvdata standard.
@@ -346,6 +349,8 @@ def hdf5_to_pyuvdata(
     uv.baseline_array = uvutils.antnums_to_baseline(
         uv.ant_1_array, uv.ant_2_array, Nants_telescope=md['n_antennas']
     )
+    # Add in station rotation - note this is not currently part of pyuvdata spec
+    uv.receptor_angle       = md['receptor_angle']
     # fmt: on
 
     # Frequency axis

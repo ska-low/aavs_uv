@@ -14,7 +14,10 @@ except ImportError:  # pragma: no cover
 
 from .cal import read_cal as read_cal
 from .cal import write_cal as write_cal
+from .from_pyuvdata import write_uvfits as write_uvfits
+from .from_pyuvdata import write_ms as write_ms
 from .to_pyuvdata import hdf5_to_pyuvdata as hdf5_to_pyuvdata
 from .to_pyuvdata import phase_to_sun as phase_to_sun
+from .to_pyuvdata import uvx_to_pyuvdata as uvx_to_pyuvdata
 from .uvx import read_uvx as read_uvx
 from .uvx import write_uvx as write_uvx
