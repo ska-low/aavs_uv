@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pyuvdata.utils as uvutils
 from astropy.coordinates import EarthLocation, SkyCoord
+from astropy.io import fits as pf
 from astropy.time import Time
 from astropy.units import Quantity
 from loguru import logger
@@ -15,6 +16,7 @@ from ska_ost_low_uv.datamodel.uvx import (
     create_empty_provenance_dict,
     create_visibility_array,
 )
+from ska_ost_low_uv.utils import import_optional_dependency
 
 
 def convert_data_to_uvx_convention(uv: UVData, check: bool = False) -> np.array:
@@ -117,3 +119,51 @@ def pyuvdata_to_uvx(uv: UVData, check: bool = False) -> UVX:
     )
 
     return uvx
+
+
+def write_ms(uv: UVData, filename: str, *args, **kwargs):
+    """Write UVData to MeasurementSet.
+
+    Notes:
+        Calls uv.write_ms(), then applies station rotation patch.
+
+    Args:
+        uv (UVData): pyuvdata object to write to file.
+        filename (str): Name of output filename.
+        args (list): Arguments to pass to uv.write_ms
+        kwargs (dict): Keyword arguments to pass to uv.write_ms
+    """
+    tables = import_optional_dependency('casacore.tables', errors='raise')
+
+    uv.write_ms(filename, *args, **kwargs)
+
+    # Patch RECEPTOR_ANGLE column
+    with tables.table(f'{filename}/FEED', readonly=False) as t:
+        logger.debug('Applying station rotation (RECEPTOR_ANGLE)')
+        r_ang = np.zeros(shape=t.getcol('RECEPTOR_ANGLE').shape, dtype='float64')
+        x_ang = -np.pi/180 * uv.receptor_angle
+        r_ang[:, 0] = x_ang
+        r_ang[:, 1] = x_ang + np.pi
+
+        t.putcol('RECEPTOR_ANGLE', r_ang)
+
+
+def write_uvfits(uv: UVData, filename: str, *args, **kwargs):
+    """Write UVData to MeasurementSet.
+
+    Notes:
+        Calls uv.write_uvfits(), then applies station rotation patch.
+
+    Args:
+        uv (UVData): pyuvdata object to write to file.
+        filename (str): Name of output filename.
+        args (list): Arguments to pass to uv.write_uvfits
+        kwargs (dict): Keyword arguments to pass to uv.write_uvfits
+    """
+    uv.write_uvfits(filename, *args, **kwargs)
+
+    # Patch POLAA/POLAB columns
+    with pf.open(filename, mode='update') as hdu:
+        logger.debug('Applying station rotation (POLAA/POLAB)')
+        hdu[1].data['POLAA'] = uv.receptor_angle
+        hdu[1].data['POLAB'] = uv.receptor_angle + 90

@@ -36,6 +36,10 @@ uvx/antennas/attrs/identifier:
   dims:
     - antenna
   hdf5_type: dataset
+uvx/antennas/attrs/array_rotation_angle:
+  description: Array rotation angle, rotated clockwise from North (0 degrees).
+  units: deg
+  hdf5_type: dataset
 uvx/antennas/coords:
   description: Data coordinates for antenna data
   hdf5_type: group

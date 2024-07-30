@@ -175,7 +175,10 @@ def hdf5_to_uvx(
         f_arr = (np.arange(md['n_chans'], dtype='float64') + 1) * md['channel_spacing'] * md['channel_id']
         f = Quantity(f_arr, unit='Hz')
 
-        antennas = create_antenna_data_array(antpos, eloc)
+        # Add station rotation angle info
+        rot_ang = Angle(md['receptor_angle'], unit='deg')
+
+        antennas = create_antenna_data_array(antpos, eloc, array_rotation_angle=rot_ang)
         if load_data:
             data = create_visibility_array(
                 data,

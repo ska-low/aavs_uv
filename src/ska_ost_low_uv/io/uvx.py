@@ -90,6 +90,7 @@ def write_uvx(uv: UVX, filename: str):
             'flags',
             'array_origin_geocentric',
             'array_origin_geodetic',
+            'array_rotation_angle'
         ):
             _create_dset(g_ant_a, attr, uv.antennas.attrs[attr])
         # fmt: on
@@ -214,6 +215,10 @@ def read_uvx(filename: str) -> UVX:
                 h['antennas/attrs/array_origin_geodetic'][:],
                 dims=('spatial'),
                 attrs=dict(h['antennas/attrs/array_origin_geodetic'].attrs.items()),
+            ),
+            'array_rotation_angle': xp.DataArray(
+                h['antennas/attrs/array_rotation_angle'],
+                attrs=dict(h['antennas/attrs/array_rotation_angle'].attrs.items()),
             ),
         }
 
