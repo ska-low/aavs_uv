@@ -223,10 +223,11 @@ def phs(f, tau, phs0, return_as_angle=True):
     else:
         return m
 
-def _plot_phs(f_mhz, freq_flags, phs_m, phs_d):
+def _plot_phs(f_mhz, freq_flags, ant_flag, phs_m, phs_d):
     """Plot phase helper."""
     plt.scatter(f_mhz[~freq_flags], phs_d[~freq_flags], marker='.')
-    plt.scatter(f_mhz, phs_m, marker='.')
+    if not ant_flag:
+        plt.scatter(f_mhz, phs_m, marker='.')
     plt.xlim(50, 250)
     plt.xticks([50, 100, 150, 200, 250], fontsize=8)
     plt.yticks([-np.pi, -np.pi/2, 0, np.pi/2, np.pi], ["-$\\pi$", "-$\\pi/2$", 0, "$\\pi/2$", "$\\pi$"], fontsize=8)
@@ -284,8 +285,19 @@ if __name__ == "__main__":
     pol_ids      = suncal.gains.polarization.values
     # fmt: on
 
+
     # Generate plots
     logger.info("Plotting...")
+
+    bad_antennas_x_idx = np.arange(256)[flags_chisq[:, 0]]
+    bad_antennas_y_idx = np.arange(256)[flags_chisq[:, 1]]
+
+    print("Bad X:")
+    print(bad_antennas_x_idx)
+    print(ant_ids[bad_antennas_x_idx])
+    print("Bad Y:")
+    print(bad_antennas_y_idx)
+    print(ant_ids[bad_antennas_y_idx])
 
     for tpm_idx in tqdm(range(16)):
         for pp in (0, 1):
@@ -297,7 +309,8 @@ if __name__ == "__main__":
                 pol_name = pol_ids[pp]
 
                 plt.subplot(4, 4, ii+1)
-                _plot_phs(f_mhz, freq_flags, np.angle(fitted_gains[:, data_idx, pp]), np.angle(cal_sweep[:, data_idx, pp]))
+                ant_flag = flags_chisq[data_idx, pp]
+                _plot_phs(f_mhz, freq_flags, ant_flag, np.angle(fitted_gains[:, data_idx, pp]), np.angle(cal_sweep[:, data_idx, pp]))
                 plt.title(f"{ant_name} {pol_name}", fontsize=8)
             plt.savefig(f"cal/cal_solutions_tpm_{tpm_idx}_{pp}.png")
             plt.clf()

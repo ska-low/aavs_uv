@@ -11,6 +11,7 @@ scripts/ska-low-deployment
 tests/test.*
 reference-docs/
 test.h5
+scripts/holo-suncal/cal
 
  Byte-compiled / optimized / DLL files
 __pycache__/
