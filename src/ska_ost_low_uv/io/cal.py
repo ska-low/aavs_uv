@@ -1,6 +1,7 @@
 """cal: calibration data I/O utils."""
 
 import h5py
+import numpy as np
 import ska_ost_low_uv
 from astropy.units import Quantity
 from loguru import logger
@@ -56,7 +57,6 @@ def write_cal(cal: UVXAntennaCal, filename: str):
         ##################
 
         g_cal = h['/']
-        print(h.keys())
         _create_dset(g_cal, 'gains', cal.gains)
         _create_dset(g_cal, 'flags', cal.flags)
 
@@ -119,8 +119,8 @@ def read_cal(filename: str) -> UVXAntennaCal:
         # CAL ROOT GROUP #
         ##################
         f = Quantity(h['coords/frequency'][:], unit=h['coords/frequency'].attrs['units'])
-        a = h['coords/antenna'][:]
-        p = h['coords/polarization'][:]
+        a = np.array([a.decode('ascii') for a in h['coords/antenna'][:]])
+        p = np.array([p.decode('ascii') for p in h['coords/polarization'][:]])
 
         flags_arr = h['flags'][:]
         gains_arr = h['gains'][:]
